@@ -13,7 +13,9 @@
 #ifndef DEFS_H
 # define DEFS_H
 
-# define CPP	1
+# include <unistd.h>
+
+# define CPP	    1
 # define CPP98		__cplusplus >= 199711L
 # define CPP11		__cplusplus >= 201103L
 # define CPP14		__cplusplus >= 201402L
@@ -27,14 +29,46 @@
 # define PRECPP20	__cplusplus <  202002L
 # define PRECPP23	1
 
-/* internal */# define ___INTERNAL___INT_TO_STRING_INTERNAL_MACRO(__x)#__x
-/* internal */# define ___INTERNAL___INT_TO_STRING_INTERNAL(__x)___INTERNAL___INT_TO_STRING_INTERNAL_MACRO(__x)
-# define INT_TO_STRING(x)___INTERNAL___INT_TO_STRING_INTERNAL(x)
-# define STR_LEN(x)({long __n=0;for(;(x)[__n];++__n);__n;})
-/* internal */# define ___INTERNAL___ABORT_MESSAGE"["__PRETTY_FUNCTION__"::"INT_TO_STRING(__LINE__)"] ABORT : "
-# define __ABORT(msg, arg)write(2,___INTERNAL___ABORT_MESSAGE,STR_LEN(___INTERNAL___ABORT_MESSAGE)+STR_LEN(INT_TO_STRING(__LINE__)))+write(2,msg,STR_LEN(msg))+write(2,": ",2*(STR_LEN(arg)!=0))+write(2,arg,STR_LEN(arg))+write(2,"\n",1);
+# define TLU_NAMESPACE_BEGIN namespace tlucanti {
+# define TLU_NAMESPACE_END }
 
-# ifdef CPP11
+# define GLUE2(__a, __b) __a##__b
+# define GLUE3(__a, __b, __c) GLUE2(__a, __b)##__c
+# define GLUE4(__a, __b, __c, __d) GLUE3(__a, __b, __c)##__d
+# define GLUE5(__a, __b, __c, __d, __e) GLUE4(__a, __b, __c, __d)##__e
+
+# /* internal */ define ___INTERNAL___INT_TO_STRING_MACRO(__x)  #__x
+# /* internal */ define ___INTERNAL___INT_TO_STRING(__x)        ___INTERNAL___INT_TO_STRING_MACRO(__x)
+# define INT_TO_STRING(x)   ___INTERNAL___INT_TO_STRING(x)
+# define STR_LEN(x) ({long __n=0;for(;(x)[__n];++__n);__n;})
+
+# define __ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, __LINE__)
+
+inline void __do_ABORT(const char *msg, const char *arg, const char *func, int line)
+{
+    write(2, "[", 1);
+//    write(2, func, STR_LEN(func));
+    while (not isspace(*func))
+        ++func;
+    while (isspace(*func))
+        ++func;
+    while (isalnum(*func) or *func == '_' or *func == ':')
+        write(2, func++, 1);
+    write(2, "::", 2);
+    const char *lineno = INT_TO_STRING(__LINE__);
+    write(2, lineno, STR_LEN(lineno));
+    write(2, "] ABORT : ", 10);
+    write(2, msg, STR_LEN(msg));
+    if (STR_LEN(arg) > 0)
+    {
+        write(2, ": ", 2);
+        write(2, arg, STR_LEN(arg));
+    }
+    write(2, "\n", 1);
+    abort();
+}
+
+# if CPP11
 #  ifndef __DEFAULT
 #   define __DEFAULT =default;
 #  endif /* __DEFAULT */
@@ -63,13 +97,17 @@
 #  ifndef nullptr
 #   define nullptr NULL
 #  endif /* nullptr */
-# endif /* PRECPP11 */
+# endif /* CPP11 */
 
-# ifdef PRECPP14
+# if CPP14
 #  ifndef constexpr
 #   define constexpr
 #  endif /* constexpr */
-# endif /* PRECPP14 */
+# else /* PRECPP14 */
+#  ifndef constexpr
+#   define constexpr
+#  endif /* constexpr */
+# endif /* CPP14 */
 
 # if CPP17
 #  ifndef __WUR
