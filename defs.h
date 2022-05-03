@@ -29,7 +29,8 @@
 # define PRECPP20	__cplusplus <  202002L
 # define PRECPP23	1
 
-# define TLU_NAMESPACE_BEGIN namespace tlucanti {
+# define TLU_NAMESPACE tlucanti
+# define TLU_NAMESPACE_BEGIN namespace TLU_NAMESPACE {
 # define TLU_NAMESPACE_END }
 
 # define GLUE2(__a, __b) __a##__b
