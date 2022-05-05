@@ -56,6 +56,10 @@ void fn_assign_test();
 void fn_get_allocator_test();
 void fn_at_test();
 void access_operator_test();
+void fn_front_test();
+void fn_back_test();
+void fn_data_test();
+void iterator_test();
 
 int main()
 {
@@ -65,6 +69,10 @@ int main()
     fn_get_allocator_test();
     fn_at_test();
     access_operator_test();
+    fn_front_test();
+    fn_back_test();
+    fn_data_test();
+    iterator_test();
 }
 
 void constructor_test()
@@ -186,3 +194,109 @@ void access_operator_test()
 
     result();
 }
+
+#undef _op
+#undef fn
+# define _op(vec) vec.front()
+# define fn "front"
+void fn_front_test()
+{
+    start(".front() test");
+
+    tlucanti::vector_base<int> a = {1, 2, 3};
+    
+    assert(_op(a) == 1, "basic " fn " test 1");
+    
+    tlucanti::vector_base<int> b;
+
+    error_test(_op(b), "empty" fn "test 1");
+
+    result();
+}
+
+#undef _op
+#undef fn
+# define _op(vec) vec.back()
+# define fn "back"
+void fn_back_test()
+{
+    start(".back() test");
+
+    tlucanti::vector_base<int> a = {1, 2, 3};
+    
+    assert(_op(a) == 3, "basic " fn " test 1");
+    
+    tlucanti::vector_base<int> b;
+
+    error_test(_op(b), "empty" fn "test 1");
+
+    result();
+}
+
+#undef _op
+# define _op(vec) vec.data()
+void fn_data_test()
+{
+    start(".data() test");
+
+    tlucanti::vector_base<int> a = {1, 2, 3};
+
+    assert(_op(a)[0] == 1, "data basic test 1");
+    assert(_op(a)[1] == 2, "data basic test 2");
+    assert(_op(a)[2] == 3, "data basic test 3");
+
+    assert(_op(a) == &a[0], "data pointer test 1");
+
+    tlucanti::vector_base<int> b;
+
+    assert(_op(b) == nullptr, "data empty pointer test 1");
+
+    result();
+}
+
+#undef _op
+void iterator_test()
+{
+    start("iterator test");
+
+    tlucanti::vector_base<int> a = {1, 2, 3};
+
+    assert(*a.begin() == 1, "basic iterator test 1");
+    assert(*(++a.begin()) == 2, "basic iterator test 2");
+    assert(*(++(++a.begin())) == 3, "basic iterator test 3");
+
+    assert(*(--a.end()) == 3, "basic iterator test 4");
+    assert(*(--(--a.end())) == 2, "basic iterator test 5");
+    assert(*(--(--(--a.end()))) == 1, "basic iterator test 6");
+
+    auto i1 = a.begin();
+    assert(i1++ == a.begin(), "basic increment test 1");
+    assert(i1 == ++a.begin(), "basic increment test 2");
+    auto i2 = a.end();
+    assert(i2-- == a.end(), "basic increment test 3");
+    assert(i2 == --a.end(), "basic increment test 4");
+
+    assert(*(a.begin() + 1) == 2, "basic iterator test 7");
+    assert(*(a.begin() + 2) == 3, "basic iterator test 8");
+   
+    assert(*(a.end() - 1) == 3, "basic iteratir test 9");
+    assert(*(a.end() - 2) == 2, "basic iteratir test 10");
+    assert(*(a.end() - 3) == 1, "basic iteratir test 11");
+
+    assert(a.begin() + 0 == a.end() - 3, "advanced iterator test 1");
+    assert(a.begin() + 1 == a.end() - 2, "advanced iterator test 2");
+    assert(a.begin() + 2 == a.end() - 1, "advanced iterator test 3");
+    assert(a.begin() + 3 == a.end() - 0, "advanced iterator test 4");
+
+    assert(a.end() - 0 == a.begin() + 3, "advanced iterator test 5");
+    assert(a.end() - 1 == a.begin() + 2, "advanced iterator test 6");
+    assert(a.end() - 2 == a.begin() + 1, "advanced iterator test 7");
+    assert(a.end() - 3 == a.begin() + 0, "advanced iterator test 8");
+
+    tlucanti::vector_base<int> b;
+    
+    assert(a.begin() == a.end(), "iterator empty test 1");
+
+    result();
+}
+

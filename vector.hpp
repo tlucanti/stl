@@ -102,6 +102,19 @@ public:
         return ret;
     }
 
+    constexpr self_type &operator --() noexcept // --i
+    {
+        --_ptr;
+        return *this;
+    }
+
+    constexpr self_type operator --(int) noexcept // i--
+    {
+        const self_type ret = self_type(_ptr);
+        --_ptr;
+        return ret;
+    }
+
     WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(difference_type, +)
     WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(difference_type, -)
     WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(const self_type &, -)
@@ -611,7 +624,7 @@ public:
 // ----------------------------- internal methods ------------------------------
 private:
 // ----------------------------- memory allocation -----------------------------
-    constexpr size_type _upper_bound_grid(size_type req)
+    __WUR constexpr size_type _upper_bound_grid(size_type req)
     {
         static const size_type grid[] = {
             7u, 11u, 18u, 29u, 47u, 76u, 123u, 199u, 322u, 521u, 843u, 1364u,
@@ -657,7 +670,7 @@ private:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr pointer _allocate(size_type req_size)
+    constexpr void _allocate(size_type req_size)
     {
         _allocated = _upper_bound_grid(req_size);
         try {
@@ -713,7 +726,7 @@ private:
         }
     }
 // ------------------------------ element access -------------------------------
-    constexpr reference _at(difference_type pos) const
+    __WUR constexpr reference _at(difference_type pos) const
     {
         if (pos >= static_cast<difference_type>(_size) or pos < -static_cast<difference_type>(_size))
             throw std::out_of_range("out of range");
@@ -721,20 +734,20 @@ private:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr iterator _iterator(pointer ptr)
+    __WUR constexpr iterator _iterator(pointer ptr)
     {
         return iterator(ptr);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr reverse_iterator _riterator(pointer ptr)
+    __WUR constexpr reverse_iterator _riterator(pointer ptr)
     {
 # warning "IMPLEMENT FUNCTION"
         __ABORT("FUNCTION NOT IMPLEMENTED", "");
     }
 
 // -----------------------------------------------------------------------------
-    constexpr pointer _insert(pointer ptr, size_type count=1)
+    __WUR constexpr pointer _insert(pointer ptr, size_type count=1)
     {
         difference_type index = ptr - _begin;
         if (_size + count > _allocated)
@@ -744,7 +757,7 @@ private:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr pointer _erase(pointer ptr, size_type count=1)
+    __WUR constexpr pointer _erase(pointer ptr, size_type count=1)
     {
         iterator::copy(ptr + count, ptr, count);
         _size -= count;
