@@ -14,6 +14,15 @@
 # define DEFS_H
 
 # include <unistd.h>
+# include <string.h>
+
+# ifdef __DEBUG
+#  define PRIVATE public
+#  define PROTECTED public
+# else
+#  define PRIVATE private
+#  define PROTECTED protected
+# endif
 
 # define CPP	    1
 # define CPP98		__cplusplus >= 199711L
@@ -41,11 +50,11 @@
 # /* internal */ define ___INTERNAL___INT_TO_STRING_MACRO(__x)  #__x
 # /* internal */ define ___INTERNAL___INT_TO_STRING(__x)        ___INTERNAL___INT_TO_STRING_MACRO(__x)
 # define INT_TO_STRING(x)   ___INTERNAL___INT_TO_STRING(x)
-# define STR_LEN(x) ({long __n=0;for(;(x)[__n];++__n);__n;})
+# define STR_LEN(x) strlen(x)
 
-# define __ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, __LINE__)
+# define __ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
 
-inline void __do_ABORT(const char *msg, const char *arg, const char *func, int line)
+inline void __do_ABORT(const char *msg, const char *arg, const char *func, const char *lineno)
 {
     write(2, "[", 1);
 //    write(2, func, STR_LEN(func));
@@ -56,7 +65,6 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, int l
     while (isalnum(*func) or *func == '_' or *func == ':')
         write(2, func++, 1);
     write(2, "::", 2);
-    const char *lineno = INT_TO_STRING(__LINE__);
     write(2, lineno, STR_LEN(lineno));
     write(2, "] ABORT : ", 10);
     write(2, msg, STR_LEN(msg));
@@ -100,15 +108,11 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, int l
 #  endif /* nullptr */
 # endif /* CPP11 */
 
-# if CPP14
+# if PRECPP14
 #  ifndef constexpr
 #   define constexpr
 #  endif /* constexpr */
-# else /* PRECPP14 */
-#  ifndef constexpr
-#   define constexpr
-#  endif /* constexpr */
-# endif /* CPP14 */
+# endif /* PRECPP14 */
 
 # if CPP17
 #  ifndef __WUR
@@ -124,6 +128,12 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, int l
 #  ifndef __WUR
 #   define __WUR __attribute__((warn_unused_result))
 #  endif /* __WUR */
+#  ifndef __UNUSED
+#   define __UNUSED __attribute__((unused)))
+#  endif /* __UNUSED */
+#  ifndef __NORET
+#   define __NORET __attribute__((noreturn))
+#  endif /* __NORET */
 # endif /* CPP17 */
 
 #endif /* DEFS_H */
