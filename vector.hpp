@@ -14,239 +14,14 @@
 # define VECTOR_HPP
 
 # include "defs.h"
-# include <iterator>
-# include "enable_if.hpp"
-# include "is_integral.hpp"
+# include "type_traits.hpp"
+# include "iterator.hpp"
 
 # define golden_ratio 1.618033988749895
 
 TLU_NAMESPACE_BEGIN
 
-# define WRAP_ITERATOR_BOOL_OPERATOR_MACRO(__op) constexpr bool operator __op( \
-    const self_type &cmp) const noexcept { return _ptr __op cmp._ptr; }
-
-# define WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op) constexpr self_type \
-    operator __op(difference_type shift) const noexcept { return self_type(_ptr __op shift); }
-
-# define WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(__op) constexpr bool operator __op( \
-    const self_type &cmp) const noexcept { return not (this->_ptr __op cmp._ptr); }
-
-# define WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op) constexpr self_type \
-    operator __op(difference_type shift) const noexcept { return self_type(this->_ptr __op -shift); }
-
-    template <class type_T, class allocator_T=std::allocator<type_T> >
-class vector_base;
-
-template <class type_T>
-class wrap_iterator : public std::iterator<std::random_access_iterator_tag, type_T>
-{
-// --------------------------------- typedefs ----------------------------------
-public:
-    typedef std::iterator<std::random_access_iterator_tag, type_T>  iterator_traits;
-// TODO:    typedef typename iterator_traits::iterator_category     iterator_category;
-    typedef typename iterator_traits::value_type            value_type;
-    typedef typename iterator_traits::difference_type       difference_type;
-    typedef typename iterator_traits::pointer               pointer;
-// TODO:    typedef typename iterator_traits::reference             reference;
-
-PRIVATE:
-    typedef wrap_iterator<value_type>                    self_type;
-
-//    friend vector_base<value_type>;
-
-// ------------------------------ protected fields -------------------------------
-PROTECTED:
-    pointer    _ptr;
-
-// =============================================================================
-// ------------------------------ initialization -------------------------------
-PROTECTED:
-    explicit constexpr wrap_iterator(pointer ptr) : _ptr(ptr) {}
-public:
-    constexpr wrap_iterator() : _ptr(nullptr) {}
-    constexpr wrap_iterator(const self_type &cpy) : _ptr(cpy._ptr) {}
-
-# if CPP11
-    constexpr wrap_iterator(self_type &&mv) noexcept
-        : _ptr(mv._ptr)
-    {
-        mv._ptr = nullptr;
-    }
-# endif /* CPP11 */
-
-// =============================================================================
-// --------------------------------- operators ---------------------------------
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(==)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(!=)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(> )
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(>=)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(< )
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(<=)
-
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+)
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-)
-
-# if CPP20
-//    constexpr bool operator <=>(const self_type &cmp)
-//    {
-//        // TODO: bool operator <=>
-////        # warning "IMPLEMENT FUNCTION"
-//        __ABORT("FUNCTION NOT IMPLEMENTED", "");
-//        return false;
-//    }
-# endif /* CPP20 */
-
-    constexpr value_type operator *() noexcept { return *_ptr; } // *i
-
-    virtual constexpr self_type &operator ++() noexcept // ++i
-    {
-        ++_ptr;
-        return *this;
-    }
-
-    virtual constexpr self_type operator ++(int) noexcept // i++
-    {
-        const self_type ret = self_type(_ptr);
-        ++_ptr;
-        return ret;
-    }
-
-    virtual constexpr self_type &operator --() noexcept // --i
-    {
-        --_ptr;
-        return *this;
-    }
-
-    virtual constexpr self_type operator --(int) noexcept // i--
-    {
-        const self_type ret = self_type(_ptr);
-        --_ptr;
-        return ret;
-    }
-
-    virtual constexpr difference_type operator -(const self_type &diff) const noexcept
-    {
-        return _ptr - diff._ptr;
-    }
-
-// ---------------------------- static members ----------------------------------
-    static constexpr difference_type distance(const self_type &begin,
-        const self_type &end)
-    {
-        if (end._ptr > begin._ptr)
-            return end._ptr - begin._ptr;
-        return begin._ptr - end._ptr;
-    }
-
-// ---------------------------- static members ----------------------------------
-    template <typename input_it>
-    static constexpr difference_type distance(const input_it &begin, const input_it &end)
-    {
-        return std::distance(begin, end);
-    }
-
-    static constexpr void copy(const self_type &begin, const self_type &end, pointer dest)
-    {
-        copy(begin._ptr, end._ptr, dest);
-    }
-
-    template <class input_it>
-    static constexpr void copy(const input_it &begin, const input_it &end, pointer dest) noexcept
-    {
-        std::copy(begin, end, dest);
-    }
-
-    static constexpr void copy(pointer start, pointer end, pointer dest)
-    {
-        if (start > dest)
-        {
-            while (start != end)
-                *dest++ = *start++;
-        }
-        else
-        {
-            difference_type dist = distance(start, end);
-            while (dist)
-                dest[--dist] = *--end;
-        }
-    }
-};
-
-template <class type_T>
-class wrap_reverse_iterator : public wrap_iterator<type_T>
-{
-// --------------------------------- typedefs ----------------------------------
-
-PRIVATE:
-    typedef wrap_iterator<type_T> base_class;
-public:
-    typedef typename base_class::iterator_traits  iterator_traits;
-// TODO:    typedef typename base_class::iterator_category     iterator_category;
-    typedef typename base_class::value_type            value_type;
-    typedef typename base_class::difference_type       difference_type;
-    typedef typename base_class::pointer               pointer;
-// TODO:    typedef typename base_class::reference             reference;
-PRIVATE:
-    typedef wrap_iterator<value_type>                    self_type;
-
-// =============================================================================
-// ------------------------------ initialization -------------------------------
-PROTECTED:
-    explicit constexpr wrap_reverse_iterator(pointer ptr) : base_class(ptr) {}
-public:
-    constexpr wrap_reverse_iterator() : base_class() {}
-    constexpr wrap_reverse_iterator(const self_type &cpy) : base_class(cpy) {}
-
-# if CPP11
-    constexpr wrap_reverse_iterator(self_type &&mv) noexcept : base_class(mv) {}
-# endif /* CPP11 */
-
-// =============================================================================
-// --------------------------------- operators ---------------------------------
-public:
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(> )
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(>=)
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(< )
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(<=)
-
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+)
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-)
-
-    constexpr self_type &operator ++() noexcept override // ++i
-    {
-        --this->_ptr;
-        return *this;
-    }
-
-    constexpr self_type operator ++(int) noexcept override // i++
-    {
-        const self_type ret = self_type(this->_ptr);
-        --this->_ptr;
-        return ret;
-    }
-
-    constexpr self_type &operator --() noexcept override // --i
-    {
-        ++this->_ptr;
-        return *this;
-    }
-
-    constexpr self_type operator --(int) noexcept override // i--
-    {
-        const self_type ret = self_type(this->_ptr);
-        ++this->_ptr;
-        return ret;
-    }
-
-    constexpr difference_type operator -(const self_type &diff) const noexcept
-    {
-        return diff._ptr - this->_ptr;
-    }
-
-};
-
-
-template <class type_T, class allocator_T>
+template <class type_T, class allocator_T=std::allocator<type_T>>
 class vector_base
 {
 // --------------------------------- typedefs ----------------------------------
@@ -256,7 +31,7 @@ public:
     typedef typename allocator_traits::size_type        size_type;
 
     typedef type_T                                      value_type;
-    typedef vector_base<value_type>                     self_type;
+    typedef vector_base<value_type, allocator_type>     self_type;
     typedef value_type &                                reference;
     typedef const value_type &                          const_reference;
 #if CPP11
@@ -278,7 +53,6 @@ PROTECTED:
     self_type    &c;
 
 // ------------------------------ private fields -------------------------------
-    size_type       _size;
     size_type       _allocated;
     allocator_type  _allocator;
     pointer         _begin;
@@ -289,7 +63,6 @@ public:
 // ------------------------------ initialization -------------------------------
     constexpr vector_base() :
         c(*this),
-        _size(0),
         _allocated(0),
         _allocator(allocator_type()),
         _begin(nullptr),
@@ -299,7 +72,6 @@ public:
 // -----------------------------------------------------------------------------
     constexpr explicit vector_base(const allocator_type &alloc) :
         c(*this),
-        _size(0),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -311,14 +83,13 @@ public:
         const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
-        _size(size),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
         _end(nullptr)
     {
         if (size > 0)
-            _allocate(size);
+            _init(size);
     }
 
 // -----------------------------------------------------------------------------
@@ -327,53 +98,48 @@ public:
         const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
-        _size(size),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
         _end(nullptr)
     {
         if (size > 0)
-            _allocate(size);
-        while (size)
-            _begin[--size] = value;
+            _init(size, false);
+        _construct(_begin, size, value);
     }
 
 // -----------------------------------------------------------------------------
     template <class input_it>
-    explicit constexpr vector_base(input_it first,
-        typename TLU_NAMESPACE::enable_if<not TLU_NAMESPACE::is_integral<
-            input_it>::value, input_it>::type last,
-        const allocator_type &alloc=allocator_type()
+    explicit constexpr vector_base(typename TLU_NAMESPACE::enable_if<
+            not TLU_NAMESPACE::is_integral<input_it>::value, input_it>::type first,
+            input_it last, const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
-        _size(0),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
         _end(nullptr)
     {
-        difference_type n = iterator::distance(last, first);
+        difference_type n = iterator::distance(first, last);
         if (n > 0)
         {
-            _allocate(n);
-            iterator::copy(first, last, _begin);
+            _init(n, false);
+            _copy(first, last, _begin);
         }
     }
 
 // -----------------------------------------------------------------------------
     constexpr vector_base(const self_type &cpy, const allocator_type &alloc=allocator_type()) :
         c(*this),
-        _size(cpy._size),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
         _end(nullptr)
     {
-        if (_size > 0)
+        if (cpy.size() > 0)
         {
-            _allocate(_size);
-            iterator::copy(cpy._begin, cpy._end, _begin);
+            _init(cpy.size(), false);
+            _copy(cpy._begin, cpy._end, _begin);
         }
     }
 
@@ -381,15 +147,13 @@ public:
 # if CPP11
     constexpr vector_base(self_type &&mv,
         const allocator_type &alloc=allocator_type()
-    ) :
+    ) noexcept :
         c(*this),
-        _size(mv._size),
         _allocated(mv._allocated),
         _allocator(alloc),
         _begin(mv._begin),
         _end(mv._end)
     {
-        mv._size = 0;
         mv._allocated = 0;
         mv._begin = nullptr;
         mv._end = nullptr;
@@ -402,17 +166,15 @@ public:
         const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
-        _size(0),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
         _end(nullptr)
     {
-        _size = init.size();
-        if (_size > 0)
+        if (init.size() > 0)
         {
-            _allocate(_size);
-            iterator::copy(init.begin(), init.end(), _begin);
+            _init(init.size(), false);
+            _copy(init.begin(), init.end(), _begin);
         }
     }
 # endif /* CPP11 */
@@ -421,41 +183,46 @@ public:
     constexpr ~vector_base()
     {
         _deallocate();
-        _size = 0;
     }
 
 // --------------------------------- assigning ---------------------------------
     constexpr vector_base &operator =(const self_type &cpy)
     {
-        _size = cpy._size;
         _deallocate();
-        if (_size > 0)
+        if (cpy.size() > 0)
         {
-            _allocate(_size);
-            iterator::copy(cpy._begin, cpy._end, _begin);
+            _init(cpy.size());
+            _copy(cpy._begin, cpy._end, _begin);
         }
     }
 
 // -----------------------------------------------------------------------------
 # if CPP11
-    constexpr vector_base &operator =(self_type &&mv)
+    constexpr vector_base &operator =(self_type &&mv) noexcept
     {
-    // TODO: move assignment
-    // TODO: do not forget to move allocator
-//# warning "IMPLEMENT FUNCTION"
-        __ABORT("FUNCTION NOT IMPLEMENTED", "");
+        _size(mv._size);
+        _allocated(mv._allocated);
+        _allocator(std::move(mv._allocator));
+        _begin(mv._begin);
+        _end(mv._end);
+        mv._size = 0;
+        mv._allocated = 0;
+        mv._begin = nullptr;
+        mv._end = nullptr;
     }
+
 #endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
 # if CPP11
     constexpr vector_base &operator =(init_list_type init_list)
     {
-    // TODO: copy assignment
-    // TODO: copy allocator?
-//# warning "IMPLEMENT FUNCTION"
-        __ABORT("FUNCTION NOT IMPLEMENTED", "");
-        /* TODO: use for (auto &&value : init_list) */
+        _deallocate();
+        if (init_list.size() > 0)
+        {
+            _init(init_list.size(), false);
+            _copy(init_list.begin(), init_list.end(), _begin);
+        }
     }
 #endif /* CPP11 */
 
@@ -499,8 +266,8 @@ public:
     __WUR constexpr reference front() { return _at((size_type)0); }
     __WUR constexpr const_reference front() const { return _at((size_type)0); }
 
-    __WUR constexpr reference back() { return _at(_size - 1); }
-    __WUR constexpr const_reference back() const { return _at(_size - 1); }
+    __WUR constexpr reference back() { return _at(size() - 1); }
+    __WUR constexpr const_reference back() const { return _at(size() - 1); }
 
     __WUR constexpr pointer data() { return _begin; }
     __WUR constexpr const_pointer data() const { return _begin; }
@@ -533,20 +300,13 @@ public:
 
 // =============================================================================
 // --------------------------------- capacity ----------------------------------
-    __WUR constexpr bool empy() const noexcept { return !_size; }
-    __WUR constexpr size_type size() const noexcept { return _size; }
-    __WUR constexpr size_type max_size() const noexcept
-    {
-//# warning "IMPLEMENT FUNCTION"
-        __ABORT("FUNCTION NOT IMPLEMENTED", "");
-        /* TODO: not this */ return allocator_traits::max_size();
-        /* TODO: last element in golden ratio array */
-    }
+    __WUR constexpr bool empty() const noexcept { return !size(); }
+    __WUR constexpr size_type size() const noexcept { return _end - _begin; }
+    __WUR constexpr size_type max_size() const noexcept { return 16860207025497458688u; }
     constexpr void reserve(size_type capacity)
     {
-    // TODO: reserve
-//# warning "IMPLEMENT FUNCTION"
-        __ABORT("FUNCTION NOT IMPLEMENTED", "");
+        if (capacity && capacity >= _allocated)
+            _alloc_more(capacity);
     }
     __WUR constexpr size_type capacity() const noexcept { return _allocated; }
 # if CPP11
@@ -557,16 +317,14 @@ public:
 // --------------------------------- modifiers ---------------------------------
     constexpr void clear() noexcept
     {
-    // TODO: clear
-//# warning "IMPLEMENT FUNCTION"
-        __ABORT("FUNCTION NOT IMPLEMENTED", "");
+        _deallocate(false);
     }
 
 // -----------------------------------------------------------------------------
     constexpr iterator insert(const_iterator pos, const_reference value)
     {
         pointer start = _insert(pos);
-        *start = value;
+        _construct_at(start, value);
         return _iterator(start);
     }
 
@@ -583,18 +341,16 @@ public:
     constexpr void insert(const_iterator pos, size_type count, const_reference value)
     {
         pointer start = _insert(pos, count);
-        for (size_type i=0; i < count; ++i)
-            start[i] = value; // TODO: maybe use _allocator.construct() here
+        _construct(start, count, value);
     }
 
 // -----------------------------------------------------------------------------
     template <class input_it>
-    constexpr void insert(const_iterator pos, input_it first, input_it last)
+    constexpr void insert(const_iterator pos,
+        typename TLU_NAMESPACE::enable_if<not TLU_NAMESPACE::is_integral<
+        input_it>::value, input_it>::type first, input_it last)
     {
-        size_type count = iterator::distance(first, last);
-        pointer start = _insert(pos, count);
-        for (size_type i=0; i < count; ++i)
-            start[i] = first++; // TODO: maybe use _allocator.construct() here
+        _copy(first, last, pos._ptr);
     }
 
 // -----------------------------------------------------------------------------
@@ -602,11 +358,8 @@ public:
     constexpr iterator insert(const_iterator pos, init_list_type init_list)
     {
         iterator ret = _iterator(pos);
-        size_type count = init_list.size();
-        pointer start = _insert(pos, count);
-        size_type i = 0;
-        for (auto &&value : init_list)
-            start[i++] = std::move(value);
+        pointer start = _insert(pos, init_list.size());
+        _copy(init_list.begin(), init_list.end(), start);
         return ++ret;
     }
 # endif /* CPP11 */
@@ -637,6 +390,7 @@ public:
         size_type count = iterator::distance(first, last);
         if (count == 0)
             return last;
+        _destroy(first, count);
         pointer fin = _erase(first, count);
         return _iterator(fin);
     }
@@ -644,17 +398,15 @@ public:
 // -----------------------------------------------------------------------------
     constexpr void push_back(const_reference value)
     {
-        _append(value);
-        ++_size;
-        *_end++ = value;
+        _append();
+        _construct_at(_end++, value);
     }
 // -----------------------------------------------------------------------------
 # if CPP11
     constexpr void push_back(rvalue_type value)
     {
-        _append(std::move(value));
-        ++_size;
-        *_end++ = value;
+        _append();
+        _construct_at(_end++, std::move(value));
     }
 # endif /* CPP11 */
 
@@ -673,33 +425,36 @@ public:
     constexpr void pop_back()
     {
         _pop();
-        --_size;
-        --_end;
+        _destroy_at(--_end);
     }
 
 // -----------------------------------------------------------------------------
     constexpr void resize(size_type count)
     {
-        _size = count;
-        if (count > _allocated)
-            _append(count - _allocated);
+        size_type size = this->size();
+        if (count >= _allocated)
+        {
+            _alloc_more(count);
+            size_type new_elems = count - size;
+            _construct(_begin + size, new_elems);
+        }
         else if (count < _allocated)
             _pop(_allocated - count);
+        _end = _begin + count; // TODO: maybe this is redundant
     }
 
 // -----------------------------------------------------------------------------
     constexpr void resize(size_type count, const_reference value)
     {
-        difference_type index = _size;
-        resize(count);
-        for (; index < _size; ++index)
-            _begin[index] = value; // TODO: maybe use _allocator.construct() here
+//        difference_type index = _size;
+//        resize(count);
+//        for (; index < _size; ++index)
+//            _begin[index] = value; // TODO: maybe use _allocator.construct() here
     }
 
 // -----------------------------------------------------------------------------
     constexpr void swap(self_type &swp)
     {
-        std::swap(_size, swp._size);
         std::swap(_allocated, swp._allocated);
         std::swap(_allocator, swp._allocator);
         std::swap(_begin, swp._begin);
@@ -770,6 +525,16 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
+    constexpr void _construct_at(pointer ptr, const_reference val)
+    {
+#if CPP20
+        allocator_traits::construct(_allocator, ptr, val);
+#else
+        _allocator.construct(ptr, val);
+#endif
+    }
+
+// -----------------------------------------------------------------------------
     constexpr void _destroy_at(pointer ptr)
     {
 #if CPP20
@@ -780,32 +545,100 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _allocate(size_type req_size)
+    constexpr void _construct(pointer start, size_type cnt)
     {
-        _allocated = _upper_bound_grid(req_size);
-        try {
-            _begin = _allocator.allocate(_allocated);
-        } catch (std::bad_alloc &)
-        {
-            _deallocate();
-            _size = 0;
-            throw ;
-        }
-        _size = 0;
-        for (; _size < req_size; ++_size)
-            _construct_at(_begin + _size);
-        _end = _begin + _size;
+        while (cnt--)
+            _construct_at(start++);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _deallocate()
+    constexpr void _construct(pointer start, size_type cnt, const_reference val)
     {
-        while (_size--)
-            _destroy_at(_begin + _size);
-        _allocator.deallocate(_begin, _allocated);
-        _allocated = 0;
-        _begin = nullptr;
-        _end = nullptr;
+        while (cnt--)
+            _construct_at(start++, val);
+    }
+
+// -----------------------------------------------------------------------------
+    constexpr void _destroy(pointer start, size_type cnt)
+    {
+        while (cnt--)
+            _destroy_at(start++);
+    }
+
+// -----------------------------------------------------------------------------
+    constexpr void _init(size_type req_size, bool do_construct=true)
+    {
+        _allocated = _upper_bound_grid(req_size);
+        try {
+            _begin = _allocate(_allocated);
+        } catch (std::bad_alloc &)
+        {
+            _deallocate();
+            throw ;
+        }
+        _end = _begin + req_size;
+        if (do_construct)
+            _construct(_begin, req_size);
+    }
+
+// -----------------------------------------------------------------------------
+    __WUR constexpr pointer _allocate(size_type alloc_size)
+    {
+#ifdef __DEBUG
+        pointer _ret = _allocator.allocate(alloc_size);
+        memset(_ret, 0, alloc_size);
+        return _ret;
+#else
+        return _allocator.allocate(alloc_size);
+#endif
+    }
+
+// -----------------------------------------------------------------------------
+    template <class forward_iterator_type>
+    constexpr void _copy(typename enable_if<is_iterator<
+            forward_iterator_type>::value, forward_iterator_type>::type first,
+        const forward_iterator_type &last, pointer dest)
+    {
+        while (first != last)
+            _construct_at(dest++, *first++);
+    }
+
+// -----------------------------------------------------------------------------
+    constexpr void _copy(pointer first, pointer last, pointer dest)
+    {
+        _copy(first, dest, last - first);
+    }
+
+// -----------------------------------------------------------------------------
+    constexpr void _copy(pointer src, pointer dst, size_type cnt)
+    {
+        if (src > dst)
+        {
+            while (cnt--)
+                _construct_at(dst++, *src++);
+        }
+        else if (dst > src)
+        {
+            dst += cnt;
+            src += cnt;
+            while (cnt--)
+                _construct_at(--dst, *--src);
+        }
+    }
+
+// -----------------------------------------------------------------------------
+    constexpr void _deallocate(bool do_deallocate=true)
+    {
+        size_type size = _end - _begin;
+        while (size--)
+            _destroy_at(--_end);
+        if (do_deallocate)
+        {
+            _allocator.deallocate(_begin, _allocated);
+            _allocated = 0;
+            _begin = nullptr;
+            _end = nullptr;
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -818,32 +651,33 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _shrink()
     {
-        if (_size < _allocated / (golden_ratio * golden_ratio) and _allocated > 7)
-            _alloc_more(_size);
+        if (size() < _allocated / (golden_ratio * golden_ratio) and _allocated > 7)
+            _alloc_more(size());
     }
 
 // -----------------------------------------------------------------------------
     constexpr void _reallocate(size_type new_size)
     {
         try {
-            pointer new_begin = _allocator.allocate(new_size);
-            iterator::copy(_begin, _size, new_begin);
-            _deallocate(_begin, _allocated);
+            pointer new_begin = _allocate(new_size);
+            _copy(_begin, _end, new_begin);
+            size_type size = _end - _begin;
+            _deallocate();
             _allocated = new_size;
             _begin = new_begin;
-            _end = _begin + _size;
+            _end = _begin + size;
         } catch (std::bad_alloc &) {
             _deallocate();
-            _size = 0;
             throw ;
         }
     }
 // ------------------------------ element access -------------------------------
     __WUR constexpr reference _at(difference_type pos) const
     {
-        if (pos >= static_cast<difference_type>(_size) or pos < -static_cast<difference_type>(_size))
+        size_type size = this->size();
+        if (pos >= static_cast<difference_type>(size) or pos < -static_cast<difference_type>(size))
             throw std::out_of_range("out of range");
-        return _begin[(pos + _size) % _size];
+        return _begin[(pos + size) % size];
     }
 
 // -----------------------------------------------------------------------------
@@ -862,32 +696,29 @@ PRIVATE:
     __WUR constexpr pointer _insert(pointer ptr, size_type count=1)
     {
         difference_type index = ptr - _begin;
-        if (_size + count > _allocated)
-            _alloc_more(_size + count);
-        iterator::copy(_begin + index + 1, count, _end - _begin - index);
+        _append(count);
+        _copy(_begin + index + 1, count, _end - _begin - index);
         return _begin + index;
     }
 
 // -----------------------------------------------------------------------------
     __WUR constexpr pointer _erase(pointer ptr, size_type count=1)
     {
-        iterator::copy(ptr + count, ptr, count);
-        _size -= count;
+        _destroy(ptr, count);
+        _copy(ptr, ptr + count, count);
         _shrink();
-        _end -= count; // TODO: maybe uwe _allocator.destroy(_end) here
     }
 
 // -----------------------------------------------------------------------------
     constexpr void _append(size_type count=1)
     {
-        if (_size + count > _allocated)
-            _alloc_more(_size + count);
+        if (size() + count >= _allocated)
+            _alloc_more(size() + count);
     }
 
 // -----------------------------------------------------------------------------
     constexpr void _pop(size_type count=1)
     {
-        _size -= count;
         _shrink();
         _end -= count; // TODO: maybe uwe _allocator.destroy(_end) here
     }

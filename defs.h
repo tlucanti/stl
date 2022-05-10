@@ -41,6 +41,9 @@
 # define TLU_NAMESPACE tlucanti
 # define TLU_NAMESPACE_BEGIN namespace TLU_NAMESPACE {
 # define TLU_NAMESPACE_END }
+# define TLU_NAMESPACE_HIDDEN __hidden_tlucanti_namespace__
+# define TLU_NAMESPACE_HIDDEN_BEGIN namespace TLU_NAMESPACE_HIDDEN {
+# define TLU_NAMESPACE_HIDDEN_END }
 
 # define GLUE2(__a, __b) __a##__b
 # define GLUE3(__a, __b, __c) GLUE2(__a, __b)##__c
