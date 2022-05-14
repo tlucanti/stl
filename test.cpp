@@ -30,14 +30,52 @@ int grand_total_ok = 0;
 } while (0)
 
 #define vec_assert(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
-    assert((__vec).size() == (__size), __msg " size() check"); \
-    assert((__vec).empty() == !(__size), __msg " empty() check"); \
-    assert((__vec)._allocated == (__allocated), __msg " allocated check"); \
-    assert((__vec).capacity() == (__allocated), __msg " .capacity() check"); \
-    assert((__vec)._begin == (__begin), __msg " begin iterator check"); \
-    assert((__vec)._end == (__end), __msg " end iterator check"); \
-    assert((__vec)._allocator == (__alloc), __msg " allocator check"); \
-    assert((__vec).get_allocator() == (__alloc), __msg " .get_allocator() check")
+    assert((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
+    assert((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
+    assert((__vec)._allocated == (__allocated), (__msg)  + std::string(" allocated check")); \
+    assert((__vec).capacity() == (__allocated), (__msg) + std::string(" .capacity() check")); \
+    assert((__vec)._begin == (__begin), (__msg) + std::string(" begin iterator check")); \
+    assert((__vec)._end == (__end), (__msg) + std::string(" end iterator check")); \
+    assert((__vec)._allocator == (__alloc), (__msg) + std::string(" allocator check")); \
+    assert((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
+
+# define vec_cmp(__msg, __type, __vec, ...) do { \
+    __type __cmp[] = {__VA_ARGS__}; \
+    std::size_t __size = sizeof(__cmp) / sizeof(__type); \
+    std::stringstream __ssvc, __sscm, __ss; \
+    assert((__vec).size() == __size, std::string("size test") + (__msg)); \
+    bool __ok = true; \
+    __ssvc << "["; \
+    __sscm << "["; \
+    for (std::size_t __i=0; __i < __size; ++__i) \
+    { \
+        if (__i == 0) \
+        { \
+            __ssvc << (__vec)[0]; \
+            __sscm << __cmp[0]; \
+        } \
+        else \
+        { \
+            __ssvc << ", " << (__vec)[__i]; \
+            __sscm << ", " << __cmp[__i]; \
+        } \
+        if ((__vec)[__i] != __cmp[__i]) \
+        { \
+            __ok = false; \
+        } \
+    } \
+    __ssvc << "]"; \
+    __sscm << "]"; \
+    if (not __ok) \
+    { \
+        __ss << "vector compare: (expected)" << __ssvc.str() << " != (got) " << __sscm.str(); \
+    } \
+    assert(__ok, __ss.str() + (__msg)); \
+} while (false)
+
+# define make_vec(...) ({ \
+                              \
+})
 
 template <typename T>
 void __to_trash(T &_) {(void)_;}
@@ -606,6 +644,47 @@ void fn_reserve_tests()
 void fn_capacity_tests()
 {
     start(".capacity() tests");
+
+    result();
+}
+
+void fn_shrink_to_fit_tests()
+{
+    start(".shrink_to_fit() tests");
+
+    result();
+}
+
+void fn_clear_tests()
+{
+    start(".clear() tests");
+
+    std::allocator<int> alloc;
+    {
+        vec_123(a);
+        a.clear();
+        vec_assert(a, 0, 0, nullptr, nullptr, alloc, "clear basic test 1");
+    }
+    {
+        tlucanti::vector_base<int> a;
+        a.clear();
+        vec_assert(a, 0, 0, nullptr, nullptr, alloc, "clear empty test 1");
+    }
+
+    result();
+}
+
+void fn_insert_tests()
+{
+    start(".insert() tests");
+
+    std::allocator<int> alloc;
+    {
+        vec_123(a);
+        a.insert(a.begin(), 123);
+        tlucanti::vector_base
+        vec_cmp("basic insert test", int, a, 123, 1, 2, 3);
+    }
 
     result();
 }

@@ -321,7 +321,7 @@ public:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr iterator insert(const_iterator pos, const_reference value)
+    constexpr iterator insert(iterator pos, const_reference value)
     {
         pointer start = _insert(pos);
         _construct_at(start, value);
@@ -697,7 +697,7 @@ PRIVATE:
     {
         difference_type index = ptr - _begin;
         _append(count);
-        _copy(_begin + index + 1, count, _end - _begin - index);
+        _copy(_begin + index + 1, _end - _begin - index, count);
         return _begin + index;
     }
 
