@@ -31,17 +31,36 @@ TLU_NAMESPACE_BEGIN
     template <> struct is_integral<short int>       : public std::true_type {};
     template <> struct is_integral<int>             : public std::true_type {};
     template <> struct is_integral<long int>        : public std::true_type {};
-#if CPP11
-    template <> struct is_integral<long long int>   : public std::true_type {};
-#endif /* CPP11 */
-
-// ------------------------------- is_integral -------------------------------
     template <> struct is_integral<unsigned char>            : public std::true_type {};
     template <> struct is_integral<unsigned short int>       : public std::true_type {};
     template <> struct is_integral<unsigned int>             : public std::true_type {};
     template <> struct is_integral<unsigned long int>        : public std::true_type {};
 #if CPP11
+	template <> struct is_integral<long long int>   : public std::true_type {};
     template <> struct is_integral<unsigned long long int>   : public std::true_type {};
+#endif /* CPP11 */
+
+	// ------------------------------- is_pointer -------------------------------
+	template <class type_T> struct is_pointer : public std::false_type {};
+
+	template <> struct is_pointer<bool *>            : public std::true_type {};
+	template <> struct is_pointer<char *>            : public std::true_type {};
+#if CPP20
+	template <> struct is_integral<char8_t *>         : public std::true_type {};
+#endif
+	template <> struct is_pointer<char16_t *>        : public std::true_type {};
+	template <> struct is_pointer<char32_t *>        : public std::true_type {};
+	template <> struct is_pointer<wchar_t *>         : public std::true_type {};
+	template <> struct is_pointer<short int *>       : public std::true_type {};
+	template <> struct is_pointer<int *>             : public std::true_type {};
+	template <> struct is_pointer<long int *>        : public std::true_type {};
+	template <> struct is_pointer<unsigned char *>            : public std::true_type {};
+	template <> struct is_pointer<unsigned short int *>       : public std::true_type {};
+	template <> struct is_pointer<unsigned int *>             : public std::true_type {};
+	template <> struct is_pointer<unsigned long int *>        : public std::true_type {};
+#if CPP11
+	template <> struct is_integral<long long int *>   : public std::true_type {};
+	template <> struct is_integral<unsigned long long int *>   : public std::true_type {};
 #endif /* CPP11 */
 
 // ------------------------------- is_iterator -------------------------------

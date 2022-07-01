@@ -145,6 +145,8 @@ void user_type_constructor_test();
 
 int main()
 {
+	std::vector<int> a;
+	a.~vector();
     constructor_test();
     assign_test();
     fn_assign_test();
@@ -682,7 +684,6 @@ void fn_insert_tests()
     {
         vec_123(a);
         a.insert(a.begin(), 123);
-        tlucanti::vector_base
         vec_cmp("basic insert test", int, a, 123, 1, 2, 3);
     }
 
@@ -717,7 +718,7 @@ struct UserClass
        std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
 #endif
     }
-    ~UserClass() noexcept(false) {
+    ~UserClass() {
         if (!valid)
             throw std::runtime_error("nullptr in `valid` value");
         if (not *valid)

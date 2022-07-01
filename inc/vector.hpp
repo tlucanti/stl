@@ -21,7 +21,7 @@
 
 TLU_NAMESPACE_BEGIN
 
-template <class type_T, class allocator_T=std::allocator<type_T>>
+template <class type_T, class allocator_T=std::allocator<type_T> >
 class vector_base
 {
 // --------------------------------- typedefs ----------------------------------
@@ -53,7 +53,7 @@ PROTECTED:
     self_type    &c;
 
 // ------------------------------ private fields -------------------------------
-    size_type       _allocated;
+    difference_type _allocated;
     allocator_type  _allocator;
     pointer         _begin;
     pointer         _end;
@@ -323,7 +323,7 @@ public:
 // -----------------------------------------------------------------------------
     constexpr iterator insert(iterator pos, const_reference value)
     {
-        pointer start = _insert(pos);
+        pointer start = _insert(pos._ptr);
         _construct_at(start, value);
         return _iterator(start);
     }
@@ -604,13 +604,15 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _copy(pointer first, pointer last, pointer dest)
+    constexpr void _copy(pointer first, pointer last,
+		typename tlucanti::enable_if<
+			tlucanti::is_pointer<pointer>::value, pointer>::type dest)
     {
         _copy(first, dest, last - first);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _copy(pointer src, pointer dst, size_type cnt)
+    constexpr void _copy(pointer src, pointer dst, difference_type cnt)
     {
         if (src > dst)
         {
@@ -693,7 +695,7 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    __WUR constexpr pointer _insert(pointer ptr, size_type count=1)
+    __WUR constexpr pointer _insert(pointer ptr, difference_type count=1)
     {
         difference_type index = ptr - _begin;
         _append(count);
