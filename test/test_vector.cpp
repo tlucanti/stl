@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include <cstdio>
 
 #define __DEBUG
 #include "defs.h"
@@ -314,8 +315,8 @@ void constructor_test()
     std::vector<int> gv(vec.begin(), vec.end());
     std::vector<int> hv(vec.begin(), vec.end(), alloc);
     std::vector<int> iv(av); (void)iv;
-    std::vector<int> jv(av, alloc);
 #if CPP11
+    std::vector<int> jv(av, alloc);
     std::vector<int> kv(std::move(av));
     std::vector<int> lv(std::move(bv), alloc);
     std::vector<int> mv({1, 2, 3});
@@ -621,7 +622,7 @@ void fn_max_size_tests()
     start(".max_size() tests");
 
     tlucanti::vector_base<int> a;
-    assert(a.max_size() == 16860207025497458688u, "max_size test 1");
+    assert(a.max_size() == 9223372036854775807, "max_size test 1");
 
     result();
 }

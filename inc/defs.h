@@ -14,7 +14,8 @@
 # define DEFS_H
 
 # include <unistd.h>
-# include <string.h>
+# include <cstring>
+# include <cstdlib>
 
 # ifdef __DEBUG
 #  define PRIVATE public
@@ -44,6 +45,9 @@
 # define TLU_NAMESPACE_HIDDEN __hidden_tlucanti_namespace__
 # define TLU_NAMESPACE_HIDDEN_BEGIN namespace TLU_NAMESPACE_HIDDEN {
 # define TLU_NAMESPACE_HIDDEN_END }
+
+# define __LIKELY(__expr) __builtin_expect((__expr), 1)
+# define __UNLIKELY(__expr) __builtin_expect((__expr), 0)
 
 # define GLUE2(__a, __b) __a##__b
 # define GLUE3(__a, __b, __c) GLUE2(__a, __b)##__c

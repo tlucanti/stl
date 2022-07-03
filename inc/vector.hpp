@@ -13,6 +13,7 @@
 #ifndef VECTOR_HPP
 # define VECTOR_HPP
 
+# include <limits>
 # include "defs.h"
 # include "type_traits.hpp"
 # include "iterator.hpp"
@@ -27,8 +28,7 @@ class vector_base
 // --------------------------------- typedefs ----------------------------------
 public:
     typedef allocator_T                                 allocator_type;
-    typedef std::allocator_traits<allocator_type>       allocator_traits;
-    typedef typename allocator_traits::size_type        size_type;
+    typedef size_t                                      size_type;
 
     typedef type_T                                      value_type;
     typedef vector_base<value_type, allocator_type>     self_type;
@@ -37,9 +37,9 @@ public:
 #if CPP11
     typedef value_type &&                               rvalue_type;
 #endif /* CPP11 */
-    typedef typename allocator_traits::difference_type  difference_type;
-    typedef typename allocator_traits::pointer          pointer;
-    typedef typename allocator_traits::const_pointer    const_pointer;
+    typedef std::ptrdiff_t                              difference_type;
+    typedef typename allocator_type::pointer            pointer;
+    typedef typename allocator_type::const_pointer      const_pointer;
     typedef wrap_iterator<value_type>                   iterator;
     typedef wrap_iterator<const value_type>             const_iterator;
     typedef wrap_reverse_iterator<value_type>           reverse_iterator;
@@ -79,7 +79,7 @@ public:
     {}
 
 // -----------------------------------------------------------------------------
-    constexpr explicit vector_base(size_type size,
+    constexpr explicit vector_base(difference_type size,
         const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
@@ -88,12 +88,12 @@ public:
         _begin(nullptr),
         _end(nullptr)
     {
-        if (size > 0)
+        if (__LIKELY(size > 0))
             _init(size);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr vector_base(size_type size,
+    constexpr vector_base(difference_type size,
         const_reference value,
         const allocator_type &alloc=allocator_type()
     ) :
@@ -103,15 +103,14 @@ public:
         _begin(nullptr),
         _end(nullptr)
     {
-        if (size > 0)
+        if (__LIKELY(size > 0))
             _init(size, false);
         _construct(_begin, size, value);
     }
 
 // -----------------------------------------------------------------------------
     template <class input_it>
-    explicit constexpr vector_base(typename TLU_NAMESPACE::enable_if<
-            not TLU_NAMESPACE::is_integral<input_it>::value, input_it>::type first,
+    explicit constexpr vector_base(NOT_INTEGRAL(input_it) first,
             input_it last, const allocator_type &alloc=allocator_type()
     ) :
         c(*this),
@@ -121,7 +120,7 @@ public:
         _end(nullptr)
     {
         difference_type n = iterator::distance(first, last);
-        if (n > 0)
+        if (__LIKELY(n > 0))
         {
             _init(n, false);
             _copy(first, last, _begin);
@@ -136,7 +135,7 @@ public:
         _begin(nullptr),
         _end(nullptr)
     {
-        if (cpy.size() > 0)
+        if (__LIKELY(cpy.size() > 0))
         {
             _init(cpy.size(), false);
             _copy(cpy._begin, cpy._end, _begin);
@@ -180,7 +179,7 @@ public:
 # endif /* CPP11 */
 
 // -------------------------------- destructors --------------------------------
-    constexpr ~vector_base()
+    ~vector_base()
     {
         _deallocate();
     }
@@ -189,7 +188,7 @@ public:
     constexpr vector_base &operator =(const self_type &cpy)
     {
         _deallocate();
-        if (cpy.size() > 0)
+        if (__LIKELY(cpy.size() > 0))
         {
             _init(cpy.size());
             _copy(cpy._begin, cpy._end, _begin);
@@ -227,9 +226,11 @@ public:
 #endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
-    constexpr void assign(size_type count, const_reference value)
+    constexpr void assign(difference_type count, const_reference value)
     {
     // TODO: assign
+        (void)count;
+        (void)value;
 //# warning "IMPLEMENT FUNCTION"
         __ABORT("FUNCTION NOT IMPLEMENTED", "");
     }
@@ -239,6 +240,8 @@ public:
     constexpr void assign(input_it first, input_it last)
     {
     // TODO: assign
+        (void)first;
+        (void)last;
 //# warning "IMPLEMENT FUNCTION"
         __ABORT("FUNCTION NOT IMPLEMENTED", "");
     }
@@ -257,14 +260,14 @@ public:
 // ------------------------------ element access -------------------------------
     __WUR constexpr allocator_type get_allocator() const noexcept { return _allocator; }
 
-    __WUR constexpr reference at(size_type pos) { return _at(pos); }
-    __WUR constexpr const_reference at(size_type pos) const { return _at(pos); }
+    __WUR constexpr reference at(difference_type pos) { return _at(pos); }
+    __WUR constexpr const_reference at(difference_type pos) const { return _at(pos); }
 
-    __WUR constexpr reference operator[](size_type pos) { return _at(pos); }
-    __WUR constexpr const_reference operator[](size_type pos) const {return _at(pos);}
+    __WUR constexpr reference operator[](difference_type pos) { return _at(pos); }
+    __WUR constexpr const_reference operator[](difference_type pos) const {return _at(pos);}
 
-    __WUR constexpr reference front() { return _at((size_type)0); }
-    __WUR constexpr const_reference front() const { return _at((size_type)0); }
+    __WUR constexpr reference front() { return _at(0); }
+    __WUR constexpr const_reference front() const { return _at(0); }
 
     __WUR constexpr reference back() { return _at(size() - 1); }
     __WUR constexpr const_reference back() const { return _at(size() - 1); }
@@ -301,14 +304,14 @@ public:
 // =============================================================================
 // --------------------------------- capacity ----------------------------------
     __WUR constexpr bool empty() const noexcept { return !size(); }
-    __WUR constexpr size_type size() const noexcept { return _end - _begin; }
-    __WUR constexpr size_type max_size() const noexcept { return 16860207025497458688u; }
-    constexpr void reserve(size_type capacity)
+    __WUR constexpr difference_type size() const noexcept { return _end - _begin; }
+    __WUR constexpr difference_type max_size() const noexcept { return std::numeric_limits<difference_type>::max(); }
+    constexpr void reserve(difference_type capacity)
     {
         if (capacity && capacity >= _allocated)
             _alloc_more(capacity);
     }
-    __WUR constexpr size_type capacity() const noexcept { return _allocated; }
+    __WUR constexpr difference_type capacity() const noexcept { return _allocated; }
 # if CPP11
     constexpr void shriknk_to_fit() {} // allocated size is always optimal
 # endif /* CPP11 */
@@ -338,8 +341,10 @@ public:
 # endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
-    constexpr void insert(const_iterator pos, size_type count, const_reference value)
+    constexpr void insert(const_iterator pos, difference_type count, const_reference value)
     {
+        if (__UNLIKELY(count <= 0))
+            return ;
         pointer start = _insert(pos, count);
         _construct(start, count, value);
     }
@@ -347,8 +352,7 @@ public:
 // -----------------------------------------------------------------------------
     template <class input_it>
     constexpr void insert(const_iterator pos,
-        typename TLU_NAMESPACE::enable_if<not TLU_NAMESPACE::is_integral<
-        input_it>::value, input_it>::type first, input_it last)
+        NOT_INTEGRAL(input_it) first, input_it last)
     {
         _copy(first, last, pos._ptr);
     }
@@ -387,8 +391,8 @@ public:
 // -----------------------------------------------------------------------------
     constexpr iterator erase(const_iterator first, const_iterator last)
     {
-        size_type count = iterator::distance(first, last);
-        if (count == 0)
+        difference_type count = iterator::distance(first, last);
+        if (count <= 0)
             return last;
         _destroy(first, count);
         pointer fin = _erase(first, count);
@@ -429,27 +433,29 @@ public:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void resize(size_type count)
+    constexpr void resize(difference_type count)
     {
-        size_type size = this->size();
+        if (__UNLIKELY(count < 0))
+            count = 0;
+        difference_type size = this->size();
         if (count >= _allocated)
         {
             _alloc_more(count);
-            size_type new_elems = count - size;
+            difference_type new_elems = count - size;
             _construct(_begin + size, new_elems);
         }
-        else if (count < _allocated)
+        else
             _pop(_allocated - count);
         _end = _begin + count; // TODO: maybe this is redundant
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void resize(size_type count, const_reference value)
+    constexpr void resize(difference_type count, const_reference value)
     {
-//        difference_type index = _size;
-//        resize(count);
-//        for (; index < _size; ++index)
-//            _begin[index] = value; // TODO: maybe use _allocator.construct() here
+        difference_type index = size();
+        resize(count);
+        for (difference_type size = this->size(); index < size; ++index)
+            _begin[index] = value; // TODO: maybe use _allocator.construct() here
     }
 
 // -----------------------------------------------------------------------------
@@ -467,9 +473,9 @@ public:
 // ----------------------------- internal methods ------------------------------
 PRIVATE:
 // ----------------------------- memory allocation -----------------------------
-    __WUR static constexpr size_type _upper_bound_grid(size_type req)
+    __WUR static constexpr difference_type _upper_bound_grid(difference_type req)
     {
-        constexpr const size_type grid[] = {
+        constexpr const difference_type grid[] = {
             7u, 11u, 18u, 29u, 47u, 76u, 123u, 199u, 322u, 521u, 843u, 1364u,
             2207u, 3571u, 5778u, 9349u, 15127u, 24476u, 39603u, 64079u, 103682u,
             167761u, 271443u, 439204u, 710647u, 1149851u, 1860498u, 3010349u,
@@ -488,14 +494,13 @@ PRIVATE:
             52361396397820264u, 84722519070079504u, 137083915467899776u,
             221806434537979296u, 358890350005879104u, 580696784543858432u,
             939587134549737600u, 1520283919093596160u, 2459871053643333632u,
-            3980154972736929792u, 6440026026380264448u, 10420180999117195264u,
-            16860207025497458688u
+            3980154972736929792u, 6440026026380264448u
         };
         int l, r, mid;
 
         if (req < 7u)
             return 7u;
-        if (req <= 103682)
+        if (__LIKELY(req <= 103682))
         {
             l = 0;
             r = 20;
@@ -515,17 +520,7 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _construct_at(pointer ptr)
-    {
-#if CPP20
-        allocator_traits::construct(_allocator, ptr);
-#else
-        _allocator.construct(ptr);
-#endif
-    }
-
-// -----------------------------------------------------------------------------
-    constexpr void _construct_at(pointer ptr, const_reference val)
+    constexpr void _construct_at(pointer ptr, const_reference val=value_type())
     {
 #if CPP20
         allocator_traits::construct(_allocator, ptr, val);
@@ -545,28 +540,28 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _construct(pointer start, size_type cnt)
+    constexpr void _construct(pointer start, difference_type cnt)
     {
-        while (cnt--)
+        while (cnt-- > 0)
             _construct_at(start++);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _construct(pointer start, size_type cnt, const_reference val)
+    constexpr void _construct(pointer start, difference_type cnt, const_reference val)
     {
-        while (cnt--)
+        while (cnt-- > 0)
             _construct_at(start++, val);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _destroy(pointer start, size_type cnt)
+    constexpr void _destroy(pointer start, difference_type cnt)
     {
-        while (cnt--)
+        while (cnt-- > 0)
             _destroy_at(start++);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _init(size_type req_size, bool do_construct=true)
+    constexpr void _init(difference_type req_size, bool do_construct=true)
     {
         _allocated = _upper_bound_grid(req_size);
         try {
@@ -582,21 +577,21 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    __WUR constexpr pointer _allocate(size_type alloc_size)
+    __WUR constexpr pointer _allocate(difference_type alloc_size)
     {
+        size_type alloc_size_signed = static_cast<size_type>(alloc_size);
 #ifdef __DEBUG
-        pointer _ret = _allocator.allocate(alloc_size);
-        memset(_ret, 0, alloc_size);
+        pointer _ret = _allocator.allocate(alloc_size_signed);
+        memset(_ret, 0, alloc_size_signed);
         return _ret;
 #else
-        return _allocator.allocate(alloc_size);
+        return _allocator.allocate(alloc_size_signed);
 #endif
     }
 
 // -----------------------------------------------------------------------------
     template <class forward_iterator_type>
-    constexpr void _copy(typename enable_if<is_iterator<
-            forward_iterator_type>::value, forward_iterator_type>::type first,
+    constexpr void _copy(IS_ITERATOR(forward_iterator_type) first,
         const forward_iterator_type &last, pointer dest)
     {
         while (first != last)
@@ -604,16 +599,19 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _copy(pointer first, pointer last,
-		typename tlucanti::enable_if<
-			tlucanti::is_pointer<pointer>::value, pointer>::type dest)
+    constexpr void _copy(pointer first, pointer last, pointer dest)
     {
-        _copy(first, dest, last - first);
+        difference_type diff = last - first;
+        if (__UNLIKELY(diff <= 0))
+            return ;
+        _copy(first, dest, diff);
     }
 
 // -----------------------------------------------------------------------------
     constexpr void _copy(pointer src, pointer dst, difference_type cnt)
     {
+        if (__UNLIKELY(cnt <= 0))
+            return ;
         if (src > dst)
         {
             while (cnt--)
@@ -631,12 +629,13 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _deallocate(bool do_deallocate=true)
     {
-        size_type size = _end - _begin;
+        difference_type size = this->size();
         while (size--)
             _destroy_at(--_end);
         if (do_deallocate)
         {
-            _allocator.deallocate(_begin, _allocated);
+            size_type allocated_unsigned = static_cast<size_type>(_allocated);
+            _allocator.deallocate(_begin, allocated_unsigned);
             _allocated = 0;
             _begin = nullptr;
             _end = nullptr;
@@ -644,7 +643,7 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _alloc_more(size_type least)
+    constexpr void _alloc_more(difference_type least)
     {
         _allocated = _upper_bound_grid(least);
         _reallocate(_allocated);
@@ -658,12 +657,17 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _reallocate(size_type new_size)
+    constexpr void _reallocate(difference_type new_size)
     {
+        if (__UNLIKELY(new_size <= 0))
+        {
+            _deallocate();
+            return ;
+        }
         try {
             pointer new_begin = _allocate(new_size);
             _copy(_begin, _end, new_begin);
-            size_type size = _end - _begin;
+            difference_type size = _end - _begin;
             _deallocate();
             _allocated = new_size;
             _begin = new_begin;
@@ -676,8 +680,8 @@ PRIVATE:
 // ------------------------------ element access -------------------------------
     __WUR constexpr reference _at(difference_type pos) const
     {
-        size_type size = this->size();
-        if (pos >= static_cast<difference_type>(size) or pos < -static_cast<difference_type>(size))
+        difference_type size = this->size();
+        if (pos >= size or pos < -size)
             throw std::out_of_range("out of range");
         return _begin[(pos + size) % size];
     }
@@ -697,30 +701,35 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     __WUR constexpr pointer _insert(pointer ptr, difference_type count=1)
     {
+        // here count cannot be negative, bc we checked it already
         difference_type index = ptr - _begin;
         _append(count);
+# error "dst argument is incorrect"
         _copy(_begin + index + 1, _end - _begin - index, count);
         return _begin + index;
     }
 
 // -----------------------------------------------------------------------------
-    __WUR constexpr pointer _erase(pointer ptr, size_type count=1)
+    __WUR constexpr pointer _erase(pointer ptr, difference_type count=1)
     {
+        // here count cannot be negative, bc we checked it already
         _destroy(ptr, count);
         _copy(ptr, ptr + count, count);
         _shrink();
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _append(size_type count=1)
+    constexpr void _append(difference_type count=1)
     {
+        // here count cannot be negative, bc we checked it already
         if (size() + count >= _allocated)
             _alloc_more(size() + count);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _pop(size_type count=1)
+    constexpr void _pop(difference_type count=1)
     {
+        // here count cannot be negative, bc we checked it already
         _shrink();
         _end -= count; // TODO: maybe uwe _allocator.destroy(_end) here
     }
