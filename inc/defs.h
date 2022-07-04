@@ -46,20 +46,20 @@
 # define TLU_NAMESPACE_HIDDEN_BEGIN namespace TLU_NAMESPACE_HIDDEN {
 # define TLU_NAMESPACE_HIDDEN_END }
 
-# define __LIKELY(__expr) __builtin_expect((__expr), 1)
-# define __UNLIKELY(__expr) __builtin_expect((__expr), 0)
+# define LIKELY(__expr) __builtin_expect((__expr), 1)
+# define UNLIKELY(__expr) __builtin_expect((__expr), 0)
 
 # define GLUE2(__a, __b) __a##__b
 # define GLUE3(__a, __b, __c) GLUE2(__a, __b)##__c
 # define GLUE4(__a, __b, __c, __d) GLUE3(__a, __b, __c)##__d
 # define GLUE5(__a, __b, __c, __d, __e) GLUE4(__a, __b, __c, __d)##__e
 
-# /* internal */ define ___INTERNAL___INT_TO_STRING_MACRO(__x)  #__x
-# /* internal */ define ___INTERNAL___INT_TO_STRING(__x)        ___INTERNAL___INT_TO_STRING_MACRO(__x)
-# define INT_TO_STRING(x)   ___INTERNAL___INT_TO_STRING(x)
+# /* internal */ define __INT_TO_STRING_MACRO(__x) #__x
+# /* internal */ define __INT_TO_STRING(__x) __INT_TO_STRING_MACRO(__x)
+# define INT_TO_STRING(x) __INT_TO_STRING(x)
 # define STR_LEN(x) strlen(x)
 
-# define __ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
+# define ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
 
 inline void __do_ABORT(const char *msg, const char *arg, const char *func, const char *lineno)
 {
@@ -85,25 +85,25 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 }
 
 # if CPP11
-#  ifndef __DEFAULT
-#   define __DEFAULT =default;
-#  endif /* __DEFAULT */
-#  ifndef __DELETE
-#   define __DELETE =delete;
-#  endif /* __DELETE */
-#  ifndef __DELETED_MEMBERS
-#   define __DELETED_MEMBERS public
-#  endif /* __DELETED_MEMBERS */
+#  ifndef DEFAULT
+#   define DEFAULT =default;
+#  endif /* DEFAULT */
+#  ifndef DELETE
+#   define DELETE =delete;
+#  endif /* DELETE */
+#  ifndef DELETED_MEMBERS
+#   define DELETED_MEMBERS public
+#  endif /* DELETED_MEMBERS */
 # else /* PRECPP11 */
-#  ifndef __DEFAULT
-#   define __DEFAULT {}
-#  endif /* __DEFAULT */
-#  ifndef __DELETE
-#   define __DELETE ;
-#  endif /* __DELETE */
-#  ifndef __DELETED_MEMBERS
-#   define __DELETED_MEMBERS private
-#  endif /* __DELETED_MEMBERS */
+#  ifndef DEFAULT
+#   define DEFAULT {}
+#  endif /* DEFAULT */
+#  ifndef DELETE
+#   define DELETE ;
+#  endif /* DELETE */
+#  ifndef DELETED_MEMBERS
+#   define DELETED_MEMBERS private
+#  endif /* DELETED_MEMBERS */
 #  ifndef noexcept
 #   define noexcept throw()
 #  endif /* noexcept */
@@ -132,15 +132,15 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define __NORET [[noreturn]]
 #  endif /* __NORET */
 # else /* PRECPP17 */
-#  ifndef __WUR
-#   define __WUR __attribute__((warn_unused_result))
-#  endif /* __WUR */
-#  ifndef __UNUSED
-#   define __UNUSED __attribute__((unused)))
-#  endif /* __UNUSED */
-#  ifndef __NORET
-#   define __NORET __attribute__((noreturn))
-#  endif /* __NORET */
+#  ifndef WUR
+#   define WUR __attribute__((warn_unused_result))
+#  endif /* WUR */
+#  ifndef UNUSED
+#   define UNUSED __attribute__((unused)))
+#  endif /* UNUSED */
+#  ifndef NORET
+#   define NORET __attribute__((noreturn))
+#  endif /* NORET */
 # endif /* CPP17 */
 
 #endif /* DEFS_H */
