@@ -8,14 +8,14 @@ TLU_NAMESPACE_BEGIN
 # define WRAP_ITERATOR_BOOL_OPERATOR_MACRO(__op) constexpr bool operator __op( \
     const self_type &cmp) const noexcept { return _ptr __op cmp._ptr; }
 
-# define WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op) constexpr self_type \
-    operator __op(difference_type shift) const noexcept { return self_type(_ptr __op shift); }
+# define WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op, __do_const) constexpr self_type \
+    operator __op(difference_type shift) __do_const noexcept { return self_type((_ptr __op shift)); }
 
 # define WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(__op, __do) constexpr bool operator __op( \
     const self_type &cmp) const noexcept { return this->_ptr __do cmp._ptr; }
 
-# define WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op) constexpr self_type \
-    operator __op(difference_type shift) const noexcept { return self_type(this->_ptr __op -shift); }
+# define WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op, __do_const) constexpr self_type \
+    operator __op(difference_type shift) __do_const noexcept { return self_type((this->_ptr __op -shift)); }
 
 template <class type_T>
 class wrap_iterator_base : public std::iterator<std::random_access_iterator_tag, type_T>
@@ -63,10 +63,12 @@ public:
     WRAP_ITERATOR_BOOL_OPERATOR_MACRO(< )
     WRAP_ITERATOR_BOOL_OPERATOR_MACRO(<=)
 
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+)
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-)
+    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+, const)
+    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-, const)
+    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+=, non_const)
+    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-=, non_const)
 
-    constexpr value_type operator *() noexcept { return *_ptr; } // *i
+    constexpr value_type operator *() const noexcept { return *_ptr; } // *i
 
     constexpr self_type &operator ++() noexcept // ++i
     {
@@ -76,7 +78,7 @@ public:
 
     constexpr self_type operator ++(int) noexcept // i++
     {
-        const self_type ret = self_type(_ptr);
+        self_type ret = self_type(_ptr);
         ++_ptr;
         return ret;
     }
@@ -194,8 +196,10 @@ public:
     WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(< , > )
     WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(<=, >=)
 
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+)
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-)
+    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+, const)
+    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-, const)
+    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+=, non_const)
+    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-=, non_const)
 
     constexpr self_type &operator ++() noexcept // ++i
     {

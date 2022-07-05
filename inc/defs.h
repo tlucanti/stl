@@ -84,6 +84,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
     abort();
 }
 
+# define non_const
 # if CPP11
 #  ifndef DEFAULT
 #   define DEFAULT =default;
@@ -122,15 +123,15 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 # endif /* PRECPP14 */
 
 # if CPP17
-#  ifndef __WUR
-#   define __WUR [[nodiscard]]
-#  endif /* __WUR */
-#  ifndef __UNUSED
-#   define __UNUSED [[maybe_unused]]
-#  endif /* __UNUSED */
-#  ifndef __NORET
-#   define __NORET [[noreturn]]
-#  endif /* __NORET */
+#  ifndef WUR
+#   define WUR [[nodiscard]]
+#  endif /* WUR */
+#  ifndef UNUSED
+#   define UNUSED [[maybe_unused]]
+#  endif /* UNUSED */
+#  ifndef NORET
+#   define NORET [[noreturn]]
+#  endif /* NORET */
 # else /* PRECPP17 */
 #  ifndef WUR
 #   define WUR __attribute__((warn_unused_result))

@@ -56,7 +56,7 @@ PRIVATE:
     pointer         _begin;
     pointer         _end;
 
-    const static double golden_ratio = 1.618033988749895;
+    constexpr const static double golden_ratio = 1.618033988749895;
 
 public:
 // =============================================================================
@@ -261,7 +261,7 @@ public:
     {
         if (init.size() > 0)
         {
-            _init(init.size(), false);
+            _init(static_cast<difference_type>(init.size()), false);
             _copy(init.begin(), init.end(), _begin);
         }
     }
@@ -319,11 +319,10 @@ public:
     */
     {
         _deallocate();
-        _size(mv._size);
-        _allocated(mv._allocated);
-        _allocator(std::move(mv._allocator));
-        _begin(mv._begin);
-        _end(mv._end);
+        _allocated = mv._allocated;
+        _allocator = std::move(mv._allocator);
+        _begin = mv._begin;
+        _end = mv._end;
         mv._size = 0;
         mv._allocated = 0;
         mv._begin = nullptr;
@@ -335,8 +334,15 @@ public:
 // -----------------------------------------------------------------------------
 # if CPP11
     constexpr vector_base &operator =(init_list_type init_list)
-    /*
+    /**
+        \brief initializer list copy operator
+        \details operator destroys current content of vector (and deallocates
+            memory) and makes deep copy of initializer list `init_list`
+        \param init_list source container
+        \time O(size(self) + size(init_list))
+        \memory O(size(init_list))
 
+        \author tlucanti
     */
     {
         _deallocate();
@@ -350,30 +356,55 @@ public:
 
 // -----------------------------------------------------------------------------
     constexpr void assign(difference_type count, const_reference value)
+    /**
+        \brief assign member function
+        \details this method destroys current content of vector (and deallocates
+            memory) and then fills current vector with `count` copies of `value`
+            values
+        \param count number of filled copies
+        \param value const reference to value to be coped to container
+        \time O(size(self) + count)
+        \memory O(count)
+
+        \author tlucanti
+    */
     {
-    // TODO: assign
-        (void)count;
-        (void)value;
-//# warning "IMPLEMENT FUNCTION"
-        ABORT("FUNCTION NOT IMPLEMENTED", "");
+        _deallocate();
+        _init(count);
+        _construct(_begin, count, value);
     }
 
 // -----------------------------------------------------------------------------
     template <class input_it>
-    constexpr void assign(input_it first, input_it last)
+    constexpr void assign(NOT_INTEGRAL(input_it) first, input_it last)
+    /**
+        \brief assign member function
+        \details this method destroys current content of vector (and deallocates
+            memory) and then fills current vector with copies of valus in
+            iterator range from `first` (included) to `last` (not included)
+        \param first iterator to first element of copy range
+        \param last iterator after last element of copy range
+        \time O(size(self) + distance(first, last))
+        \memory O(distance(first, last))
+
+        \author tlucanti
+    */
     {
-    // TODO: assign
-        (void)first;
-        (void)last;
-//# warning "IMPLEMENT FUNCTION"
-        ABORT("FUNCTION NOT IMPLEMENTED", "");
+        _deallocate();
+        difference_type size = iterator::distance(first, last);
+        _init(size);
+        _copy(first, last, _begin);
     }
 
 // -----------------------------------------------------------------------------
 # if CPP11
     constexpr void assign(init_list_type init_list)
+    /*
+
+    */
     {
     // TODO: assign
+        (void)init_list;
 //# warning "IMPLEMENT FUNCTION"
         ABORT("FUNCTION NOT IMPLEMENTED", "");
     }
@@ -381,26 +412,183 @@ public:
 
 // =============================================================================
 // ------------------------------ element access -------------------------------
-    WUR constexpr allocator_type get_allocator() const noexcept { return _allocator; }
+    WUR constexpr allocator_type get_allocator() const noexcept
+    /**
+        \brief allocator getter member function
+        \details function returns copy of container allocator
+        \return copy of allocator
+        \time O(1)
+        \memory O(1)
 
-    WUR constexpr reference at(difference_type pos) { return _at(pos); }
-    WUR constexpr const_reference at(difference_type pos) const { return _at(pos); }
+        \author tlucanti
+    */
+    {
+        return _allocator;
+    }
 
-    WUR constexpr reference operator[](difference_type pos) { return _at(pos); }
-    WUR constexpr const_reference operator[](difference_type pos) const {return _at(pos);}
+    WUR constexpr reference at(difference_type pos)
+    /**
+        \brief element access function
+        \details return elemnt in `pos` index if pos > 0 (counting from 0), or
+            negative `pos` element from end of array (if pos < 0) (or
+            `pos + size` element from begining (counting from 0)). If `pos` is
+            out of range - std::out_of_range exception will be thrown
+        \return const reference to element
+        \time O(1)
+        \memory O(1)
 
-    WUR constexpr reference front() { return _at(0); }
-    WUR constexpr const_reference front() const { return _at(0); }
+        \author tlucanti
+    */
+    {
+        return _at(pos);
+    }
 
-    WUR constexpr reference back() { return _at(size() - 1); }
-    WUR constexpr const_reference back() const { return _at(size() - 1); }
+    WUR constexpr const_reference at(difference_type pos) const
+    /**
+        \brief element access function for const container
+        \details return elemnt in `pos` index if pos > 0 (counting from 0), or
+            negative `pos` element from end of array (if pos < 0) (or
+            `pos + size` element from begining (counting from 0)). If `pos` is
+            out of range - std::out_of_range exception will be thrown
+        \return const reference to element
+        \time O(1)
+        \memory O(1)
 
-    WUR constexpr pointer data() { return _begin; }
-    WUR constexpr const_pointer data() const { return _begin; }
+        \author tlucanti
+    */
+    {
+        return _at(pos);
+    }
+
+    WUR constexpr reference operator[](difference_type pos)
+    /**
+        \brief element access operator
+        \details (see .at() member function)
+        \return non const reference to element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(pos);
+    }
+
+    WUR constexpr const_reference operator[](difference_type pos) const
+    /**
+        \brief element access operator for const container
+        \details (see .at() const member function)
+        \return const reference to element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(pos);
+    }
+
+    WUR constexpr reference front()
+    /**
+        \brief element access function
+        \details method returns first element of array, if array is empty -
+            std::out_of_range exception will be thrown
+        \return non const reference to first element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(0);
+    }
+
+    WUR constexpr const_reference front() const
+    /**
+        \brief element access function for const container
+        \details method returns first element of array, if array is empty -
+            std::out_of_range exception will be thrown
+        \return const reference to first element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(0);
+    }
+
+    WUR constexpr reference back()
+    /**
+        \brief element access function
+        \details method returns last element of array, if array is empty -
+            std::out_of_range exception will be thrown
+        \return non const reference to last element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(size() - 1);
+    }
+
+    WUR constexpr const_reference back() const
+    /**
+        \brief element access function for const container
+        \details method returns last element of array, if array is empty -
+            std::out_of_range exception will be thrown
+        \return const reference to last element
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _at(size() - 1);
+    }
+
+    WUR constexpr pointer data()
+    /**
+        \brief data access function
+        \details method returns pointer to begining of internal data container
+        \return pointer to element storage array. If vector is empty - nullptr
+            will returned
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _begin;
+    }
+
+    WUR constexpr const_pointer data() const
+    /**
+        \brief data access function for const container
+        \details (see .data() member function)
+        \return const pointer to element storage array. If vector is empty -
+            nullptr will returned
+        \time O(1)
+        \memory O(1)
+
+        \author tlucanti
+    */
+    {
+        return _begin;
+    }
 
 // =============================================================================
 // --------------------------------- iterators ---------------------------------
-    WUR constexpr iterator begin() noexcept { return _iterator(_begin); }
+    WUR constexpr iterator begin() noexcept
+    /**
+        \brief iterator access function
+        \details method returns iterator to first element of vector
+    */
+    {
+        return _iterator(_begin);
+    }
+
     WUR constexpr const_iterator begin() const noexcept { return _iterator(_begin); }
 
     WUR constexpr iterator end() noexcept { return _iterator(_end); }
@@ -436,7 +624,7 @@ public:
     }
     WUR constexpr difference_type capacity() const noexcept { return _allocated; }
 # if CPP11
-    constexpr void shriknk_to_fit() {} // allocated size is always optimal
+    constexpr void shrink_to_fit() {} // allocated size is always optimal
 # endif /* CPP11 */
 
 // =============================================================================
@@ -497,6 +685,8 @@ public:
     constexpr iterator emplace(const_iterator pos, arg_type && ... args)
     {
     // TODO: emplace
+        (void)pos;
+        void *a[] = {args...};
 //# warning "IMPLEMENT FUNCTION"
         ABORT("FUNCTION NOT IMPLEMENTED", "");
     }
@@ -598,7 +788,11 @@ PRIVATE:
 // ----------------------------- memory allocation -----------------------------
     WUR static constexpr difference_type _upper_bound_grid(difference_type req)
     {
+#if CPP17
         constexpr const difference_type grid[] = {
+#else
+        const static difference_type grid[] = {
+#endif
             7u, 11u, 18u, 29u, 47u, 76u, 123u, 199u, 322u, 521u, 843u, 1364u,
             2207u, 3571u, 5778u, 9349u, 15127u, 24476u, 39603u, 64079u, 103682u,
             167761u, 271443u, 439204u, 710647u, 1149851u, 1860498u, 3010349u,
@@ -702,14 +896,8 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     WUR constexpr pointer _allocate(difference_type alloc_size)
     {
-        size_type alloc_size_signed = static_cast<size_type>(alloc_size);
-#ifdef __DEBUG
-        pointer _ret = _allocator.allocate(alloc_size_signed);
-        memset(_ret, 0, alloc_size_signed);
-        return _ret;
-#else
-        return _allocator.allocate(alloc_size_signed);
-#endif
+        size_type alloc_size_unsigned = static_cast<size_type>(alloc_size);
+        return _allocator.allocate(alloc_size_unsigned);
     }
 
 // -----------------------------------------------------------------------------
@@ -718,11 +906,14 @@ PRIVATE:
         const forward_iterator_type &last, pointer dest)
     {
         while (first != last)
-            _construct_at(dest++, *first++);
+        {
+            _construct_at(dest++, *first);
+            ++first;
+        }
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _copy(pointer first, pointer last, pointer dest)
+    constexpr void _copy(const_pointer first, const_pointer last, pointer dest)
     {
         difference_type diff = last - first;
         if (UNLIKELY(diff <= 0))
@@ -731,10 +922,11 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _copy(pointer src, pointer dst, difference_type cnt)
+    constexpr void _copy(const_pointer src_ptr, pointer dst, difference_type cnt)
     {
         if (UNLIKELY(cnt <= 0))
             return ;
+        pointer src = const_cast<pointer>(src_ptr);
         if (src > dst)
         {
             while (cnt--)
@@ -775,7 +967,10 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _shrink()
     {
-        if (size() < _allocated / (golden_ratio * golden_ratio) and _allocated > 7)
+        difference_type less_size = static_cast<difference_type>(
+                static_cast<double>(_allocated) / (golden_ratio * golden_ratio)
+        );
+        if (size() < less_size and _allocated > 7)
             _alloc_more(size());
     }
 
@@ -823,12 +1018,17 @@ PRIVATE:
 
 // -----------------------------------------------------------------------------
     WUR constexpr pointer _insert(pointer ptr, difference_type count=1)
+    /*
+        function inserts `count` empty places before ptr position in vector
+        returns pointer to first empty place
+    */
     {
         // here count cannot be negative, bc we checked it already
         difference_type index = ptr - _begin;
+        difference_type move_cnt = _end - ptr;
         _append(count);
-# error "dst argument is incorrect"
-        _copy(_begin + index + 1, _begin + index + count, count);
+        _copy(_begin + index, _begin + index + count, move_cnt);
+        _end += count;
         return _begin + index;
     }
 
