@@ -779,7 +779,6 @@ void fn_insert_tests()
 {
     start(".insert() tests");
 
-    std::allocator<int> alloc;
     {
         vec_123(a);
         a.insert(a.begin(), 123);

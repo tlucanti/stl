@@ -6,13 +6,13 @@
 #    By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/11/08 14:54:30 by kostya            #+#    #+#              #
-#    Updated: 2022/07/01 14:15:57 by tlucanti         ###   ########.fr        #
+#    Updated: 2022/07/06 18:01:33 by tlucanti         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # ------------------------------ compiler options ------------------------------
 NAME		=	ircserv
-CXX			=	clang++ -std=c++20
+CXX			=	clang++ -std=c++2a
 CXXFLAGS	=	-Wall -Wextra -Werror
 CXXOPTIONS	=	-O0 -pedantic-errors
 CC			=	CC
@@ -47,7 +47,7 @@ S			=	\e[0m
 SPACE		=	\t                     \t
 
 # ------------------------------------------------------------------------------
-all:			${OBJS_DIR} ${DEPS_DIR}
+all:			${OBJS_DIR} ${DEPS_DIR} vec
 	@$(MAKE)	$(NAME)
 	@printf		"$(G)OK$(S)                                                  \n"
 
