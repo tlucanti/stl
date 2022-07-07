@@ -33,7 +33,7 @@ public:
 PROTECTED:
     explicit constexpr wrap_iterator_base(pointer ptr) : _ptr(ptr) {}
 public:
-    virtual ~wrap_iterator_base() noexcept = 0;
+    virtual ~wrap_iterator_base() noexcept = default;
 
 // --------------------------------- operators ---------------------------------
     virtual value_type operator *() const noexcept
@@ -140,7 +140,7 @@ public:
 
     constexpr bool operator >=(const self_type &cmp) const noexcept
     {
-        return this->_ptr <= cmp._ptr;
+        return this->_ptr >= cmp._ptr;
     }
 
     constexpr self_type operator +(difference_type shift) const noexcept
@@ -231,7 +231,7 @@ public:
 
     constexpr bool operator !=(const self_type &cmp) const noexcept
     {
-        return this->_ptr == cmp._ptr;
+        return this->_ptr != cmp._ptr;
     }
 
     constexpr bool operator >(const self_type &cmp) const noexcept
@@ -251,7 +251,7 @@ public:
 
     constexpr bool operator <=(const self_type &cmp) const noexcept
     {
-        return this->_ptr <= cmp._ptr;
+        return this->_ptr >= cmp._ptr;
     }
 
     constexpr self_type operator +(difference_type shift) const noexcept
