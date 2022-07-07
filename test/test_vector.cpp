@@ -159,7 +159,25 @@ void sigill_cathcer(UNUSED(int sig))
 }
 
 # define vec_123(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
+# define vec_111(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
 # define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
+# define std_vec_111(__vec) std::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
+
+template<class v1T, class v2T>
+void std_vec_cmp(const v1T &v1, const v2T &v2, const std::string &msg)
+{
+    ASSERT(static_cast<std::ptrdiff_t>(v1.size()) == static_cast<std::ptrdiff_t>(v2.size()), msg + " (size mismatch)");
+    bool _ok = true;
+    for (std::ptrdiff_t i=0; i < v1.size(); ++i)
+    {
+        if (v1.data()[i] != v2.data()[i])
+        {
+            ok = false;
+            break;
+        }
+    }
+    ASSERT(_ok, msg + "(vector content mismatch)");
+}
 
 void constructor_test();
 void assign_test();
@@ -822,10 +840,55 @@ void fn_insert_tests()
     {
         vec_123(a);
         a.insert(++a.begin(), 111);
-		vec_cmp("basic insert test 2", int, a, 1, 111, 2, 3);
+        vec_cmp("basic insert test 2", int, a, 1, 111, 2, 3);
+    }
+
+    {
+        vec_123(a);
+        a.insert(a.begin(), 3, 234);
+        vec_cmp("basic insert test 3", int, a, 234, 234, 234, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        a.insert(a.end(), 3, 432);
+        vec_cmp("basic insert 4", int, a, 1, 2, 3, 432, 432, 432);
+    }
+    {
+        vec_123(a);
+        a.insert(++a.begin(), 3, 345);
+        vec_cmp("basic insert test 5", int, a, 1, 345, 345, 345, 2, 3);
+    }
+
+    {
+        vec_123(a);
+        vec_111(b);
+        a.insert(a.begin(), b.begin(), b.end());
+        vec_cmp("basic insert test 6", int, a, 123, 456, 789, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        vec_111(b);
+        a.insert(a.end(), b.begin(), b.end());
+        vec_cmp("basic insert test 7", int, a, 1, 2, 3, 123, 456, 789);
+    }
+    {
+        vec_123(a);
+        vec_111(b);
+        a.insert(++a.begin(), b.begin(), b.end());
+        vec_cmp("basic insert test 8", int, a, 1, 123, 456, 789, 2, 3);
+    }
+    {
+        vec_123(a);
+        vec_111(b);
+        std_vec_123(sa);
+        std_vec_111(sb);
+        a.insert(++a.begin(), b.rbegin(), b.rend());
+        sa.insert(++sa.begin(), sb.rbegin(), sb.rend());
+        std_vec_cmp(a, sa, "basic insert test 9");
     }
 
     result();
+
 }
 
 void fn_emplace_tests()
@@ -838,6 +901,44 @@ void fn_emplace_tests()
 void fn_erase_tests()
 {
     start(".fn_erase_tests() tests");
+
+    {
+        vec_123(a);
+        a.erase(a.begin());
+        vec_cmp("basic erase test 0", int, a, 2, 3);
+    }
+    {
+        vec_123(a);
+        a.erase(a.end());
+        vec_cmp("basic erase test 1", int, a, 1, 2);
+    }
+    {
+        vec_123(a);
+        a.erase(++a.begin());
+        vec_cmp("basic erase test 2", int, a, 1, 3);
+    }
+
+    {
+        vec_123(a);
+        a.erase(a.begin(), a.end());
+        ASSERT(a.empty(), "basic erase test 3");
+    }
+    {
+        vec_123(a);
+        a.erase(a.begin(), ++a.begin());
+        vec_cmp("basic erase test 4", int, a, 2, 3);
+    }
+    {
+        vec_123(a);
+        a.erase(--a.end(), a.end());
+        vec_cmp("basic erase test 5", int, a, 1, 2);
+    }
+    {
+        vec_123(a);
+        a.erase(++a.begin(), ++(++a.begin()));
+        vec_cmp("basic erase test 6", int, a, 1, 3);
+    }
+
 
     result();
 }

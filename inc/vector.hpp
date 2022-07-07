@@ -656,16 +656,17 @@ public:
     {
         if (UNLIKELY(count <= 0))
             return ;
-        pointer start = _insert(pos, count);
+        pointer start = _insert(pos._ptr, count);
         _construct(start, count, value);
     }
 
 // -----------------------------------------------------------------------------
     template <class input_it>
-    constexpr void insert(const_iterator pos,
+    constexpr void insert(iterator pos,
         NOT_INTEGRAL(input_it) first, input_it last)
     {
-        _copy(first, last, pos._ptr);
+        pointer begin = _insert(pos._ptr, iterator::distance(first, last));
+        _copy(first, last, begin);
     }
 
 // -----------------------------------------------------------------------------
@@ -693,22 +694,22 @@ public:
 # endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
-    constexpr iterator erase(const_iterator pos)
+    constexpr iterator erase(iterator pos)
     {
         if (pos == end())
             return end();
-        pointer fin = _erase(pos);
+        pointer fin = _erase(pos._ptr);
         return _iterator(fin);
     }
 
 // -----------------------------------------------------------------------------
-    constexpr iterator erase(const_iterator first, const_iterator last)
+    constexpr iterator erase(iterator first, iterator last)
     {
         difference_type count = iterator::distance(first, last);
         if (count <= 0)
             return last;
-        _destroy(first, count);
-        pointer fin = _erase(first, count);
+        _destroy(first._ptr, count);
+        pointer fin = _erase(first._ptr, count);
         return _iterator(fin);
     }
 
@@ -1038,9 +1039,11 @@ PRIVATE:
     WUR constexpr pointer _erase(pointer ptr, difference_type count=1)
     {
         // here count cannot be negative, bc we checked it already
+        difference_type index = ptr - _begin;
         _destroy(ptr, count);
         _copy(ptr, ptr + count, count);
         _shrink();
+        return _begin + index;
     }
 
 // -----------------------------------------------------------------------------
