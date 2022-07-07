@@ -19,7 +19,7 @@
 
 # ifdef __DEBUG
 #  define PRIVATE public
-#  define PROTECTED public
+#  define PROTECTED protected
 # else
 #  define PRIVATE private
 #  define PROTECTED protected
@@ -127,7 +127,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define WUR [[nodiscard]]
 #  endif /* WUR */
 #  ifndef UNUSED
-#   define UNUSED [[maybe_unused]]
+#   define UNUSED(__x) [[maybe_unused]] __x
 #  endif /* UNUSED */
 #  ifndef NORET
 #   define NORET [[noreturn]]
@@ -137,7 +137,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define WUR __attribute__((warn_unused_result))
 #  endif /* WUR */
 #  ifndef UNUSED
-#   define UNUSED __attribute__((unused)))
+#   define UNUSED(__x) __attribute__((unused))) __x
 #  endif /* UNUSED */
 #  ifndef NORET
 #   define NORET __attribute__((noreturn))

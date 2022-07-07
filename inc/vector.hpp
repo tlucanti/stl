@@ -643,16 +643,16 @@ public:
     }
 
 // -----------------------------------------------------------------------------
-# if CPP11
-    constexpr iterator insert(const_iterator pos, rvalue_type value)
-    {
-        pointer start = _insert(pos);
-        *start = std::move(value);
-    }
-# endif /* CPP11 */
+//# if CPP11
+//    constexpr iterator insert(iterator pos, rvalue_type value)
+//    {
+//        pointer start = _insert(pos._ptr);
+//        *start = std::move(value);
+//    }
+//# endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
-    constexpr void insert(const_iterator pos, difference_type count, const_reference value)
+    constexpr void insert(iterator pos, difference_type count, const_reference value)
     {
         if (UNLIKELY(count <= 0))
             return ;

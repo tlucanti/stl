@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <cstdio>
+#include <csignal>
 
 #define __DEBUG
 #include "defs.h"
@@ -56,32 +57,45 @@ std::string current_test = "null";
     std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
     std::stringstream __ssvc, __sscm, __ss; \
     std::ptrdiff_t __vec_size = static_cast<std::ptrdiff_t>((__vec).size()); \
-    ASSERT(__vec_size == __size, std::string("size test: ") + (__msg)); \
-    bool __ok = true; \
+	bool __ok = true; \
+    __ok = (__vec_size == __size); \
     __ssvc << "["; \
     __sscm << "["; \
     for (std::ptrdiff_t __i=0; __i < __size; ++__i) \
     { \
         if (__i == 0) \
         { \
-            __ssvc << (__vec)[0]; \
             __sscm << __cmp[0]; \
         } \
         else \
         { \
-            __ssvc << ", " << (__vec.data())[__i]; \
             __sscm << ", " << __cmp[__i]; \
+        } \
+        if (__ok && (__vec.data())[__i] != __cmp[__i]) \
+        { \
+            __ok = false; \
+        } \
+    } \
+	for (std::ptrdiff_t __i=0; __i < __vec_size; ++__i) \
+    { \
+        if (__i == 0) \
+        { \
+            __ssvc << (__vec)[0]; \
+        } \
+        else \
+        { \
+            __ssvc << ", " << (__vec.data())[__i]; \
         } \
         if ((__vec.data())[__i] != __cmp[__i]) \
         { \
             __ok = false; \
         } \
     } \
-    __ssvc << "]"; \
+	__ssvc << "]"; \
     __sscm << "]"; \
     if (not __ok) \
     { \
-        __ss << "vector compare: (expected)" << __ssvc.str() << " != (got) " << __sscm.str() << ": "; \
+        __ss << "vector compare: (expected)" << __sscm.str() << " != (got) " << __ssvc.str() << ": "; \
     } \
     ASSERT(__ok, __ss.str() + (__msg)); \
 } while (false)
@@ -134,6 +148,19 @@ void final() {
     std::cout << c << "╰────────────────────╯" S "\n";
 }
 
+void sigsegv_catcher(UNUSED(int sig))
+{
+	throw std::runtime_error("test fall with SIGSEGV");
+}
+
+void sigill_cathcer(UNUSED(int sig))
+{
+	throw std::runtime_error("test fall with SIGILL");
+}
+
+# define vec_123(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
+# define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
+
 void constructor_test();
 void assign_test();
 void fn_assign_test();
@@ -166,7 +193,13 @@ void user_type_constructor_test();
 
 int main()
 {
-    run_test(constructor_test);
+	vec_123(a);
+	tlucanti::vector_base<int>::iterator i = a.begin();
+
+	signal(SIGSEGV, sigsegv_catcher);
+	signal(SIGILL, sigill_cathcer);
+
+	run_test(constructor_test);
     run_test(fn_assign_test);
     run_test(fn_get_allocator_test);
     run_test(fn_at_test);
@@ -198,9 +231,6 @@ int main()
 
     final();
 }
-
-# define vec_123(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
-# define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
 
 void constructor_test()
 {
@@ -594,7 +624,7 @@ void reverse_iterator_test()
 
     vec_123(a);
 
-    ASSERT(*a.rbegin() == 3, "basic reverse iterator test 1");
+    ASSERT(*(a.rbegin()) == 3, "basic reverse iterator test 1");
     ASSERT(*(++a.rbegin()) == 2, "basic reverse iterator test 2");
     ASSERT(*(++(++a.rbegin())) == 1, "basic reverse iterator test 3");
 
@@ -791,8 +821,8 @@ void fn_insert_tests()
     }
     {
         vec_123(a);
-//        a.insert(++a.begin(), 111);
-
+        a.insert(++a.begin(), 111);
+		vec_cmp("basic insert test 2", int, a, 1, 111, 2, 3);
     }
 
     result();
@@ -807,42 +837,42 @@ void fn_emplace_tests()
 
 void fn_erase_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".fn_erase_tests() tests");
 
     result();
 }
 
 void fn_push_back_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".fn_push_back_tests() tests");
 
     result();
 }
 
 void fn_emplace_back_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".fn_emplace_back_tests() tests");
 
     result();
 }
 
 void fn_pop_back_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".fn_pop_back_tests() tests");
 
     result();
 }
 
 void fn_resize_test()
 {
-    start(".fn_insert_tests() tests");
+    start(".fn_resize_test() tests");
 
     result();
 }
 
 void swap_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".swap_tests() tests");
 
     result();
 }
@@ -890,16 +920,16 @@ void std_vector_test()
         std::vector<int> b;
 
         b.assign(++a.begin(), ++(++(a.begin())));
-        vec_cmp("iterator operators test 0", int, b, 1);
+        vec_cmp("iterator operators test 0", int, b, 2);
 
         b.assign(--(--a.end()), --a.end());
         vec_cmp("iterator operators test 1", int, b, 2);
 
-        b.assign(++a.rbegin(), ++(++a.rend()));
+        b.assign(++a.rbegin(), ++(++a.rbegin()));
         vec_cmp("iterator operators test 2", int, b, 2);
 
         b.assign(--(--a.rend()), --a.rend());
-        vec_cmp("iterator operators test 3", int, b, 1);
+        vec_cmp("iterator operators test 3", int, b, 2);
 
         b.assign(a.begin() + 1, a.end() + 0);
         vec_cmp("iterator operators test 4", int, b, 2, 3);
@@ -926,20 +956,20 @@ void std_vector_test()
         vec_cmp("iterator operators test 7", int, b, 3, 2, 1);
     }
     {
-        vec_123(b);
-        std::vector<int> a;
+        std_vec_123(a);
+        tlucanti::vector_base<int> b;
 
         b.assign(++a.begin(), ++(++(a.begin())));
-        vec_cmp("std iterator operators test 0", int, b, 1);
+        vec_cmp("std iterator operators test 0", int, b, 2);
 
         b.assign(--(--a.end()), --a.end());
         vec_cmp("std iterator operators test 1", int, b, 2);
 
-        b.assign(++a.rbegin(), ++(++a.rend()));
+        b.assign(++a.rbegin(), ++(++a.rbegin()));
         vec_cmp("std iterator operators test 2", int, b, 2);
 
         b.assign(--(--a.rend()), --a.rend());
-        vec_cmp("std iterator operators test 3", int, b, 1);
+        vec_cmp("std iterator operators test 3", int, b, 2);
 
         b.assign(a.begin() + 1, a.end() + 0);
         vec_cmp("std iterator operators test 4", int, b, 2, 3);

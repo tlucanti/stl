@@ -5,18 +5,11 @@
 
 TLU_NAMESPACE_BEGIN
 
-# define WRAP_ITERATOR_BOOL_OPERATOR_MACRO(__op) constexpr bool operator __op( \
-    const self_type &cmp) const noexcept { return _ptr __op cmp._ptr; }
-
-# define WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op, __do_const) constexpr self_type \
-    operator __op(difference_type shift) __do_const noexcept { return self_type((_ptr __op shift)); }
-
-# define WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(__op, __do) constexpr bool operator __op( \
-    const self_type &cmp) const noexcept { return this->_ptr __do cmp._ptr; }
-
 # define WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op, __do_const) constexpr self_type \
     operator __op(difference_type shift) __do_const noexcept { return self_type((this->_ptr __op -shift)); }
 
+// =============================================================================
+// --------------------------------- iterator base ----------------------------------
 template <class type_T>
 class wrap_iterator_base : public std::iterator<std::random_access_iterator_tag, type_T>
 {
@@ -29,77 +22,39 @@ public:
     typedef typename iterator_traits::pointer                       pointer;
     typedef typename iterator_traits::reference                     reference;
 
-PRIVATE:
     typedef wrap_iterator_base<value_type>                          self_type;
 
-//    friend vector_base<value_type>;
-
 // ------------------------------ protected fields -------------------------------
-PROTECTED:
+//PROTECTED: // TODO: return to private
+public:
     pointer    _ptr;
 
-// =============================================================================
 // ------------------------------ initialization -------------------------------
 PROTECTED:
     explicit constexpr wrap_iterator_base(pointer ptr) : _ptr(ptr) {}
 public:
-    constexpr wrap_iterator_base() : _ptr(nullptr) {}
-    constexpr wrap_iterator_base(const self_type &cpy) : _ptr(cpy._ptr) {}
+    virtual ~wrap_iterator_base() noexcept = 0;
 
-# if CPP11
-    constexpr wrap_iterator_base(self_type &&mv) noexcept
-        : _ptr(mv._ptr)
-    {
-        mv._ptr = nullptr;
-    }
-# endif /* CPP11 */
-
-// =============================================================================
 // --------------------------------- operators ---------------------------------
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(==)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(!=)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(> )
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(>=)
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(< )
-    WRAP_ITERATOR_BOOL_OPERATOR_MACRO(<=)
-
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+, const)
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-, const)
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+=, non_const)
-    WRAP_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-=, non_const)
-
-    constexpr value_type operator *() const noexcept { return *_ptr; } // *i
-
-    constexpr self_type &operator ++() noexcept // ++i
+    virtual value_type operator *() const noexcept
     {
-        ++_ptr;
-        return *this;
+        return *_ptr;
     }
 
-    constexpr self_type operator ++(int) noexcept // i++
-    {
-        self_type ret = self_type(_ptr);
-        ++_ptr;
-        return ret;
-    }
-
-    constexpr self_type &operator --() noexcept // --i
-    {
-        --_ptr;
-        return *this;
-    }
-
-    constexpr self_type operator --(int) noexcept // i--
-    {
-        const self_type ret = self_type(_ptr);
-        --_ptr;
-        return ret;
-    }
-
-    constexpr difference_type operator -(const self_type &diff) const noexcept
-    {
-        return _ptr - diff._ptr;
-    }
+//  virtual constexpr bool operator ==(const self_type &cmp) const noexcept = 0;
+//  virtual constexpr bool operator !=(const self_type &cmp) const noexcept = 0;
+//  virtual constexpr bool operator >(const self_type &cmp) const noexcept = 0;
+//  virtual constexpr bool operator <(const self_type &cmp) const noexcept = 0;
+//  virtual constexpr bool operator <=(const self_type &cmp) const noexcept = 0;
+//    virtual constexpr self_type operator +(difference_type shift) const noexcept = 0;
+//    virtual constexpr self_type operator -(difference_type shift) const noexcept = 0;
+//    virtual constexpr self_type operator +=(difference_type shift) noexcept = 0;
+//    virtual constexpr self_type operator -=(difference_type shift) noexcept = 0;
+//    virtual constexpr self_type &operator ++() noexcept = 0; // ++i
+//    virtual constexpr self_type operator ++(int) noexcept = 0; // i++
+//    virtual constexpr self_type &operator --() noexcept = 0; // --i
+//    virtual constexpr self_type operator --(int) noexcept = 0; // i--
+//    virtual constexpr difference_type operator -(const self_type &diff) const noexcept = 0;
 
 // ---------------------------- static members ----------------------------------
     static constexpr difference_type distance(const self_type &begin,
@@ -135,10 +90,13 @@ public:
     }
 };
 
+// =============================================================================
+// --------------------------------- iterator ----------------------------------
 template <class type_T>
 class wrap_iterator : public wrap_iterator_base<type_T>
 {
 PRIVATE:
+    typedef wrap_iterator<type_T>                       self_type;
     typedef wrap_iterator_base<type_T>                  base_class;
 public:
     typedef typename base_class::iterator_traits        iterator_traits;
@@ -147,25 +105,103 @@ public:
     typedef typename base_class::difference_type        difference_type;
     typedef typename base_class::pointer                pointer;
     typedef typename base_class::reference              reference;
-PRIVATE:
-    typedef wrap_iterator<value_type>                   self_type;
 
 PROTECTED:
-    explicit constexpr wrap_iterator(pointer ptr) : base_class(ptr) {}
+
 public:
+    explicit constexpr wrap_iterator(pointer ptr) : base_class(ptr) {} // TODO: return this to protected
     constexpr wrap_iterator() : base_class() {}
-    constexpr wrap_iterator(const self_type &cpy) : base_class(cpy) {}
-# if CPP11
-    constexpr wrap_iterator(self_type &&mv) noexcept : base_class(mv) {}
-# endif /* CPP11 */
+    ~wrap_iterator() noexcept override = default;
+
+    constexpr bool operator ==(const self_type &cmp) const noexcept
+    {
+        return this->_ptr == cmp._ptr;
+    }
+
+    constexpr bool operator !=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr != cmp._ptr;
+    }
+
+    constexpr bool operator >(const self_type &cmp) const noexcept
+    {
+        return this->_ptr > cmp._ptr;
+    }
+
+    constexpr bool operator <(const self_type &cmp) const noexcept
+    {
+        return this->_ptr < cmp._ptr;
+    }
+
+    constexpr bool operator <=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr <= cmp._ptr;
+    }
+
+    constexpr bool operator >=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr <= cmp._ptr;
+    }
+
+    constexpr self_type operator +(difference_type shift) const noexcept
+    {
+        return self_type(this->_ptr + shift);
+    }
+
+    constexpr self_type operator -(difference_type shift) const noexcept
+    {
+        return self_type(this->_ptr - shift);
+    }
+
+    constexpr self_type operator +=(difference_type shift) noexcept
+    {
+        return self_type((this->_ptr += shift));
+    }
+
+    constexpr self_type operator -=(difference_type shift) noexcept
+    {
+        return self_type((this->_ptr -= shift));
+    }
+
+    constexpr self_type &operator ++() noexcept // ++i
+    {
+        ++this->_ptr;
+        return *this;
+    }
+
+    constexpr self_type operator ++(int) noexcept // i++
+    {
+        ++this->_ptr;
+        return self_type(this->_ptr - 1);
+    }
+
+    constexpr self_type &operator --() noexcept // --i
+    {
+        --this->_ptr;
+        return *this;
+    }
+
+    constexpr self_type operator --(int) noexcept // i--
+    {
+        --this->_ptr;
+        return self_type(this->_ptr + 1);
+    }
+
+    constexpr difference_type operator -(const self_type &diff) const noexcept
+    {
+        return this->_ptr - diff._ptr;
+    }
 };
 
+// =============================================================================
+// --------------------------------- reverse iterator ----------------------------------
 template <class type_T>
 class wrap_reverse_iterator : public wrap_iterator_base<type_T>
 {
 // --------------------------------- typedefs ----------------------------------
 
 PRIVATE:
+    typedef wrap_reverse_iterator<type_T>               self_type;
     typedef wrap_iterator_base<type_T>                  base_class;
 public:
     typedef typename base_class::iterator_traits        iterator_traits;
@@ -174,32 +210,69 @@ public:
     typedef typename base_class::difference_type        difference_type;
     typedef typename base_class::pointer                pointer;
     typedef typename base_class::reference              reference;
-PRIVATE:
-    typedef wrap_reverse_iterator<value_type>           self_type;
 
 // =============================================================================
 // ------------------------------ initialization -------------------------------
 PROTECTED:
-    explicit constexpr wrap_reverse_iterator(pointer ptr) : base_class(ptr) {}
+
 public:
+    explicit constexpr wrap_reverse_iterator(pointer ptr) : base_class(ptr) {} // TODO: make this protected
     constexpr wrap_reverse_iterator() : base_class() {}
-    constexpr wrap_reverse_iterator(const self_type &cpy) : base_class(cpy) {}
-# if CPP11
-    constexpr wrap_reverse_iterator(self_type &&mv) noexcept : base_class(mv) {}
-# endif /* CPP11 */
+    ~wrap_reverse_iterator() noexcept override = default;
 
 // =============================================================================
 // --------------------------------- operators ---------------------------------
 public:
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(> , < )
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(>=, <=)
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(< , > )
-    WRAP_REVERSE_ITERATOR_BOOL_OPERATOR_MACRO(<=, >=)
 
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+, const)
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-, const)
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(+=, non_const)
-    WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(-=, non_const)
+    constexpr bool operator ==(const self_type &cmp) const noexcept
+    {
+        return this->_ptr == cmp._ptr;
+    }
+
+    constexpr bool operator !=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr == cmp._ptr;
+    }
+
+    constexpr bool operator >(const self_type &cmp) const noexcept
+    {
+        return this->_ptr < cmp._ptr;
+    }
+
+    constexpr bool operator >=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr <= cmp._ptr;
+    }
+
+    constexpr bool operator <(const self_type &cmp) const noexcept
+    {
+        return this->   _ptr > cmp._ptr;
+    }
+
+    constexpr bool operator <=(const self_type &cmp) const noexcept
+    {
+        return this->_ptr <= cmp._ptr;
+    }
+
+    constexpr self_type operator +(difference_type shift) const noexcept
+    {
+        return self_type(this->_ptr + -shift);
+    }
+
+    constexpr self_type operator -(difference_type shift) const noexcept
+    {
+        return self_type(this->_ptr - -shift);
+    }
+
+    constexpr self_type operator +=(difference_type shift) noexcept
+    {
+        return self_type((this->_ptr += -shift));
+    }
+
+    constexpr self_type operator -=(difference_type shift) noexcept
+    {
+        return self_type((this->_ptr -= -shift));
+    }
 
     constexpr self_type &operator ++() noexcept // ++i
     {
@@ -209,9 +282,8 @@ public:
 
     constexpr self_type operator ++(int) noexcept // i++
     {
-        const self_type ret = self_type(this->_ptr);
         --this->_ptr;
-        return ret;
+        return self_type(this->_ptr + 1);
     }
 
     constexpr self_type &operator --() noexcept // --i
@@ -222,9 +294,8 @@ public:
 
     constexpr self_type operator --(int) noexcept // i--
     {
-        const self_type ret = self_type(this->_ptr);
         ++this->_ptr;
-        return ret;
+        return self_type(this->_ptr - 1);
     }
 
     constexpr difference_type operator -(const self_type &diff) const noexcept
