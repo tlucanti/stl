@@ -100,6 +100,16 @@ std::string current_test = "null";
     ASSERT(__ok, __ss.str() + (__msg)); \
 } while (false)
 
+# define make_vec(__name, __type, ...) \
+    __type __cmp[] = {__VA_ARGS__}; \
+    std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
+    tlucanti::vector_base<__type> __name(__cmp, __cmp + __size)
+
+# define make_std_vec(__name, __type, ...) \
+    __type __cmp[] = {__VA_ARGS__}; \
+    std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
+    std::vector<__type> __name(__cmp, __cmp + __size)
+
 template <typename T>
 void __to_trash(T &_) {(void)_;}
 
@@ -1266,6 +1276,29 @@ std::string Icpy = B + std::string("icpy") + Y;
 std::string Mv = P + std::string("mv") + Y;
 std::string Imv = K + std::string("imv") + Y;
 
+void convolve(std::vector<std::string> &v)
+{
+    if (v.empty())
+        return ;
+    std::string last;
+    int cnt = 0;
+    std::vector<std::string> out;
+    for (std::size_t i=0; i < v.size(); ++i)
+    {
+        if (v[i] == last)
+            ++cnt;
+        else
+        {
+            std::stringstream ss;
+            ss << cnt;
+            out.push_back(last.substr(0, last.size() - std::strlen(Y)) +"(x" + ss.str() + ')' + Y);
+            cnt = 0;
+            last = v[i];
+        }
+    }
+    v.swap(out);
+}
+
 struct UserClass
 {
     int a;
@@ -1415,9 +1448,12 @@ void user_type_constructor_test()
         moves.clear();
         {
             tlucanti::vector_base<UserClass> a(6);
-            vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def);
+            make_std_vec(cmp1, std::string, Def, Def, Def, Def, Def, Def);
+            std_vec_cmp(moves, cmp1, "user class modern test 2");
             a.push_back(UserClass(111, 222));
-            vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
+            make_std_vec(cmp2, std::string, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
+            std_vec_cmp(moves, cmp1, "user class modern test 3");
+            vec_cmp("user class modern test 2", std::string, moves, );
         }
         vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del, Del, Del, Del, Del, Del, Del, Del);
     }
