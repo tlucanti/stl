@@ -95,7 +95,7 @@ std::string current_test = "null";
     __sscm << "]"; \
     if (not __ok) \
     { \
-        __ss << "vector compare: (expected)" << __sscm.str() << " != (got) " << __ssvc.str() << ": "; \
+        __ss << "vector compare: (expected) " << __sscm.str() << " != (got) " << __ssvc.str() << ": "; \
     } \
     ASSERT(__ok, __ss.str() + (__msg)); \
 } while (false)
@@ -158,29 +158,63 @@ void sigill_cathcer(UNUSED(int sig))
 	throw std::runtime_error("test fall with SIGILL");
 }
 
+void sigabrt_catcher(UNUSED(int sig))
+{
+    throw std::runtime_error("test fall with SIGABRT");
+}
+
 # define vec_123(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
 # define vec_111(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
 # define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
 # define std_vec_111(__vec) std::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
 
+template<class V>
+std::string _vec_to_str(const V &v)
+{
+    std::stringstream ss;
+    for (std::ptrdiff_t i=0; i < static_cast<std::ptrdiff_t>(v.size()); ++i)
+    {
+        if (i == 0)
+        {
+            ss << '[' << v.data()[0];
+        }
+        else
+        {
+            ss << ", " << v.data()[i];
+        }
+    }
+    ss << ']';
+    return ss.str();
+}
+
 template<class v1T, class v2T>
 void std_vec_cmp(const v1T &v1, const v2T &v2, const std::string &msg)
 {
-    ASSERT(static_cast<std::ptrdiff_t>(v1.size()) == static_cast<std::ptrdiff_t>(v2.size()), msg + " (size mismatch)");
+
     bool _ok = true;
+    std::string sv1, sv2;
+    sv1 = _vec_to_str(v1);
+    sv2 = _vec_to_str(v2);
+    std::string outmsg;
+    if (static_cast<std::ptrdiff_t>(v1.size()) != static_cast<std::ptrdiff_t>(v2.size()))
+    {
+        outmsg = "vector size mismatch: ";
+        goto _ASSERT_LABEL;
+    }
     for (std::ptrdiff_t i=0; i < v1.size(); ++i)
     {
         if (v1.data()[i] != v2.data()[i])
         {
             ok = false;
+            outmsg = "vector compare: ";
             break;
         }
     }
-    ASSERT(_ok, msg + "(vector content mismatch)");
+_ASSERT_LABEL:
+    ASSERT(_ok, outmsg + "(expected) " + sv1 + " != (got) " + sv2 + ": " + msg);
 }
 
 void constructor_test();
-void assign_test();
 void fn_assign_test();
 void fn_get_allocator_test();
 void fn_at_test();
@@ -211,11 +245,9 @@ void user_type_constructor_test();
 
 int main()
 {
-	vec_123(a);
-	tlucanti::vector_base<int>::iterator i = a.begin();
-
 	signal(SIGSEGV, sigsegv_catcher);
-	signal(SIGILL, sigill_cathcer);
+    signal(SIGILL, sigill_cathcer);
+    signal(SIGABRT, sigabrt_catcher);
 
 	run_test(constructor_test);
     run_test(fn_assign_test);
@@ -893,7 +925,7 @@ void fn_insert_tests()
 
 void fn_emplace_tests()
 {
-    start(".fn_insert_tests() tests");
+    start(".emplace() tests");
 
     result();
 }
@@ -904,48 +936,88 @@ void fn_erase_tests()
 
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(a.begin());
-        vec_cmp("basic erase test 0", int, a, 2, 3);
+        b.erase(b.begin());
+        std_vec_cmp(a, b, "basic erase test 0");
     }
     {
         vec_123(a);
-        a.erase(a.end());
-        vec_cmp("basic erase test 1", int, a, 1, 2);
+        std_vec_123(b);
+        a.erase(--a.end());
+        b.erase(--b.end());
+        std_vec_cmp(a, b, "basic erase test 1");
     }
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(++a.begin());
-        vec_cmp("basic erase test 2", int, a, 1, 3);
+        b.erase(++b.begin());
+        std_vec_cmp(a, b, "basic erase test 2");
     }
 
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(a.begin(), a.end());
-        ASSERT(a.empty(), "basic erase test 3");
+        b.erase(b.begin(), b.end());
+        std_vec_cmp(a, b, "basic erase test 3");
     }
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(a.begin(), ++a.begin());
-        vec_cmp("basic erase test 4", int, a, 2, 3);
+        b.erase(b.begin(), ++b.begin());
+        std_vec_cmp(a, b, "basic erase test 4");
     }
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(--a.end(), a.end());
-        vec_cmp("basic erase test 5", int, a, 1, 2);
+        b.erase(--b.end(), b.end());
+        std_vec_cmp(a, b, "basic erase test 5");
     }
     {
         vec_123(a);
+        std_vec_123(b);
         a.erase(++a.begin(), ++(++a.begin()));
-        vec_cmp("basic erase test 6", int, a, 1, 3);
+        b.erase(++b.begin(), ++(++b.begin()));
+        std_vec_cmp(a, b, "basic erase test 6");
     }
-
 
     result();
 }
 
 void fn_push_back_tests()
 {
-    start(".fn_push_back_tests() tests");
+    start(".push_back() tests");
+
+    {
+        tlucanti::vector_base<int> a;
+        a.push_back(123);
+        vec_cmp("push back basic test 0", int, a, 123);
+    }
+    {
+        vec_123(a);
+        a.push_back(321);
+        vec_cmp("push back basic test 1", int, a, 1, 2, 3, 321);
+    }
+
+    {
+        tlucanti::vector_base<int> a;
+        a.push_back(1);
+        a.push_back(2);
+        a.push_back(3);
+        a.push_back(4);
+        a.push_back(5);
+        a.push_back(6);
+        a.push_back(7);
+        a.push_back(8);
+        a.push_back(9);
+        a.push_back(10);
+        a.push_back(11);
+        vec_cmp("push back advanced test 0", int, a, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+    }
 
     result();
 }
@@ -961,6 +1033,18 @@ void fn_pop_back_tests()
 {
     start(".fn_pop_back_tests() tests");
 
+    {
+        vec_123(a);
+        a.pop_back();
+        vec_cmp("pop back basic test 0", int, a, 1, 2);
+    }
+    {
+        tlucanti::vector_base<int> a;
+        a.push_back(1);
+        a.pop_back();
+        ASSERT(a.empty(), "pop back basic test 1");
+    }
+
     result();
 }
 
@@ -968,12 +1052,85 @@ void fn_resize_test()
 {
     start(".fn_resize_test() tests");
 
+    {
+        tlucanti::vector_base<int> a;
+        a.resize(3);
+        ASSERT(a.size() == 3, "resize basic test 0");
+        ASSERT(a.capacity() == 7, "resize basic test 1");
+    }
+    {
+        vec_123(a);
+        a.resize(2);
+        vec_cmp("resize basic test 2", int, a, 1, 2);
+    }
+    {
+        tlucanti::vector_base<int> a;
+        a.resize(6);
+        a.resize(0);
+        ASSERT(a.empty(), "resize basic test 3");
+        a.resize(6);
+        ASSERT(a.size() == 6, "resize basic test 4");
+        ASSERT(a.capacity() == 7, "resize basic test 5");
+        a.resize(7);
+        ASSERT(a.size() == 7, "resize basic test 6");
+        ASSERT(a.capacity() == 11, "resize basic test 7");
+    }
+
+    {
+        tlucanti::vector_base<int> a;
+        a.resize(4, 111);
+        vec_cmp("resize basic test 8", int, a, 111, 111, 111, 111);
+    }
+    {
+        vec_123(a);
+        a.resize(2, 888);
+        vec_cmp("resize basic test 9", int, a, 1, 2);
+    }
+    {
+        tlucanti::vector_base<int> a;
+        a.resize(6, 111);
+        a.resize(1, 222);
+        vec_cmp("resize basic test 10", int, a, 111);
+        a.resize(6, 333);
+        vec_cmp("resize basic test 11", int, a, 111, 333, 333, 333, 333, 333);
+        ASSERT(a.capacity() == 7, "resize basic test 12");
+        a.resize(7, 44);
+        vec_cmp("resize basic test 13", int, a, 111, 333, 333, 333, 333, 333, 44);
+        ASSERT(a.capacity() == 11, "resize basic test 14");
+        a.resize(0, 999);
+        ASSERT(a.empty(), "resize basic test 15");
+        a.resize(1, 145145);
+        vec_cmp("resize basic test 16", int, a, 145145);
+    }
+
     result();
 }
 
 void swap_tests()
 {
     start(".swap_tests() tests");
+
+    {
+        vec_123(a);
+        vec_111(b);
+        a.swap(b);
+        vec_cmp("basic swap test 0", int, a, 123, 456, 789);
+        vec_cmp("basic swap test 1", int, b, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        tlucanti::vector_base<int> b;
+        a.swap(b);
+        ASSERT(a.empty(), "basic swap test 3");
+        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        tlucanti::vector_base<int> b;
+        b.swap(a);
+        ASSERT(a.empty(), "basic swap test 3");
+        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+    }
 
     result();
 }
@@ -1100,8 +1257,15 @@ void std_vector_test()
     result();
 }
 
+std::vector<std::string> moves;
+std::string Def = G + std::string("def") + Y;
+std::string Cons = C + std::string("cons") + Y;
+std::string Del = R + std::string("del") + Y;
+std::string Cpy = C + std::string("cpy") + Y;
+std::string Icpy = B + std::string("icpy") + Y;
+std::string Mv = P + std::string("mv") + Y;
+std::string Imv = K + std::string("imv") + Y;
 
-# define __USER_CLASS_VERBOSE 0
 struct UserClass
 {
     int a;
@@ -1110,24 +1274,25 @@ struct UserClass
 
     static int c;
     static int total_instances;
+    static int verbose;
     int my_c;
-    UserClass() :a(111), b(222) {
+    UserClass() : a(111), b(222) {
         valid = new(bool);
         *valid = true;
         my_c = ++c;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" G " default" S "\n";
-#endif
+        moves.push_back(Def);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" G " default" S "\n";
     }
     UserClass(int _a, int _b) : a(_a), b(_b) {
         valid = new(bool);
         *valid = true;
         my_c = ++c;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-       std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
-#endif
+        moves.push_back(Cons);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
     }
     ~UserClass() noexcept(false) {
         if (!valid)
@@ -1136,9 +1301,9 @@ struct UserClass
             throw std::runtime_error("invalid class");
         delete valid;
         --total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" R " destructor" S "\n";
-#endif
+        moves.push_back(Del);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" R " destructor" S "\n";
     }
     WUR const char *cl() const {
         switch (my_c % 7) {
@@ -1157,9 +1322,9 @@ struct UserClass
         *valid = true;
         my_c = cpy.my_c;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" Y " copy" S "\n";
-#endif
+        moves.push_back(Cpy);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" Y " copy" S "\n";
     }
     UserClass &operator =(const UserClass &cpy) {
         a = cpy.a;
@@ -1168,9 +1333,9 @@ struct UserClass
         *valid = true;
         my_c = cpy.my_c;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" C " copy assign" S "\n";
-#endif
+        moves.push_back(Icpy);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" C " copy assign" S "\n";
         return *this;
     }
     UserClass(UserClass &&mv) noexcept : a(mv.a), b(mv.b) {
@@ -1178,9 +1343,9 @@ struct UserClass
         valid = mv.valid;
         mv.valid = nullptr;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" P " move" S "\n";
-#endif
+        moves.push_back(Mv);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" P " move" S "\n";
     }
     UserClass &operator =(UserClass &&mv) noexcept {
         a = mv.a;
@@ -1189,9 +1354,9 @@ struct UserClass
         mv.valid = nullptr;
         my_c = mv.my_c;
         ++total_instances;
-#if __USER_CLASS_VERBOSE
-        std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
-#endif
+        moves.push_back(Imv);
+        if (verbose)
+            std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
         return *this;
     }
 DELETED_MEMBERS:
@@ -1204,6 +1369,7 @@ DELETED_MEMBERS:
 };
 int UserClass::c = 3;
 int UserClass::total_instances = 0;
+int UserClass::verbose = 0;
 
 void user_type_constructor_test()
 {
@@ -1217,10 +1383,10 @@ void user_type_constructor_test()
 
     {
         tlucanti::vector_base<UserClass> a(3);
-        ASSERT(a._allocated == 7, "allocator check 1");
+        ASSERT(a.capacity() == 7, "allocator check 1");
         ASSERT(UserClass::total_instances == 3, "user type constructor test 3");
         a.resize(7);
-        ASSERT(a._allocated == 11, "allocator check 2");
+        ASSERT(a.capacity() == 11, "allocator check 2");
         ASSERT(UserClass::total_instances == 7, "user type constructor test 4");
     }
     ASSERT(UserClass::total_instances == 0, "user type constructor test 5");
@@ -1232,6 +1398,29 @@ void user_type_constructor_test()
         ASSERT(UserClass::total_instances == 11, "user type test 7");
     }
     ASSERT(UserClass::total_instances == 0, "user type test 8");
+
+    // --------------------------------
+    UserClass::total_instances = 0;
+    UserClass::verbose = 1;
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a;
+            a.push_back(UserClass());
+            vec_cmp("user class modern test 0", std::string, moves, Def, Cpy, Del);
+        }
+        vec_cmp("user class modern test 1", std::string, moves, Def, Cpy, Del, Del);
+    }
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a(6);
+            vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def);
+            a.push_back(UserClass(111, 222));
+            vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
+        }
+        vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del, Del, Del, Del, Del, Del, Del, Del);
+    }
 
     result();
 }

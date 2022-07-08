@@ -45,10 +45,6 @@ public:
     typedef std::initializer_list<value_type>           init_list_type;
 #endif /* CPP11 */
 
-// ----------------------------- protected fields ------------------------------
-PROTECTED:
-    self_type    &c;
-
 // ------------------------------ private fields -------------------------------
 PRIVATE:
     difference_type _allocated;
@@ -62,7 +58,6 @@ public:
 // =============================================================================
 // ------------------------------ initialization -------------------------------
     constexpr vector_base() :
-        c(*this),
         _allocated(0),
         _allocator(allocator_type()),
         _begin(nullptr),
@@ -79,7 +74,6 @@ public:
 
 // -----------------------------------------------------------------------------
     constexpr explicit vector_base(const allocator_type &alloc) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -100,7 +94,6 @@ public:
     constexpr explicit vector_base(difference_type size,
         const allocator_type &alloc=allocator_type()
     ) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -126,7 +119,6 @@ public:
         const_reference value,
         const allocator_type &alloc=allocator_type()
     ) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -154,7 +146,6 @@ public:
     explicit constexpr vector_base(NOT_INTEGRAL(input_it) first,
             input_it last, const allocator_type &alloc=allocator_type()
     ) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -185,7 +176,6 @@ public:
     constexpr vector_base(const self_type &cpy,
             const allocator_type &alloc=allocator_type()
     ) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -214,7 +204,6 @@ public:
     constexpr vector_base(self_type &&mv,
         const allocator_type &alloc=allocator_type()
     ) noexcept :
-        c(*this),
         _allocated(mv._allocated),
         _allocator(alloc),
         _begin(mv._begin),
@@ -242,7 +231,6 @@ public:
     constexpr vector_base(init_list_type init,
         const allocator_type &alloc=allocator_type()
     ) :
-        c(*this),
         _allocated(0),
         _allocator(alloc),
         _begin(nullptr),
@@ -323,10 +311,10 @@ public:
         _allocator = std::move(mv._allocator);
         _begin = mv._begin;
         _end = mv._end;
-        mv._size = 0;
         mv._allocated = 0;
         mv._begin = nullptr;
         mv._end = nullptr;
+        return *this;
     }
 
 #endif /* CPP11 */
@@ -742,8 +730,8 @@ public:
 // -----------------------------------------------------------------------------
     constexpr void pop_back()
     {
+        _destroy_at(_end - 1);
         _pop();
-        _destroy_at(--_end);
     }
 
 // -----------------------------------------------------------------------------
@@ -779,7 +767,6 @@ public:
         std::swap(_allocator, swp._allocator);
         std::swap(_begin, swp._begin);
         std::swap(_end, swp._end);
-        std::swap(c, swp.c);
         /* TODO: add swaps for other private/protected fields */
     }
 
@@ -932,14 +919,14 @@ PRIVATE:
         pointer src = const_cast<pointer>(src_ptr);
         if (src > dst)
         {
-            while (cnt--)
+            while (cnt-- > 0)
                 _construct_at(dst++, *src++);
         }
         else if (dst > src)
         {
             dst += cnt;
             src += cnt;
-            while (cnt--)
+            while (cnt-- > 0)
                 _construct_at(--dst, *--src);
         }
     }
@@ -948,7 +935,7 @@ PRIVATE:
     constexpr void _deallocate(bool do_deallocate=true)
     {
         difference_type size = this->size();
-        while (size--)
+        while (size-- > 0)
             _destroy_at(--_end);
         if (do_deallocate)
         {

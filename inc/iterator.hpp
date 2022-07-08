@@ -41,21 +41,6 @@ public:
         return *_ptr;
     }
 
-//  virtual constexpr bool operator ==(const self_type &cmp) const noexcept = 0;
-//  virtual constexpr bool operator !=(const self_type &cmp) const noexcept = 0;
-//  virtual constexpr bool operator >(const self_type &cmp) const noexcept = 0;
-//  virtual constexpr bool operator <(const self_type &cmp) const noexcept = 0;
-//  virtual constexpr bool operator <=(const self_type &cmp) const noexcept = 0;
-//    virtual constexpr self_type operator +(difference_type shift) const noexcept = 0;
-//    virtual constexpr self_type operator -(difference_type shift) const noexcept = 0;
-//    virtual constexpr self_type operator +=(difference_type shift) noexcept = 0;
-//    virtual constexpr self_type operator -=(difference_type shift) noexcept = 0;
-//    virtual constexpr self_type &operator ++() noexcept = 0; // ++i
-//    virtual constexpr self_type operator ++(int) noexcept = 0; // i++
-//    virtual constexpr self_type &operator --() noexcept = 0; // --i
-//    virtual constexpr self_type operator --(int) noexcept = 0; // i--
-//    virtual constexpr difference_type operator -(const self_type &diff) const noexcept = 0;
-
 // ---------------------------- static members ----------------------------------
     static constexpr difference_type distance(const self_type &begin,
                                               const self_type &end)
@@ -77,6 +62,8 @@ public:
         _distance(input_it first, const input_it &last, std::input_iterator_tag)
     {
         typename std::iterator_traits<input_it>::difference_type n = 0;
+        if (UNLIKELY(first == last))
+            return 0;
         while (first++ != last)
             ++n;
         return n;
@@ -234,7 +221,7 @@ public:
         return this->_ptr != cmp._ptr;
     }
 
-    constexpr bool operator >(const self_type &cmp) const noexcept
+    virtual bool operator >(const base_class &cmp) const noexcept
     {
         return this->_ptr < cmp._ptr;
     }
