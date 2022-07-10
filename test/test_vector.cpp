@@ -1311,13 +1311,23 @@ struct ColString
     {
         std::stringstream ss;
         ss << _col << _str;
-        if (_cnt > 0)
+        if (_cnt > 1)
             ss << "(x" << _cnt << ')';
         ss << Y;
         return ss.str();
     }
 
     bool operator ==(const ColString &cmp) const
+    {
+        return _col_e == cmp._col_e && _cnt == cmp._cnt;
+    }
+
+    bool operator !=(const ColString &cmp) const
+    {
+        return not (*this == cmp);
+    }
+
+    bool cmp(const ColString &cmp) const
     {
         return _col_e == cmp._col_e;
     }
@@ -1347,7 +1357,7 @@ void convolve(std::vector<ColString> &v)
     std::vector<ColString> out;
     for (std::size_t i=0; i < v.size(); ++i)
     {
-        if (v[i] == last)
+        if (v[i].cmp(last))
             cnt += v[i]._cnt;
         else
         {
@@ -1356,6 +1366,7 @@ void convolve(std::vector<ColString> &v)
             last = v[i];
         }
     }
+    out.push_back(last * cnt);
     v.swap(out);
 }
 
@@ -1367,15 +1378,19 @@ struct UserClass
 
     static int c;
     static int total_instances;
-    static int verbose;
+    static bool verbose;
+    static bool monitoring;
+
     int my_c;
     UserClass() : a(111), b(222) {
         valid = new(bool);
         *valid = true;
         my_c = ++c;
         ++total_instances;
-        moves.push_back(Def);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Def);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" G " default" S "\n";
     }
@@ -1384,8 +1399,10 @@ struct UserClass
         *valid = true;
         my_c = ++c;
         ++total_instances;
-        moves.push_back(Cons);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Cons);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
     }
@@ -1396,8 +1413,10 @@ struct UserClass
             throw std::runtime_error("invalid class");
         delete valid;
         --total_instances;
-        moves.push_back(Del);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Del);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" R " destructor" S "\n";
     }
@@ -1418,8 +1437,10 @@ struct UserClass
         *valid = true;
         my_c = cpy.my_c;
         ++total_instances;
-        moves.push_back(Cpy);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Cpy);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" Y " copy" S "\n";
     }
@@ -1430,8 +1451,10 @@ struct UserClass
         *valid = true;
         my_c = cpy.my_c;
         ++total_instances;
-        moves.push_back(Icpy);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Icpy);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" C " copy assign" S "\n";
         return *this;
@@ -1441,8 +1464,10 @@ struct UserClass
         valid = mv.valid;
         mv.valid = nullptr;
         ++total_instances;
-        moves.push_back(Mv);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Mv);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" P " move" S "\n";
     }
@@ -1453,8 +1478,10 @@ struct UserClass
         mv.valid = nullptr;
         my_c = mv.my_c;
         ++total_instances;
-        moves.push_back(Imv);
-        convolve(moves);
+        if (monitoring) {
+            moves.push_back(Imv);
+            convolve(moves);
+        }
         if (verbose)
             std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
         return *this;
@@ -1469,7 +1496,23 @@ DELETED_MEMBERS:
 };
 int UserClass::c = 3;
 int UserClass::total_instances = 0;
-int UserClass::verbose = 0;
+bool UserClass::verbose = false;
+bool UserClass::monitoring = false;
+
+# define vec_cmp_lock(__msg, __type, __vec, ...) \
+    UserClass::monitoring = false; \
+    vec_cmp(__msg, __type, __vec, __VA_ARGS__); \
+    UserClass::monitoring = true
+
+# define make_std_vec_lock(__name, __type, ...) \
+    UserClass::monitoring = false; \
+    make_std_vec(__name, __type, __VA_ARGS__); \
+    UserClass::monitoring = true
+
+#define std_vec_cmp_lock(__v1, __v2, __msg) \
+    UserClass::monitoring = false; \
+    std_vec_cmp(__v1, __v2, __msg); \
+    UserClass::monitoring = true
 
 void user_type_constructor_test()
 {
@@ -1501,28 +1544,31 @@ void user_type_constructor_test()
 
     // --------------------------------
     UserClass::total_instances = 0;
-    UserClass::verbose = 1;
+    UserClass::verbose = false;
+    UserClass::monitoring = true;
     {
         moves.clear();
         {
             tlucanti::vector_base<UserClass> a;
             a.push_back(UserClass());
-            vec_cmp("user class modern test 0", ColString, moves, Def, Cpy, Del);
+            vec_cmp_lock("user class modern test 0", ColString, moves, Def, Cpy, Del);
         }
-        vec_cmp("user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
+        vec_cmp_lock("user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "user type test 9");
     }
+    UserClass::verbose = true;
     {
         moves.clear();
         {
             tlucanti::vector_base<UserClass> a(6);
-            make_std_vec(cmp1, ColString, Def * 6);
-            std_vec_cmp(moves, cmp1, "user class modern test 2");
+            make_std_vec_lock(cmp1, ColString, Def * 6);
+            std_vec_cmp_lock(moves, cmp1, "user class modern test 2");
             a.push_back(UserClass(111, 222));
-            make_std_vec(cmp2, ColString, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
-            std_vec_cmp(moves, cmp1, "user class modern test 3");
-            vec_cmp("user class modern test 2", std::string, moves, );
+            make_std_vec_lock(cmp2, ColString, Def * 6, Cons, Cpy * 6, Del * 6);
+            std_vec_cmp_lock(moves, cmp2, "user class modern test 3");
         }
-        vec_cmp("user class modern test 2", ColString, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del, Del, Del, Del, Del, Del, Del, Del);
+        vec_cmp_lock("user class modern test 4", ColString, moves, Def * 6, Cons, Cpy, Del, Cpy * 7, Del * 8);
+        ASSERT(UserClass::total_instances == 0, "user type test 10");
     }
 
     result();
