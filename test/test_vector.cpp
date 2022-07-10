@@ -106,9 +106,12 @@ std::string current_test = "null";
     tlucanti::vector_base<__type> __name(__cmp, __cmp + __size)
 
 # define make_std_vec(__name, __type, ...) \
-    __type __cmp[] = {__VA_ARGS__}; \
-    std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
-    std::vector<__type> __name(__cmp, __cmp + __size)
+    std::vector<__type> __name; \
+    { \
+        __type __cmp[] = {__VA_ARGS__}; \
+        std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
+        __name.assign(__cmp, __cmp + __size); \
+    }
 
 template <typename T>
 void __to_trash(T &_) {(void)_;}
@@ -211,7 +214,7 @@ void std_vec_cmp(const v1T &v1, const v2T &v2, const std::string &msg)
         outmsg = "vector size mismatch: ";
         goto _ASSERT_LABEL;
     }
-    for (std::ptrdiff_t i=0; i < v1.size(); ++i)
+    for (std::ptrdiff_t i=0; i < static_cast<std::ptrdiff_t>(v1.size()); ++i)
     {
         if (v1.data()[i] != v2.data()[i])
         {
@@ -1267,32 +1270,89 @@ void std_vector_test()
     result();
 }
 
-std::vector<std::string> moves;
-std::string Def = G + std::string("def") + Y;
-std::string Cons = C + std::string("cons") + Y;
-std::string Del = R + std::string("del") + Y;
-std::string Cpy = C + std::string("cpy") + Y;
-std::string Icpy = B + std::string("icpy") + Y;
-std::string Mv = P + std::string("mv") + Y;
-std::string Imv = K + std::string("imv") + Y;
+typedef enum e_colors
+{
+    Green,
+    Cyan,
+    Red,
+    Blue,
+    Purple,
+    Black
+} colors;
 
-void convolve(std::vector<std::string> &v)
+struct ColString
+{
+    std::string _str;
+    std::string _col;
+    colors _col_e;
+    int _cnt;
+    ColString(const std::string &str, colors col, int cnt=1)
+    {
+        _cnt = cnt;
+        _str = str;
+        _col_e = col;
+        switch (col)
+        {
+            case Green: _col = G; break;
+            case Cyan: _col = C; break;
+            case Red: _col = R; break;
+            case Blue: _col = B; break;
+            case Purple: _col = P; break;
+            case Black: _col = B; break;
+        }
+    }
+
+    ColString operator *(int i)
+    {
+        return ColString(_str, _col_e, i * _cnt);
+    }
+
+    std::string str() const
+    {
+        std::stringstream ss;
+        ss << _col << _str;
+        if (_cnt > 0)
+            ss << "(x" << _cnt << ')';
+        ss << Y;
+        return ss.str();
+    }
+
+    bool operator ==(const ColString &cmp) const
+    {
+        return _col_e == cmp._col_e;
+    }
+};
+
+std::ostream &operator <<(std::ostream &out, const ColString &s)
+{
+    out << s.str();
+    return out;
+}
+
+ColString Def("def", Green); // = G + std::string("def") + Y;
+ColString Cons("cons", Cyan); // = C + std::string("cons") + Y;
+ColString Del("del", Red); // = R + std::string("del") + Y;
+ColString Cpy("cpy", Blue); // = C + std::string("cpy") + Y;
+ColString Icpy("icpy", Blue); // = B + std::string("icpy") + Y;
+ColString Mv("mv", Purple); // = P + std::string("mv") + Y;
+ColString Imv("imv", Black); // = K + std::string("imv") + Y;
+
+std::vector<ColString> moves;
+void convolve(std::vector<ColString> &v)
 {
     if (v.empty())
         return ;
-    std::string last;
+    ColString last = v[0];
     int cnt = 0;
-    std::vector<std::string> out;
+    std::vector<ColString> out;
     for (std::size_t i=0; i < v.size(); ++i)
     {
         if (v[i] == last)
-            ++cnt;
+            cnt += v[i]._cnt;
         else
         {
-            std::stringstream ss;
-            ss << cnt;
-            out.push_back(last.substr(0, last.size() - std::strlen(Y)) +"(x" + ss.str() + ')' + Y);
-            cnt = 0;
+            out.push_back(last * cnt);
+            cnt = v[i]._cnt;
             last = v[i];
         }
     }
@@ -1315,6 +1375,7 @@ struct UserClass
         my_c = ++c;
         ++total_instances;
         moves.push_back(Def);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" G " default" S "\n";
     }
@@ -1324,6 +1385,7 @@ struct UserClass
         my_c = ++c;
         ++total_instances;
         moves.push_back(Cons);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
     }
@@ -1335,6 +1397,7 @@ struct UserClass
         delete valid;
         --total_instances;
         moves.push_back(Del);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" R " destructor" S "\n";
     }
@@ -1356,6 +1419,7 @@ struct UserClass
         my_c = cpy.my_c;
         ++total_instances;
         moves.push_back(Cpy);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" Y " copy" S "\n";
     }
@@ -1367,6 +1431,7 @@ struct UserClass
         my_c = cpy.my_c;
         ++total_instances;
         moves.push_back(Icpy);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" C " copy assign" S "\n";
         return *this;
@@ -1377,6 +1442,7 @@ struct UserClass
         mv.valid = nullptr;
         ++total_instances;
         moves.push_back(Mv);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" P " move" S "\n";
     }
@@ -1388,6 +1454,7 @@ struct UserClass
         my_c = mv.my_c;
         ++total_instances;
         moves.push_back(Imv);
+        convolve(moves);
         if (verbose)
             std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
         return *this;
@@ -1440,22 +1507,22 @@ void user_type_constructor_test()
         {
             tlucanti::vector_base<UserClass> a;
             a.push_back(UserClass());
-            vec_cmp("user class modern test 0", std::string, moves, Def, Cpy, Del);
+            vec_cmp("user class modern test 0", ColString, moves, Def, Cpy, Del);
         }
-        vec_cmp("user class modern test 1", std::string, moves, Def, Cpy, Del, Del);
+        vec_cmp("user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
     }
     {
         moves.clear();
         {
             tlucanti::vector_base<UserClass> a(6);
-            make_std_vec(cmp1, std::string, Def, Def, Def, Def, Def, Def);
+            make_std_vec(cmp1, ColString, Def * 6);
             std_vec_cmp(moves, cmp1, "user class modern test 2");
             a.push_back(UserClass(111, 222));
-            make_std_vec(cmp2, std::string, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
+            make_std_vec(cmp2, ColString, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del);
             std_vec_cmp(moves, cmp1, "user class modern test 3");
             vec_cmp("user class modern test 2", std::string, moves, );
         }
-        vec_cmp("user class modern test 2", std::string, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del, Del, Del, Del, Del, Del, Del, Del);
+        vec_cmp("user class modern test 2", ColString, moves, Def, Def, Def, Def, Def, Def, Cons, Cpy, Del, Del, Del, Del, Del, Del, Del, Del);
     }
 
     result();
