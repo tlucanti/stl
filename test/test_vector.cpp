@@ -1443,6 +1443,10 @@ struct UserClass
         }
     }
     UserClass(const UserClass &cpy) : a(cpy.a), b(cpy.b) {
+        if (!cpy.valid)
+            throw std::runtime_error("nullptr in `valid` value");
+        if (not *cpy.valid)
+            throw std::runtime_error("invalid class");
         valid = new(bool);
         *valid = true;
         my_c = ++c;
@@ -1455,6 +1459,10 @@ struct UserClass
             std::cout << str() << Y " copy" S "\n";
     }
     UserClass &operator =(const UserClass &cpy) {
+        if (!cpy.valid)
+            throw std::runtime_error("nullptr in `valid` value");
+        if (not *cpy.valid)
+            throw std::runtime_error("invalid class");
         a = cpy.a;
         b = cpy.b;
         valid = new(bool);
@@ -1655,27 +1663,26 @@ void user_type_constructor_test()
             vec_cmp_lock("user class modern test 8", ColString, moves, Def * 3);
             moves.clear();
             a.erase(++a.begin());
-            vec_cmp_lock("user class modern test 9", ColString, moves, Del, Cpy, Del);
+            vec_cmp_lock("user class modern test 9", ColString, moves, Icpy, Del);
             moves.clear();
         }
         vec_cmp_lock("user class modern test 10", ColString, moves, Del * 2);
         ASSERT(UserClass::total_instances == 0, "user type test 12");
     }
-    UserClass::verbose = true;
+    UserClass::verbose = false;
     {{{
         moves.clear();
         {
-            std::vector<UserClass> a(10);
+            std::vector<UserClass> a(3);
             vec_cmp_lock("std -- user class modern test 8", ColString, moves, Def * 3);
             moves.clear();
-            a.erase(++a.begin(), --a.end());
-            vec_cmp_lock("std -- user class modern test 9", ColString, moves, Del);
+            a.erase(++a.begin());
+            vec_cmp_lock("std -- user class modern test 9", ColString, moves, Icpy, Del);
             moves.clear();
         }
         vec_cmp_lock("std -- user class modern test 10", ColString, moves, Del * 2);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 12");
     }}}
-    return;
     {
         moves.clear();
         {
@@ -1684,12 +1691,27 @@ void user_type_constructor_test()
             moves.clear();
             a.erase(++a.begin(), --a.end());
             ASSERT(a.size() == 2, "user class test 13");
-            vec_cmp_lock("user class modern test 12", ColString, moves, Del * 3);
+            vec_cmp_lock("user class modern test 12", ColString, moves, Icpy, Del * 3);
             moves.clear();
         }
         vec_cmp_lock("user class modern test 13", ColString, moves, Del * 2);
         ASSERT(UserClass::total_instances == 0, "user type test 14");
     }
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a(5);
+            vec_cmp_lock("std -- user class modern test 11", ColString, moves, Def * 5);
+            moves.clear();
+            a.erase(++a.begin(), --a.end());
+            ASSERT(a.size() == 2, "user class test 13");
+            vec_cmp_lock("std -- user class modern test 12", ColString, moves, Icpy, Del * 3);
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 13", ColString, moves, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 14");
+    }}}
+    UserClass::verbose = true;
     {
         moves.clear();
         {
@@ -1699,9 +1721,22 @@ void user_type_constructor_test()
             vec_cmp_lock("user class modern test 14", ColString, moves, Cons, Cpy, Del);
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 15", ColString, moves, Del * 2);
+        vec_cmp_lock("user class modern test 15", ColString, moves, Del);
         ASSERT(UserClass::total_instances == 0, "user type test 16");
     }
+    return ;
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a;
+            ASSERT(UserClass::total_instances == 0, "std -- user type test 15");
+            a.insert(a.end(), UserClass(1, 2));
+            vec_cmp_lock("std -- user class modern test 14", ColString, moves, Cons, Cpy, Del);
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 15", ColString, moves, Del);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 16");
+    }}}
     {
         moves.clear();
         {
@@ -1712,8 +1747,8 @@ void user_type_constructor_test()
                 tlucanti::vector_base<UserClass> b(3, UserClass(4, 5));
                 vec_cmp_lock("user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
                 moves.clear();
-                a.insert(++(++a.begin()), b.begin(), b.end());
-                vec_cmp_lock("user class modern test 18", ColString, moves, Cpy, Del, Cpy * 3);
+                a.insert(++a.begin(), b.begin(), b.end());
+                vec_cmp_lock("user class modern test 18", ColString, moves, Cpy * 4);
                 moves.clear();
             }
             vec_cmp_lock("user class modern test 18", ColString, moves, Del * 3);
@@ -1723,6 +1758,27 @@ void user_type_constructor_test()
         vec_cmp_lock("user class modern test 19", ColString, moves, Del * 5);
         ASSERT(UserClass::total_instances == 0, "user type test 18");
     }
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a(2);
+            vec_cmp_lock("std -- user class modern test 16", ColString, moves, Def * 2);
+            moves.clear();
+            {
+                tlucanti::vector_base<UserClass> b(3, UserClass(4, 5));
+                vec_cmp_lock("std -- user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
+                moves.clear();
+                a.insert(++(++a.begin()), b.begin(), b.end());
+                vec_cmp_lock("std -- user class modern test 18", ColString, moves, Cpy, Del, Cpy * 3);
+                moves.clear();
+            }
+            vec_cmp_lock("std -- user class modern test 18", ColString, moves, Del * 3);
+            ASSERT(UserClass::total_instances == 5, "std -- user type test 17");
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 19", ColString, moves, Del * 5);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 18");
+    }}}
 
     result();
 }

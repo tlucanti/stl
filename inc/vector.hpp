@@ -631,7 +631,7 @@ public:
     constexpr iterator insert(iterator pos, const_reference value)
     {
         pointer start = _insert(pos._ptr);
-        _construct_at(start, value);
+        *start = value;
         return _iterator(start);
     }
 
@@ -650,7 +650,8 @@ public:
         if (UNLIKELY(count <= 0))
             return ;
         pointer start = _insert(pos._ptr, count);
-        _construct(start, count, value);
+        for (difference_type i=0; i < count; ++i)
+            start[i] = value;
     }
 
 // -----------------------------------------------------------------------------
@@ -658,8 +659,9 @@ public:
     constexpr void insert(iterator pos,
         NOT_INTEGRAL(input_it) first, input_it last)
     {
-        pointer begin = _insert(pos._ptr, iterator::distance(first, last));
-        _copy(first, last, begin);
+        difference_type size = iterator::distance(first, last);
+        pointer begin = _insert(pos._ptr, size);
+        _move(first, begin, size);
     }
 
 // -----------------------------------------------------------------------------
@@ -701,7 +703,6 @@ public:
         difference_type count = iterator::distance(first, last);
         if (count <= 0)
             return last;
-        _destroy(first._ptr, count);
         pointer fin = _erase(first._ptr, count);
         return _iterator(fin);
     }
@@ -934,11 +935,10 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _move(const_pointer src_ptr, pointer dst, difference_type cnt)
+    constexpr void _move(pointer src, pointer dst, difference_type cnt)
     {
         if (UNLIKELY(cnt <= 0))
             return ;
-        pointer src = const_cast<pointer>(src_ptr);
         if (src > dst)
         {
             while (cnt-- > 0)
@@ -951,6 +951,16 @@ PRIVATE:
             while (cnt-- > 0)
                 *(--dst) = *(--src);
         }
+    }
+
+// -----------------------------------------------------------------------------
+    template <typename Iter_T>
+    constexpr void _move(Iter_T src, pointer dst, difference_type cnt)
+    {
+        if (UNLIKELY(cnt <= 0))
+            return ;
+        while (cnt-- > 0)
+            *dst++ = *src++;
     }
 
 // -----------------------------------------------------------------------------
@@ -977,17 +987,13 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr bool _shrink()
+    constexpr void _shrink()
     {
         difference_type less_size = static_cast<difference_type>(
                 static_cast<double>(_allocated) / (golden_ratio * golden_ratio) + 0.5
         );
         if (size() < less_size and _allocated > 7)
-        {
             _alloc_more(size());
-            return true;
-        }
-        return false;
     }
 
 // -----------------------------------------------------------------------------
@@ -1062,23 +1068,19 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr bool _append(difference_type count=1)
+    constexpr void _append(difference_type count=1)
     {
         // here count cannot be negative, bc we checked it already
         if (size() + count >= _allocated)
-        {
             _alloc_more(size() + count);
-            return true;
-        }
-        return false;
     }
 
 // -----------------------------------------------------------------------------
-    constexpr bool _pop(difference_type count=1)
+    constexpr void _pop(difference_type count=1)
     {
         // here count cannot be negative, bc we checked it already
         _end -= count;
-        return _shrink();
+        _shrink();
     }
 
 // -----------------------------------------------------------------------------
