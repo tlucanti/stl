@@ -12,8 +12,8 @@
 
 # ------------------------------ compiler options ------------------------------
 NAME		=	ircserv
-CXX			=	clang++ -std=c++2a
-CXXFLAGS	=	-Wall -Wextra -Werror
+CXX			=	g++ -std=c++2a
+CXXFLAGS	=	-Wall -Wextra -Werror -g3
 CXXOPTIONS	=	-O0 -pedantic-errors
 CC			=	CC
 # --------------------------------- submodules ---------------------------------
@@ -77,8 +77,8 @@ fclean:			clean
 
 # ------------------------------------------------------------------------------
 vec:
-	${CXX}		test/test_vector.cpp ${INCLUDE} -o test
-	./test
+	${CXX}		test/test_vector.cpp ${INCLUDE} -o tst
+#	./tst
 
 # ------------------------------------------------------------------------------
 re:				fclean all

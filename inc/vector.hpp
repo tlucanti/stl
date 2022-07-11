@@ -44,7 +44,7 @@ public:
 # if CPP11
     typedef value_type &&                               rvalue_type;
     typedef std::initializer_list<value_type>           init_list_type;
-#endif /* CPP11 */
+# endif /* CPP11 */
 
 // ------------------------------ private fields -------------------------------
 PRIVATE:
@@ -53,7 +53,11 @@ PRIVATE:
     pointer         _begin;
     pointer         _end;
 
+#if CPP17
     constexpr const static double golden_ratio = 1.618033988749895;
+#else
+    const static double golden_ratio;
+#endif
 
 public:
 // =============================================================================
@@ -248,7 +252,7 @@ public:
         \author tlucanti
     */
     {
-        if (init.size() > 0)
+        if (LIKELY(init.size() > 0))
         {
             _init(static_cast<difference_type>(init.size()), false);
             _copy(init.begin(), init.end(), _begin);
@@ -359,7 +363,7 @@ public:
     */
     {
         _deallocate();
-        _init(count);
+        _init(count, false);
         _construct(_begin, count, value);
     }
 
@@ -671,15 +675,15 @@ public:
 
 // -----------------------------------------------------------------------------
 # if CPP11
-    template <class ... arg_type>
-    constexpr iterator emplace(const_iterator pos, arg_type && ... args)
-    {
-    // TODO: emplace
-        (void)pos;
-        void *a[] = {args...};
-//# warning "IMPLEMENT FUNCTION"
-        ABORT("FUNCTION NOT IMPLEMENTED", "");
-    }
+//    template <class ... arg_type>
+//    constexpr iterator emplace(const_iterator pos, arg_type && ... args)
+//    {
+//    // TODO: emplace
+//        (void)pos;
+//        void *a[] = {args...};
+////# warning "IMPLEMENT FUNCTION"
+//        ABORT("FUNCTION NOT IMPLEMENTED", "");
+//    }
 # endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
@@ -830,11 +834,7 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _construct_at(pointer ptr)
     {
-#if CPP17
         _allocator.construct(ptr);
-#else
-        ABORT("", "");
-#endif
     }
 
     constexpr void _construct_at(pointer ptr, const_reference val)
@@ -934,6 +934,26 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
+    constexpr void _move(const_pointer src_ptr, pointer dst, difference_type cnt)
+    {
+        if (UNLIKELY(cnt <= 0))
+            return ;
+        pointer src = const_cast<pointer>(src_ptr);
+        if (src > dst)
+        {
+            while (cnt-- > 0)
+                *dst++ = *src++;
+        }
+        else if (dst > src)
+        {
+            dst += cnt;
+            src += cnt;
+            while (cnt-- > 0)
+                *(--dst) = *(--src);
+        }
+    }
+
+// -----------------------------------------------------------------------------
     constexpr void _deallocate(bool do_deallocate=true)
     {
         difference_type size = this->size();
@@ -957,13 +977,17 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _shrink()
+    constexpr bool _shrink()
     {
         difference_type less_size = static_cast<difference_type>(
-                static_cast<double>(_allocated) / (golden_ratio * golden_ratio)
+                static_cast<double>(_allocated) / (golden_ratio * golden_ratio) + 0.5
         );
         if (size() < less_size and _allocated > 7)
+        {
             _alloc_more(size());
+            return true;
+        }
+        return false;
     }
 
 // -----------------------------------------------------------------------------
@@ -1019,7 +1043,7 @@ PRIVATE:
         difference_type index = ptr - _begin;
         difference_type move_cnt = _end - ptr;
         _append(count);
-        _copy(_begin + index, _begin + index + count, move_cnt);
+        _move(_begin + index, _begin + index + count, move_cnt);
         _end += count;
         return _begin + index;
     }
@@ -1029,30 +1053,41 @@ PRIVATE:
     {
         // here count cannot be negative, bc we checked it already
         difference_type index = ptr - _begin;
-        _destroy(ptr, count);
-        _copy(ptr, ptr + count, count);
+        difference_type move_cnt = _end - ptr - count;
+        _move(ptr + count, ptr, move_cnt);
+        _destroy(_end - count, count);
+        _end -= count;
         _shrink();
         return _begin + index;
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _append(difference_type count=1)
+    constexpr bool _append(difference_type count=1)
     {
         // here count cannot be negative, bc we checked it already
         if (size() + count >= _allocated)
+        {
             _alloc_more(size() + count);
+            return true;
+        }
+        return false;
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _pop(difference_type count=1)
+    constexpr bool _pop(difference_type count=1)
     {
         // here count cannot be negative, bc we checked it already
-        _shrink();
-        _end -= count; // TODO: maybe uwe _allocator.destroy(_end) here
+        _end -= count;
+        return _shrink();
     }
 
 // -----------------------------------------------------------------------------
 };
+
+# if PRECPP17
+template <class type_T, class allocator_T>
+const double vector_base<type_T, allocator_T>::golden_ratio = 1.618033988749895;
+# endif /* PRECPP17 */
 
 TLU_NAMESPACE_END
 

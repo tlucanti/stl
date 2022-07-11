@@ -137,7 +137,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define WUR __attribute__((warn_unused_result))
 #  endif /* WUR */
 #  ifndef UNUSED
-#   define UNUSED(__x) __attribute__((unused))) __x
+#   define UNUSED(__x) __attribute__((unused)) __x
 #  endif /* UNUSED */
 #  ifndef NORET
 #   define NORET __attribute__((noreturn))

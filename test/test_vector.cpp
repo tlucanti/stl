@@ -7,6 +7,8 @@
 #include <csignal>
 
 #define __DEBUG
+#define __SAFE_TEST 0
+
 #include "defs.h"
 #include "vector.hpp"
 #include "color.h"
@@ -17,13 +19,19 @@ int ok = 0;
 int grand_total_ok = 0;
 std::string current_test = "null";
 
-#define run_test(func) do { \
-    try { \
-        func(); \
-    } catch (std::exception &e) { \
-        std::cout << R "test fall with exception: " Y << e.what() << S << std::endl; \
-    } \
-} while (false)
+template <typename func_T>
+void run_test(func_T func)
+{
+#if __SAFE_TEST
+    try {
+        func();
+    } catch (std::exception &e) {
+        std::cout << R "test fall with exception: " Y << e.what() << S << std::endl;
+    }
+#else
+    func();
+#endif
+}
 
 #undef ASSERT
 #define ASSERT(e, msg) do { \
@@ -201,30 +209,31 @@ std::string _vec_to_str(const V &v)
 }
 
 template<class v1T, class v2T>
-void std_vec_cmp(const v1T &v1, const v2T &v2, const std::string &msg)
+void std_vec_cmp(const v1T &expected, const v2T &got, const std::string &msg)
 {
 
     bool _ok = true;
-    std::string sv1, sv2;
-    sv1 = _vec_to_str(v1);
-    sv2 = _vec_to_str(v2);
+    std::string sexp, sgot;
+    sexp = _vec_to_str(expected);
+    sgot = _vec_to_str(got);
     std::string outmsg;
-    if (static_cast<std::ptrdiff_t>(v1.size()) != static_cast<std::ptrdiff_t>(v2.size()))
+    if (static_cast<std::ptrdiff_t>(expected.size()) != static_cast<std::ptrdiff_t>(got.size()))
     {
+        _ok = false;
         outmsg = "vector size mismatch: ";
         goto _ASSERT_LABEL;
     }
-    for (std::ptrdiff_t i=0; i < static_cast<std::ptrdiff_t>(v1.size()); ++i)
+    for (std::ptrdiff_t i=0; i < static_cast<std::ptrdiff_t>(expected.size()); ++i)
     {
-        if (v1.data()[i] != v2.data()[i])
+        if (expected.data()[i] != got.data()[i])
         {
-            ok = false;
+            _ok = false;
             outmsg = "vector compare: ";
-            break;
+            goto _ASSERT_LABEL;
         }
     }
 _ASSERT_LABEL:
-    ASSERT(_ok, outmsg + "(expected) " + sv1 + " != (got) " + sv2 + ": " + msg);
+    ASSERT(_ok, outmsg + "(expected) " + sexp + " != (got) " + sgot + ": " + msg);
 }
 
 void constructor_test();
@@ -929,7 +938,7 @@ void fn_insert_tests()
         std_vec_111(sb);
         a.insert(++a.begin(), b.rbegin(), b.rend());
         sa.insert(++sa.begin(), sb.rbegin(), sb.rend());
-        std_vec_cmp(a, sa, "basic insert test 9");
+        std_vec_cmp(sa, a, "basic insert test 9");
     }
 
     result();
@@ -952,21 +961,21 @@ void fn_erase_tests()
         std_vec_123(b);
         a.erase(a.begin());
         b.erase(b.begin());
-        std_vec_cmp(a, b, "basic erase test 0");
+        std_vec_cmp(b, a, "basic erase test 0");
     }
     {
         vec_123(a);
         std_vec_123(b);
         a.erase(--a.end());
         b.erase(--b.end());
-        std_vec_cmp(a, b, "basic erase test 1");
+        std_vec_cmp(b, a, "basic erase test 1");
     }
     {
         vec_123(a);
         std_vec_123(b);
         a.erase(++a.begin());
         b.erase(++b.begin());
-        std_vec_cmp(a, b, "basic erase test 2");
+        std_vec_cmp(b, a, "basic erase test 2");
     }
 
     {
@@ -974,28 +983,28 @@ void fn_erase_tests()
         std_vec_123(b);
         a.erase(a.begin(), a.end());
         b.erase(b.begin(), b.end());
-        std_vec_cmp(a, b, "basic erase test 3");
+        std_vec_cmp(b, a, "basic erase test 3");
     }
     {
         vec_123(a);
         std_vec_123(b);
         a.erase(a.begin(), ++a.begin());
         b.erase(b.begin(), ++b.begin());
-        std_vec_cmp(a, b, "basic erase test 4");
+        std_vec_cmp(b, a, "basic erase test 4");
     }
     {
         vec_123(a);
         std_vec_123(b);
         a.erase(--a.end(), a.end());
         b.erase(--b.end(), b.end());
-        std_vec_cmp(a, b, "basic erase test 5");
+        std_vec_cmp(b, a, "basic erase test 5");
     }
     {
         vec_123(a);
         std_vec_123(b);
         a.erase(++a.begin(), ++(++a.begin()));
         b.erase(++b.begin(), ++(++b.begin()));
-        std_vec_cmp(a, b, "basic erase test 6");
+        std_vec_cmp(b, a, "basic erase test 6");
     }
 
     result();
@@ -1304,7 +1313,7 @@ struct ColString
 
     ColString operator *(int i)
     {
-        return ColString(_str, _col_e, i * _cnt);
+        return ColString(_str, _col_e, i);
     }
 
     std::string str() const
@@ -1348,6 +1357,7 @@ ColString Mv("mv", Purple); // = P + std::string("mv") + Y;
 ColString Imv("imv", Black); // = K + std::string("imv") + Y;
 
 std::vector<ColString> moves;
+std::vector<ColString> moves_std;
 void convolve(std::vector<ColString> &v)
 {
     if (v.empty())
@@ -1392,7 +1402,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << cl() << "[" << this << "]:" G " default" S "\n";
+            std::cout << str() << G " default" S "\n";
     }
     UserClass(int _a, int _b) : a(_a), b(_b) {
         valid = new(bool);
@@ -1404,7 +1414,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << cl() << "[" << this << "]:" C " constructor" S "\n";
+            std::cout << str() << C " constructor" S "\n";
     }
     ~UserClass() noexcept(false) {
         if (!valid)
@@ -1418,7 +1428,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << cl() << "[" << this << "]:" R " destructor" S "\n";
+            std::cout << str() << R " destructor" S "\n";
     }
     WUR const char *cl() const {
         switch (my_c % 7) {
@@ -1432,17 +1442,17 @@ struct UserClass
             default: return W;
         }
     }
-    UserClass(const UserClass &cpy) : a(111), b(111) {
+    UserClass(const UserClass &cpy) : a(cpy.a), b(cpy.b) {
         valid = new(bool);
         *valid = true;
-        my_c = cpy.my_c;
+        my_c = ++c;
         ++total_instances;
         if (monitoring) {
             moves.push_back(Cpy);
             convolve(moves);
         }
         if (verbose)
-            std::cout << cl() << "[" << this << "]:" Y " copy" S "\n";
+            std::cout << str() << Y " copy" S "\n";
     }
     UserClass &operator =(const UserClass &cpy) {
         a = cpy.a;
@@ -1450,48 +1460,54 @@ struct UserClass
         valid = new(bool);
         *valid = true;
         my_c = cpy.my_c;
-        ++total_instances;
         if (monitoring) {
             moves.push_back(Icpy);
             convolve(moves);
         }
         if (verbose)
-            std::cout << cl() << "[" << this << "]:" C " copy assign" S "\n";
+            std::cout << str() << C " copy assign" S "\n";
         return *this;
     }
-    UserClass(UserClass &&mv) noexcept : a(mv.a), b(mv.b) {
-        my_c = mv.my_c;
-        valid = mv.valid;
-        mv.valid = nullptr;
-        ++total_instances;
-        if (monitoring) {
-            moves.push_back(Mv);
-            convolve(moves);
-        }
-        if (verbose)
-            std::cout << cl() << "[" << this << "]:" P " move" S "\n";
+
+    std::string str()
+    {
+        std::stringstream ss;
+        ss << cl() << '[' << this << '(' << my_c << ")]:";
+        return ss.str();
     }
-    UserClass &operator =(UserClass &&mv) noexcept {
-        a = mv.a;
-        b = mv.b;
-        valid = mv.valid;
-        mv.valid = nullptr;
-        my_c = mv.my_c;
-        ++total_instances;
-        if (monitoring) {
-            moves.push_back(Imv);
-            convolve(moves);
-        }
-        if (verbose)
-            std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
-        return *this;
-    }
+//    UserClass(UserClass &&mv) noexcept : a(mv.a), b(mv.b) {
+//        my_c = mv.my_c;
+//        valid = mv.valid;
+//        mv.valid = nullptr;
+//        ++total_instances;
+//        if (monitoring) {
+//            moves.push_back(Mv);
+//            convolve(moves);
+//        }
+//        if (verbose)
+//            std::cout << cl() << "[" << this << "]:" P " move" S "\n";
+//    }
+//    UserClass &operator =(UserClass &&mv) noexcept {
+//        a = mv.a;
+//        b = mv.b;
+//        valid = mv.valid;
+//        mv.valid = nullptr;
+//        my_c = mv.my_c;
+//        ++total_instances;
+//        if (monitoring) {
+//            moves.push_back(Imv);
+//            convolve(moves);
+//        }
+//        if (verbose)
+//            std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
+//        return *this;
+//    }
 DELETED_MEMBERS:
 //    UserClass(const UserClass &) __DELETE
 //    UserClass &operator =(const UserClass &) __DELETE
 #if CPP11
-//    UserClass(UserClass &&) __DELETE
-//    UserClass &operator =(UserClass &&) __DELETE
+//    UserClass(UserClass &&) DELETE
+//    UserClass &operator =(UserClass &&) DELETE
 #endif /* CPP11 */
 };
 int UserClass::c = 3;
@@ -1556,21 +1572,157 @@ void user_type_constructor_test()
         vec_cmp_lock("user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
         ASSERT(UserClass::total_instances == 0, "user type test 9");
     }
-    UserClass::verbose = true;
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a;
+            a.push_back(UserClass());
+            vec_cmp_lock("std -- user class modern test 0", ColString, moves, Def, Cpy, Del);
+        }
+        vec_cmp_lock("std -- user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 9");
+    }}}
+    UserClass::verbose = false;
     {
         moves.clear();
         {
             tlucanti::vector_base<UserClass> a(6);
             make_std_vec_lock(cmp1, ColString, Def * 6);
-            std_vec_cmp_lock(moves, cmp1, "user class modern test 2");
+            std_vec_cmp_lock(cmp1, moves, "user class modern test 2");
+            moves.clear();
             a.push_back(UserClass(111, 222));
-            make_std_vec_lock(cmp2, ColString, Def * 6, Cons, Cpy * 6, Del * 6);
-            std_vec_cmp_lock(moves, cmp2, "user class modern test 3");
+            make_std_vec_lock(cmp2, ColString, Cons, Cpy * 6, Del * 6, Cpy, Del);
+            std_vec_cmp_lock(cmp2, moves, "user class modern test 3");
+            moves.clear();
         }
-        vec_cmp_lock("user class modern test 4", ColString, moves, Def * 6, Cons, Cpy, Del, Cpy * 7, Del * 8);
+        vec_cmp_lock("user class modern test 4", ColString, moves, Del * 7);
         ASSERT(UserClass::total_instances == 0, "user type test 10");
+    }
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a(6);
+            make_std_vec_lock(cmp1, ColString, Def * 6);
+            std_vec_cmp_lock(cmp1, moves, "std -- user class modern test 2");
+            moves.clear();
+            a.push_back(UserClass(111, 222));
+            make_std_vec_lock(cmp2, ColString, Cons, Cpy * 7, Del * 7);
+            std_vec_cmp_lock(cmp2, moves, "std -- user class modern test 3");
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 4", ColString, moves, Del * 7);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 10");
+    }}}
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
+            vec_cmp_lock("user class modern test 5", ColString, moves, Cons, Cpy * 11, Del);
+            moves.clear();
+            a.pop_back(); // 10 left + 1 del
+            a.pop_back(); // 9 left + 2 del
+            a.pop_back(); // 8 left + 3 del
+            a.pop_back(); // 7 left + 4 del
+            a.pop_back(); // 6 left + 5 del --> reallocation
+            vec_cmp_lock("user class modern test 6", ColString, moves, Del * 5, Cpy * 6, Del * 6);
+            moves.clear();
+        }
+        vec_cmp_lock("user class modern test 7", ColString, moves, Del * 6);
+        ASSERT(UserClass::total_instances == 0, "user type test 11");
+    }
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
+            vec_cmp_lock("std -- user class modern test 5", ColString, moves, Cons, Cpy * 11, Del);
+            moves.clear();
+            a.pop_back(); // 10 left + 1 del
+            a.pop_back(); // 9 left + 2 del
+            a.pop_back(); // 8 left + 3 del
+            a.pop_back(); // 7 left + 4 del
+            a.pop_back(); // 6 left + 5 del --> reallocation
+            vec_cmp_lock("std -- user class modern test 6", ColString, moves, Del * 5);
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 7", ColString, moves, Del * 6);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 11");
+    }}}
+    UserClass::verbose = false;
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a(3);
+            vec_cmp_lock("user class modern test 8", ColString, moves, Def * 3);
+            moves.clear();
+            a.erase(++a.begin());
+            vec_cmp_lock("user class modern test 9", ColString, moves, Del, Cpy, Del);
+            moves.clear();
+        }
+        vec_cmp_lock("user class modern test 10", ColString, moves, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "user type test 12");
+    }
+    UserClass::verbose = true;
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a(10);
+            vec_cmp_lock("std -- user class modern test 8", ColString, moves, Def * 3);
+            moves.clear();
+            a.erase(++a.begin(), --a.end());
+            vec_cmp_lock("std -- user class modern test 9", ColString, moves, Del);
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 10", ColString, moves, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 12");
+    }}}
+    return;
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a(5);
+            vec_cmp_lock("user class modern test 11", ColString, moves, Def * 5);
+            moves.clear();
+            a.erase(++a.begin(), --a.end());
+            ASSERT(a.size() == 2, "user class test 13");
+            vec_cmp_lock("user class modern test 12", ColString, moves, Del * 3);
+            moves.clear();
+        }
+        vec_cmp_lock("user class modern test 13", ColString, moves, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "user type test 14");
+    }
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a;
+            ASSERT(UserClass::total_instances == 0, "user type test 15");
+            a.insert(a.end(), UserClass(1, 2));
+            vec_cmp_lock("user class modern test 14", ColString, moves, Cons, Cpy, Del);
+            moves.clear();
+        }
+        vec_cmp_lock("user class modern test 15", ColString, moves, Del * 2);
+        ASSERT(UserClass::total_instances == 0, "user type test 16");
+    }
+    {
+        moves.clear();
+        {
+            tlucanti::vector_base<UserClass> a(2);
+            vec_cmp_lock("user class modern test 16", ColString, moves, Def * 2);
+            moves.clear();
+            {
+                tlucanti::vector_base<UserClass> b(3, UserClass(4, 5));
+                vec_cmp_lock("user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
+                moves.clear();
+                a.insert(++(++a.begin()), b.begin(), b.end());
+                vec_cmp_lock("user class modern test 18", ColString, moves, Cpy, Del, Cpy * 3);
+                moves.clear();
+            }
+            vec_cmp_lock("user class modern test 18", ColString, moves, Del * 3);
+            ASSERT(UserClass::total_instances == 5, "user type test 17");
+            moves.clear();
+        }
+        vec_cmp_lock("user class modern test 19", ColString, moves, Del * 5);
+        ASSERT(UserClass::total_instances == 0, "user type test 18");
     }
 
     result();
 }
-
