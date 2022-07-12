@@ -36,7 +36,7 @@ public:
     virtual ~wrap_iterator_base() noexcept = default;
 
 // --------------------------------- operators ---------------------------------
-    virtual value_type operator *() const noexcept
+    virtual value_type &operator *() const noexcept
     {
         return *_ptr;
     }

@@ -385,7 +385,7 @@ public:
     {
         _deallocate();
         difference_type size = iterator::distance(first, last);
-        _init(size);
+        _init(size, false);
         _copy(first, last, _begin);
     }
 
@@ -630,6 +630,12 @@ public:
 // -----------------------------------------------------------------------------
     constexpr iterator insert(iterator pos, const_reference value)
     {
+        if (UNLIKELY(_begin == nullptr))
+        {
+            _init(1, false);
+            _construct_at(_begin, value);
+            return begin();
+        }
         pointer start = _insert(pos._ptr);
         *start = value;
         return _iterator(start);
@@ -649,9 +655,18 @@ public:
     {
         if (UNLIKELY(count <= 0))
             return ;
+        if (UNLIKELY(_begin == nullptr))
+        {
+            _init(count, false);
+            _construct(_begin, count, value);
+            return ;
+        }
         pointer start = _insert(pos._ptr, count);
-        for (difference_type i=0; i < count; ++i)
+        difference_type movable = std::min(_end - pos._ptr, count);
+        for (difference_type i=0; i < movable; ++i)
             start[i] = value;
+        for (difference_type i=movable; i < count; ++i)
+            _construct_at(start, value);
     }
 
 // -----------------------------------------------------------------------------
@@ -659,9 +674,16 @@ public:
     constexpr void insert(iterator pos,
         NOT_INTEGRAL(input_it) first, input_it last)
     {
+        if (UNLIKELY(_begin == nullptr))
+        {
+            assign(first, last);
+            return ;
+        }
         difference_type size = iterator::distance(first, last);
+        difference_type movable = std::min(_end - pos._ptr, size);
         pointer begin = _insert(pos._ptr, size);
-        _move(first, begin, size);
+        input_it non_movable = _move(first, begin, movable);
+        _copy(non_movable, last, begin + movable);
     }
 
 // -----------------------------------------------------------------------------
@@ -890,6 +912,11 @@ PRIVATE:
     WUR constexpr pointer _allocate(difference_type alloc_size)
     {
         size_type alloc_size_unsigned = static_cast<size_type>(alloc_size);
+#ifdef __DEBUG
+        pointer __ptr = _allocator.allocate(alloc_size_unsigned);
+        memset(static_cast<void *>(__ptr), 0, alloc_size_unsigned);
+        return __ptr;
+#endif
         return _allocator.allocate(alloc_size_unsigned);
     }
 
@@ -955,12 +982,11 @@ PRIVATE:
 
 // -----------------------------------------------------------------------------
     template <typename Iter_T>
-    constexpr void _move(Iter_T src, pointer dst, difference_type cnt)
+    WUR constexpr Iter_T _move(Iter_T src, pointer dst, difference_type cnt)
     {
-        if (UNLIKELY(cnt <= 0))
-            return ;
         while (cnt-- > 0)
             *dst++ = *src++;
+        return src;
     }
 
 // -----------------------------------------------------------------------------
@@ -969,7 +995,7 @@ PRIVATE:
         difference_type size = this->size();
         while (size-- > 0)
             _destroy_at(--_end);
-        if (do_deallocate)
+        if (do_deallocate && _allocated)
         {
             size_type allocated_unsigned = static_cast<size_type>(_allocated);
             _allocator.deallocate(_begin, allocated_unsigned);
@@ -1047,11 +1073,18 @@ PRIVATE:
     {
         // here count cannot be negative, bc we checked it already
         difference_type index = ptr - _begin;
-        difference_type move_cnt = _end - ptr;
         _append(count);
-        _move(_begin + index, _begin + index + count, move_cnt);
+        ptr = _begin + index;
+        difference_type move_cnt = _end - ptr - count;
+        if (move_cnt <= 0)
+            _copy(ptr, ptr + count, _end - ptr);
+        else
+        {
+            _copy(ptr + move_cnt, _end, count);
+            _move(ptr, ptr + count, move_cnt);
+        }
         _end += count;
-        return _begin + index;
+        return ptr;
     }
 
 // -----------------------------------------------------------------------------
