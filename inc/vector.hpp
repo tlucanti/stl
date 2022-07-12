@@ -30,7 +30,6 @@ public:
     typedef size_t                                      size_type;
 
     typedef type_T                                      value_type;
-    typedef vector_base<value_type, allocator_type>     self_type;
     typedef value_type &                                reference;
     typedef const value_type &                          const_reference;
     typedef std::ptrdiff_t                              difference_type;
@@ -42,12 +41,13 @@ public:
     typedef wrap_reverse_iterator<const value_type>     const_reverse_iterator;
 
 # if CPP11
-    typedef value_type &&                               rvalue_type;
     typedef std::initializer_list<value_type>           init_list_type;
 # endif /* CPP11 */
 
 // ------------------------------ private fields -------------------------------
 PRIVATE:
+    typedef vector_base<value_type, allocator_type>     self_type;
+
     difference_type _allocated;
     allocator_type  _allocator;
     pointer         _begin;
@@ -541,7 +541,7 @@ public:
         return _at(size() - 1);
     }
 
-    WUR constexpr pointer data()
+    WUR constexpr pointer data() noexcept
     /**
         \brief data access function
         \details method returns pointer to begining of internal data container
@@ -556,7 +556,7 @@ public:
         return _begin;
     }
 
-    WUR constexpr const_pointer data() const
+    WUR constexpr const_pointer data() const noexcept
     /**
         \brief data access function for const container
         \details (see .data() member function)
@@ -579,30 +579,30 @@ public:
         \details method returns iterator to first element of vector
     */
     {
-        return _iterator(_begin);
+        return iterator(_begin);
     }
 
-    WUR constexpr const_iterator begin() const noexcept { return _iterator(_begin); }
+    WUR constexpr const_iterator begin() const noexcept { return const_iterator(_begin); }
 
-    WUR constexpr iterator end() noexcept { return _iterator(_end); }
-    WUR constexpr const_iterator end() const noexcept { return _iterator(_end); }
+    WUR constexpr iterator end() noexcept { return iterator(_end); }
+    WUR constexpr const_iterator end() const noexcept { return iterator(_end); }
 
-    WUR constexpr reverse_iterator rbegin() noexcept { return _riterator(_end - 1); }
+    WUR constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(_end - 1); }
     WUR constexpr const_reverse_iterator rbegin() const noexcept
     { return _riterator(_end - 1); }
 
-    WUR constexpr reverse_iterator rend() noexcept { return _riterator(_begin - 1); }
+    WUR constexpr reverse_iterator rend() noexcept { return reverse_iterator(_begin - 1); }
     WUR constexpr const_reverse_iterator rend() const noexcept
     { return _riterator(_begin - 1); }
 
 # if CPP11
-    WUR constexpr const_iterator cbegin() const noexcept {return _iterator(_begin); }
-    WUR constexpr const_iterator cend() const noexcept { return _iterator(_end); }
+    WUR constexpr const_iterator cbegin() const noexcept { return iterator(_begin); }
+    WUR constexpr const_iterator cend() const noexcept { return iterator(_end); }
 
     WUR constexpr const_reverse_iterator crbegin() const noexcept
-    { return _riterator(_end - 1); }
+    { return reverse_iterator(_end - 1); }
     WUR constexpr const_reverse_iterator crend() const noexcept
-    { return _riterator(_begin - 1); }
+    { return reverse_iterator(_begin - 1); }
 # endif /* CPP11 */
 
 // =============================================================================
@@ -638,7 +638,7 @@ public:
         }
         pointer start = _insert(pos._ptr);
         *start = value;
-        return _iterator(start);
+        return iterator(start);
     }
 
 // -----------------------------------------------------------------------------
@@ -716,7 +716,7 @@ public:
         if (pos == end())
             return end();
         pointer fin = _erase(pos._ptr);
-        return _iterator(fin);
+        return iterator(fin);
     }
 
 // -----------------------------------------------------------------------------
@@ -726,7 +726,7 @@ public:
         if (count <= 0)
             return last;
         pointer fin = _erase(first._ptr, count);
-        return _iterator(fin);
+        return iterator(fin);
     }
 
 // -----------------------------------------------------------------------------
@@ -1053,18 +1053,6 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    WUR constexpr iterator _iterator(pointer ptr)
-    {
-        return iterator(ptr);
-    }
-
-// -----------------------------------------------------------------------------
-    WUR constexpr reverse_iterator _riterator(pointer ptr)
-    {
-        return reverse_iterator(ptr);
-    }
-
-// -----------------------------------------------------------------------------
     WUR constexpr pointer _insert(pointer ptr, difference_type count=1)
     /*
         function inserts `count` empty places before ptr position in vector
@@ -1116,14 +1104,103 @@ PRIVATE:
         _shrink();
     }
 
-// -----------------------------------------------------------------------------
 };
 
+// ----------------------------------------------------------------------------
 # if PRECPP17
 template <class type_T, class allocator_T>
 const double vector_base<type_T, allocator_T>::golden_ratio = 1.618033988749895;
 # endif /* PRECPP17 */
 
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr int vector_base_compare(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+
+    if (lhs.size() < rhs.size())
+        return -1;
+    else if (lhs.size() > rhs.size())
+        return 1;
+    else
+        return TLU_NAMESPACE::vector_base<type_T>::iterator::compare(
+            lhs.begin(), rhs.begin(), lhs.size()
+        );
+}
+
 TLU_NAMESPACE_END
+
+// =============================================================================
+// --------------------------- non-member operators ----------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator ==(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) == 0;
+}
+
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator !=(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) != 0;
+}
+
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator >(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) > 0;
+}
+
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator >=(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) >= 0;
+}
+
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator <(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) < 0;
+}
+
+// ----------------------------------------------------------------------------
+template <class type_T, class allocator_T>
+constexpr bool operator <=(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) <= 0;
+}
+
+// --------------------------- non-member swap ----------------------------
+template <class type_T, class allocator_T>
+void swap(
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+    )
+{
+    lhs.swap(rhs);
+}
 
 #endif /* VECTOR_HPP */

@@ -29,6 +29,8 @@ void swap_tests();
 
 void std_vector_test();
 void user_type_test();
+void operator_vector_test();
+void std_swap_tests();
 
 int main()
 {
@@ -65,6 +67,8 @@ int main()
 
     run_test(std_vector_test);
     run_test(user_type_test);
+    run_test(operator_vector_test);
+    run_test(std_swap_tests);
 
     final();
 }
@@ -1329,5 +1333,116 @@ void user_type_test()
         vec_cmp_lock("user class modern test 23", ColString, moves, Del * 3);
         ASSERT(UserClass::total_instances == 0, "user type test 22");
     }
+    {{{
+        moves.clear();
+        {
+            std::vector<UserClass> a;
+            ASSERT(UserClass::total_instances == 0, "std -- user type test 19");
+            {
+                std::vector<UserClass> b(3);
+                vec_cmp_lock("std -- user class modern test 20", ColString, moves, Def * 3);
+                moves.clear();
+                a.insert(a.begin(), b.begin(), b.end());
+                vec_cmp_lock("std -- user class modern test 21", ColString, moves, Cpy * 3);
+                ASSERT(UserClass::total_instances == 6, "std -- user type test 20");
+                moves.clear();
+            }
+            vec_cmp_lock("std -- user class modern test 22", ColString, moves, Del * 3);
+            ASSERT(UserClass::total_instances == 3, "std -- user type test 21");
+            moves.clear();
+        }
+        vec_cmp_lock("std -- user class modern test 23", ColString, moves, Del * 3);
+        ASSERT(UserClass::total_instances == 0, "std -- user type test 22");
+    }}}
+    result();
+}
+
+void operator_vector_test()
+{
+    start("operator vector tests");
+
+    {
+        tlucanti::vector_base<int> a;
+        const tlucanti::vector_base<int> b;
+        ASSERT(a == b, "compare vector test 0");
+    }
+    {
+        vec_123(a);
+        vec_123(b);
+        ASSERT(a == b, "compare vector test 1");
+    }
+    {
+        vec_123(a);
+        const_vec_123(b);
+        ASSERT(a == b, "compare vector test 2");
+    }
+    {
+        const_vec_123(a);
+        const_vec_123(b);
+        ASSERT(a == b, "compare vector test 3");
+    }
+
+    {
+        vec_123(a);
+        vec_111(b);
+        ASSERT(a != b, "compare vector test 1");
+    }
+    {
+        vec_123(a);
+        const_vec_111(b);
+        ASSERT(a != b, "compare vector test 2");
+    }
+    {
+        const_vec_123(a);
+        const_vec_111(b);
+        ASSERT(a != b, "compare vector test 3");
+    }
+
+    {
+        vec_123(a);
+        const_vec_111(b);
+        ASSERT(b > a, "compare vector test 4");
+        ASSERT(b >= a, "compare vector test 5");
+        ASSERT(a < b, "compare vector test 6");
+        ASSERT(a <= b, "compare vector test 7");
+    }
+    {
+        const tlucanti::vector_base<int> a;
+        vec_123(b);
+        ASSERT(b > a, "compare vector test 8");
+        ASSERT(b >= a, "compare vector test 9");
+        ASSERT(a < b, "compare vector test 10");
+        ASSERT(a <= b, "compare vector test 11");
+    }
+
+    result();
+}
+
+void std_swap_tests()
+{
+    start("std::swap() tests");
+
+    {
+        vec_123(a);
+        vec_111(b);
+        std::swap(a, b);
+        vec_cmp("basic swap test 0", int, a, 123, 456, 789);
+        vec_cmp("basic swap test 1", int, b, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        tlucanti::vector_base<int> b;
+        std::swap(a, b);
+        ASSERT(a.empty(), "basic swap test 3");
+        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+    }
+    {
+        vec_123(a);
+        tlucanti::vector_base<int> b;
+        std::swap(b, a);
+        ASSERT(a.empty(), "basic swap test 3");
+        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+    }
+
     result();
 }

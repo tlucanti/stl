@@ -22,7 +22,7 @@ public:
     typedef typename iterator_traits::pointer                       pointer;
     typedef typename iterator_traits::reference                     reference;
 
-    typedef wrap_iterator_base<value_type>                          self_type;
+    typedef wrap_iterator_base<const value_type>                    self_type;
 
 // ------------------------------ protected fields -------------------------------
 //PROTECTED: // TODO: return to private
@@ -74,6 +74,16 @@ public:
         _distance(rand_it first, const rand_it &last, std::random_access_iterator_tag)
     {
         return last - first;
+    }
+
+    static constexpr int compare(self_type lhs, self_type rhs, difference_type size)
+    {
+        while (size-- > 0)
+        {
+            if (*lhs != *rhs)
+                return (*lhs > *rhs) * 2 - 1;
+        }
+        return 0;
     }
 };
 
