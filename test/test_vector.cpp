@@ -31,6 +31,10 @@ void std_vector_test();
 void user_type_test();
 void operator_vector_test();
 void std_swap_tests();
+void const_iterator_test();
+void const_reverse_iterator_test();
+
+void other_tests();
 
 int main()
 {
@@ -69,7 +73,10 @@ int main()
     run_test(user_type_test);
     run_test(operator_vector_test);
     run_test(std_swap_tests);
+    run_test(const_iterator_test);
+    run_test(const_reverse_iterator_test);
 
+    run_test(other_tests);
     final();
 }
 
@@ -400,13 +407,13 @@ void fn_data_test()
 
     result();
 }
-
 #undef _op
-void iterator_test()
+
+template <class myVec>
+void F_iterator_test_suite(myVec &a, myVec &b)
 {
     start("iterator tests");
 
-    vec_123(a);
 
     ASSERT(*a.begin() == 1, "basic iterator test 1");
     ASSERT(*(++a.begin()) == 2, "basic iterator test 2");
@@ -416,12 +423,10 @@ void iterator_test()
     ASSERT(*(--(--a.end())) == 2, "basic iterator test 5");
     ASSERT(*(--(--(--a.end()))) == 1, "basic iterator test 6");
 
-    tlucanti::vector_base<int>::iterator i1 = a.begin();
-    ASSERT(i1++ == a.begin(), "basic increment iterator test 1");
-    ASSERT(i1 == ++a.begin(), "basic increment iterator test 2");
-    tlucanti::vector_base<int>::iterator i2 = a.end();
-    ASSERT(i2-- == a.end(), "basic increment iterator test 3");
-    ASSERT(i2 == --a.end(), "basic increment iterator test 4");
+    ASSERT(a.begin()++ == a.begin(), "basic increment iterator test 1");
+    ASSERT(++a.begin() > a.begin(), "basic increment iterator test 2");
+    ASSERT(a.end()-- == a.end(), "basic increment iterator test 3");
+    ASSERT(--a.end() < a.end(), "basic increment iterator test 4");
 
     ASSERT(*(a.begin() + 1) == 2, "basic iterator test 7");
     ASSERT(*(a.begin() + 2) == 3, "basic iterator test 8");
@@ -443,11 +448,10 @@ void iterator_test()
     ASSERT(a.end() - a.begin() == 3, "advanced iterator test 9");
     ASSERT(a.begin() - a.end() == -3, "advanced iterator test 10");
 
-    tlucanti::vector_base<int> b;
-    
+
     ASSERT(b.begin() == b.end(), "iterator empty test 1");
 
-    std_vec_123(_a);
+    const_std_vec_123(_a);
     ASSERT((a.begin() < a.end()) == (_a.begin() < _a.end()), "basic iterator test 12");
     ASSERT((a.begin() > a.end()) == (_a.begin() > _a.end()), "basic iterator test 13");
     ASSERT((a.begin() <= a.end()) == (_a.begin() <= _a.end()), "basic iterator test 14");
@@ -464,11 +468,24 @@ void iterator_test()
     result();
 }
 
-void reverse_iterator_test()
+void iterator_test()
+{
+    vec_123(a);
+    tlucanti::vector_base<int> b;
+    F_iterator_test_suite(a, b);
+}
+
+void const_iterator_test()
+{
+    const_vec_123(a);
+    const tlucanti::vector_base<int> b;
+    F_iterator_test_suite(a, b);
+}
+
+template <class myVec>
+void F_reverse_iterator_test_suite(myVec &a, myVec &b)
 {
     start("reverse iterator tests");
-
-    vec_123(a);
 
     ASSERT(*(a.rbegin()) == 3, "basic reverse iterator test 1");
     ASSERT(*(++a.rbegin()) == 2, "basic reverse iterator test 2");
@@ -478,12 +495,10 @@ void reverse_iterator_test()
     ASSERT(*(--(--a.rend())) == 2, "basic reverse iterator test 5");
     ASSERT(*(--(--(--a.rend()))) == 3, "basic reverse iterator test 6");
 
-    tlucanti::vector_base<int>::reverse_iterator i1 = a.rbegin();
-    ASSERT(i1++ == a.rbegin(), "basic increment reverse iterator test 1");
-    ASSERT(i1 == ++a.rbegin(), "basic increment reverse iterator test 2");
-    tlucanti::vector_base<int>::reverse_iterator i2 = a.rend();
-    ASSERT(i2-- == a.rend(), "basic increment reverse iterator test 3");
-    ASSERT(i2 == --a.rend(), "basic increment reverse iterator test 4");
+    ASSERT(a.rbegin()++ == a.rbegin(), "basic increment reverse iterator test 1");
+    ASSERT(a.rbegin() < ++a.rbegin(), "basic increment reverse iterator test 2");
+    ASSERT(a.rend()-- == a.rend(), "basic increment reverse iterator test 3");
+    ASSERT(a.rend() > --a.rend(), "basic increment reverse iterator test 4");
 
     ASSERT(*(a.rbegin() + 1) == 2, "basic reverse iterator test 7");
     ASSERT(*(a.rbegin() + 2) == 1, "basic reverse iterator test 8");
@@ -505,11 +520,9 @@ void reverse_iterator_test()
     ASSERT(a.rend() - a.rbegin() == 3, "advanced reverse iterator test 9");
     ASSERT(a.rbegin() - a.rend() == -3, "advanced reverse iterator test 10");
 
-    tlucanti::vector_base<int> b;
-
     ASSERT(b.begin() == b.end(), "iterator empty test 1");
 
-    std_vec_123(_a);
+    const_std_vec_123(_a);
     ASSERT((a.rbegin() < a.rend()) == (_a.rbegin() < _a.rend()), "basic iterator test 12");
     ASSERT((a.rbegin() > a.rend()) == (_a.rbegin() > _a.rend()), "basic iterator test 13");
     ASSERT((a.rbegin() <= a.rend()) == (_a.rbegin() <= _a.rend()), "basic iterator test 14");
@@ -524,6 +537,20 @@ void reverse_iterator_test()
     ASSERT((a.rend() <= a.rbegin() + 3) == (_a.rend() <= _a.rbegin() + 3), "basic iterator test 23");
 
     result();
+}
+
+void reverse_iterator_test()
+{
+    vec_123(a);
+    tlucanti::vector_base<int> b;
+    F_reverse_iterator_test_suite(a, b);
+}
+
+void const_reverse_iterator_test()
+{
+    const_vec_123(a);
+    const tlucanti::vector_base<int> b;
+    F_reverse_iterator_test_suite(a, b);
 }
 
 void fn_empty_tests()
@@ -1443,6 +1470,28 @@ void std_swap_tests()
         ASSERT(a.empty(), "basic swap test 3");
         vec_cmp("basic swap test 4", int, b, 1, 2, 3);
     }
+
+    result();
+}
+
+void other_tests()
+{
+    start("other tests");
+
+#if CPP11
+    {
+        vec_123(a);
+        ASSERT(*a.begin() == *a.cbegin(), "other test 0");
+        ASSERT(*--a.cend() == *--a.cend(), "other test 1");
+        ASSERT(*++a.rbegin() == *++a.crbegin(), "other test 2");
+        ASSERT(*a.rend() == *a.crend(), "other test 3");
+    }
+    {
+        tlucanti::vector_base<int> a;
+        a.insert(a.begin(), {1, 2, 3});
+        vec_cmp("other test 4", int, a, 1, 2, 3);
+    }
+#endif
 
     result();
 }

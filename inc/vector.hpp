@@ -15,6 +15,7 @@
 
 # include <limits>
 # include <memory>
+# include <cmath>
 # include "defs.h"
 # include "type_traits.hpp"
 # include "iterator.hpp"
@@ -585,24 +586,24 @@ public:
     WUR constexpr const_iterator begin() const noexcept { return const_iterator(_begin); }
 
     WUR constexpr iterator end() noexcept { return iterator(_end); }
-    WUR constexpr const_iterator end() const noexcept { return iterator(_end); }
+    WUR constexpr const_iterator end() const noexcept { return const_iterator(_end); }
 
     WUR constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(_end - 1); }
     WUR constexpr const_reverse_iterator rbegin() const noexcept
-    { return _riterator(_end - 1); }
+    { return const_reverse_iterator(_end - 1); }
 
     WUR constexpr reverse_iterator rend() noexcept { return reverse_iterator(_begin - 1); }
     WUR constexpr const_reverse_iterator rend() const noexcept
-    { return _riterator(_begin - 1); }
+    { return const_reverse_iterator(_begin - 1); }
 
 # if CPP11
-    WUR constexpr const_iterator cbegin() const noexcept { return iterator(_begin); }
-    WUR constexpr const_iterator cend() const noexcept { return iterator(_end); }
+    WUR constexpr const_iterator cbegin() const noexcept { return const_iterator(_begin); }
+    WUR constexpr const_iterator cend() const noexcept { return const_iterator(_end); }
 
     WUR constexpr const_reverse_iterator crbegin() const noexcept
-    { return reverse_iterator(_end - 1); }
+    { return const_reverse_iterator(_end - 1); }
     WUR constexpr const_reverse_iterator crend() const noexcept
-    { return reverse_iterator(_begin - 1); }
+    { return const_reverse_iterator(_begin - 1); }
 # endif /* CPP11 */
 
 // =============================================================================
@@ -688,26 +689,13 @@ public:
 
 // -----------------------------------------------------------------------------
 # if CPP11
-    constexpr iterator insert(const_iterator pos, init_list_type init_list)
+    constexpr iterator insert(iterator pos, init_list_type init_list)
     {
-        iterator ret = _iterator(pos);
-        pointer start = _insert(pos, init_list.size());
+        iterator ret = iterator(pos);
+        pointer start = _insert(pos._ptr, init_list.size());
         _copy(init_list.begin(), init_list.end(), start);
         return ++ret;
     }
-# endif /* CPP11 */
-
-// -----------------------------------------------------------------------------
-# if CPP11
-//    template <class ... arg_type>
-//    constexpr iterator emplace(const_iterator pos, arg_type && ... args)
-//    {
-//    // TODO: emplace
-//        (void)pos;
-//        void *a[] = {args...};
-////# warning "IMPLEMENT FUNCTION"
-//        ABORT("FUNCTION NOT IMPLEMENTED", "");
-//    }
 # endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
@@ -735,25 +723,6 @@ public:
         _append();
         _construct_at(_end++, value);
     }
-// -----------------------------------------------------------------------------
-//# if CPP11
-//    constexpr void push_back(rvalue_type value)
-//    {
-//        _append();
-//        _construct_at(_end++, std::move(value));
-//    }
-//# endif /* CPP11 */
-
-// -----------------------------------------------------------------------------
-# if CPP11
-    template <class ... arg_type>
-//    constexpr reference emplace_back(arg_type && ... args)
-//    {
-//    // TODO: emplace_back
-//# warning "IMPLEMENT FUNCTION"
-//        ABORT("FUNCTION NOT IMPLEMENTED", "");
-//    }
-# endif /* CPP11 */
 
 // -----------------------------------------------------------------------------
     constexpr void pop_back()
@@ -830,22 +799,18 @@ PRIVATE:
             3980154972736929792u, 6440026026380264448u
         };
         int l = 0;
-		int r = 0;
-		int mid = 0;
+		int r = 20;
 
         if (req < 7u)
             return 7u;
-        if (LIKELY(req <= 103682))
+        if (UNLIKELY(req > 103682))
         {
-            l = 0;
-            r = 20;
-        } else {
             l = 21;
             r = 88;
         }
         while (r - l > 1)
         {
-            mid = (l + r) / 2;
+            int mid = (l + r) / 2;
             if (req >= grid[mid])
                 l = (l + r) / 2;
             else
@@ -911,13 +876,14 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     WUR constexpr pointer _allocate(difference_type alloc_size)
     {
-        size_type alloc_size_unsigned = static_cast<size_type>(alloc_size);
+        AUTO(size_type) alloc_size_unsigned = static_cast<size_type>(alloc_size);
 #ifdef __DEBUG
-        pointer __ptr = _allocator.allocate(alloc_size_unsigned);
-        memset(static_cast<void *>(__ptr), 0, alloc_size_unsigned);
-        return __ptr;
-#endif
+        pointer P_ptr = _allocator.allocate(alloc_size_unsigned);
+        memset(static_cast<void *>(P_ptr), 0, alloc_size_unsigned);
+        return P_ptr;
+#else
         return _allocator.allocate(alloc_size_unsigned);
+#endif
     }
 
 // -----------------------------------------------------------------------------
@@ -946,7 +912,7 @@ PRIVATE:
     {
         if (UNLIKELY(cnt <= 0))
             return ;
-        pointer src = const_cast<pointer>(src_ptr);
+        AUTO(pointer) src = const_cast<pointer>(src_ptr);
         if (src > dst)
         {
             while (cnt-- > 0)
@@ -997,7 +963,7 @@ PRIVATE:
             _destroy_at(--_end);
         if (do_deallocate && _allocated)
         {
-            size_type allocated_unsigned = static_cast<size_type>(_allocated);
+            AUTO(size_type) allocated_unsigned = static_cast<size_type>(_allocated);
             _allocator.deallocate(_begin, allocated_unsigned);
             _allocated = 0;
             _begin = nullptr;
@@ -1015,7 +981,7 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _shrink()
     {
-        difference_type less_size = static_cast<difference_type>(
+        AUTO(difference_type) less_size = lround(
                 static_cast<double>(_allocated) / (golden_ratio * golden_ratio) + 0.5
         );
         if (size() < less_size and _allocated > 7)

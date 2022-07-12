@@ -192,6 +192,8 @@ void sigabrt_catcher(UNUSED(int sig))
     const tlucanti::vector_base<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 # define const_vec_111(__vec) vec_111(GLUE2(__vec_non_const_macro__, __vec)); \
     const tlucanti::vector_base<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
+# define const_std_vec_123(__vec) std_vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
+    const std::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 
 template<class V>
 std::string _vec_to_str(const V &v)

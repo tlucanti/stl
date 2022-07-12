@@ -95,6 +95,9 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef DELETED_MEMBERS
 #   define DELETED_MEMBERS public
 #  endif /* DELETED_MEMBERS */
+#  ifndef AUTO
+#   define AUTO(__x) auto
+#  endif /* AUTO */
 # else /* PRECPP11 */
 #  ifndef DEFAULT
 #   define DEFAULT {}
@@ -114,6 +117,9 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef nullptr
 #   define nullptr NULL
 #  endif /* nullptr */
+#  ifndef AUTO
+#   define AUTO(__x) __x
+#  endif /* AUTO */
 # endif /* CPP11 */
 
 # if PRECPP14

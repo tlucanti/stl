@@ -5,9 +5,6 @@
 
 TLU_NAMESPACE_BEGIN
 
-# define WRAP_REVERSE_ITERATOR_ARITHMETIC_OPERATOR_MACRO(__op, __do_const) constexpr self_type \
-    operator __op(difference_type shift) __do_const noexcept { return self_type((this->_ptr __op -shift)); }
-
 // =============================================================================
 // --------------------------------- iterator base ----------------------------------
 template <class type_T>
@@ -55,18 +52,6 @@ public:
         distance(input_it first, const input_it &last)
     {
         return _distance(first, last, typename std::iterator_traits<input_it>::iterator_category());
-    }
-
-    template <class input_it>
-    static constexpr typename std::iterator_traits<input_it>::difference_type
-        _distance(input_it first, const input_it &last, std::input_iterator_tag)
-    {
-        typename std::iterator_traits<input_it>::difference_type n = 0;
-        if (UNLIKELY(first == last))
-            return 0;
-        while (first++ != last)
-            ++n;
-        return n;
     }
 
     template <class rand_it>
