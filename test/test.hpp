@@ -111,7 +111,7 @@ void run_test(func_T func)
 # define make_vec(__name, __type, ...) \
     __type __cmp[] = {__VA_ARGS__}; \
     std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
-    tlucanti::vector_base<__type> __name(__cmp, __cmp + __size)
+    ft::vector<__type> __name(__cmp, __cmp + __size)
 
 # define make_std_vec(__name, __type, ...) \
     std::vector<__type> __name; \
@@ -184,14 +184,14 @@ void sigabrt_catcher(UNUSED(int sig))
     throw std::runtime_error("test fall with SIGABRT");
 }
 
-# define vec_123(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
-# define vec_111(__vec) tlucanti::vector_base<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
+# define vec_123(__vec) ft::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
+# define vec_111(__vec) ft::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
 # define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
 # define std_vec_111(__vec) std::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
 # define const_vec_123(__vec) vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
-    const tlucanti::vector_base<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
+    const ft::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 # define const_vec_111(__vec) vec_111(GLUE2(__vec_non_const_macro__, __vec)); \
-    const tlucanti::vector_base<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
+    const ft::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 # define const_std_vec_123(__vec) std_vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
     const std::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 

@@ -87,25 +87,25 @@ void constructor_test()
 
     std::allocator<int> alloc;
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc, "default constructor test");
     }
     {
-        tlucanti::vector_base<int> a(alloc);
+        ft::vector<int> a(alloc);
         vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc, "default constructor + alloc test");
     }
     {
-        tlucanti::vector_base<int> a(3);
+        ft::vector<int> a(3);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size constructor test");
         ASSERT(a._end - a._begin == 3, "size 3 vec iterator test 1");
     }
     {
-        tlucanti::vector_base<int> a(3, alloc);
+        ft::vector<int> a(3, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size + alloc constructor test");
         ASSERT(a._end - a._begin == 3, "default size iterator test 1");
     }
     {
-        tlucanti::vector_base<int> a(3, 123);
+        ft::vector<int> a(3, 123);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value test");
         ASSERT(a._end - a._begin == 3, "constructor default value iterator test 1");
         ASSERT(a[0] == 123, "constructor default value test 1");
@@ -113,7 +113,7 @@ void constructor_test()
         ASSERT(a[2] == 123, "constructor default value test 3");
     }
     {
-        tlucanti::vector_base<int> a(3, 123, alloc);
+        ft::vector<int> a(3, 123, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value + alloc test");
         ASSERT(a._end - a._begin == 3, "constructor default value + alloc iterator test 1");
         ASSERT(a[0] == 123, "constructor default value + alloc test 1");
@@ -124,21 +124,21 @@ void constructor_test()
         vec_123(v);
         std_vec_123(stdv);
         {
-            tlucanti::vector_base<int> a(v.begin(), v.end());
+            ft::vector<int> a(v.begin(), v.end());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 1");
             ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 1");
             ASSERT(a[0] == 1, "constructor iterator copy test 1");
             ASSERT(a[1] == 2, "constructor iterator copy test 2");
             ASSERT(a[2] == 3, "constructor iterator copy test 3");
         } {
-            tlucanti::vector_base<int> a(v.data(), v.data() + v.size());
+            ft::vector<int> a(v.data(), v.data() + v.size());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 2");
             ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 2");
             ASSERT(a[0] == 1, "constructor iterator copy test 4");
             ASSERT(a[1] == 2, "constructor iterator copy test 5");
             ASSERT(a[2] == 3, "constructor iterator copy test 6");
         } {
-            tlucanti::vector_base<int> a(stdv.begin(), stdv.end());
+            ft::vector<int> a(stdv.begin(), stdv.end());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 3");
             ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 3");
             ASSERT(a[0] == 1, "constructor iterator copy test 7");
@@ -148,7 +148,7 @@ void constructor_test()
     }
     {
         vec_123(v);
-        tlucanti::vector_base<int> a(v.begin(), v.end(), alloc);
+        ft::vector<int> a(v.begin(), v.end(), alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy + alloc test");
         ASSERT(a._end - a._begin == 3, "constructor iterator copy + alloc iterator test 1");
         ASSERT(a[0] == 1, "constructor iterator copy + alloc test 1");
@@ -157,7 +157,7 @@ void constructor_test()
     }
     {
         vec_123(v);
-        tlucanti::vector_base<int> a(v);
+        ft::vector<int> a(v);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "copy constructor test");
         ASSERT(a._end - a._begin == 3, "copy constructor iterator test 1");
         ASSERT(a[0] == 1, "copy constructor test 1");
@@ -166,7 +166,7 @@ void constructor_test()
     }
     {
         vec_123(v);
-        tlucanti::vector_base<int> a(v, alloc);
+        ft::vector<int> a(v, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "copy constructor + alloc test");
         ASSERT(a._end - a._begin == 3, "copy constructor + alloc iterator test 1");
         ASSERT(a[0] == 1, "copy constructor + alloc test 1");
@@ -176,7 +176,7 @@ void constructor_test()
 #if CPP11
     {
         vec_123(v);
-        tlucanti::vector_base<int> a(std::move(v));
+        ft::vector<int> a(std::move(v));
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move constructor test");
         ASSERT(a._end - a._begin == 3, "move constructor iterator test 1");
         ASSERT(a[0] == 1, "move constructor test 1");
@@ -186,7 +186,7 @@ void constructor_test()
     }
     {
         vec_123(v);
-        tlucanti::vector_base<int> a(std::move(v), alloc);
+        ft::vector<int> a(std::move(v), alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move + alloc constructor test");
         ASSERT(a._end - a._begin == 3, "move + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "move + alloc constructor test 1");
@@ -195,7 +195,7 @@ void constructor_test()
         vec_ASSERT(v, 0, 0, nullptr, nullptr, alloc, "move + alloc constructor empty vector test");
     }
     {
-        tlucanti::vector_base<int> a({1, 2, 3});
+        ft::vector<int> a({1, 2, 3});
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list constructor test");
         ASSERT(a._end - a._begin == 3, "initializer list constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list constructor test 1");
@@ -203,7 +203,7 @@ void constructor_test()
         ASSERT(a[2] == 3, "initializer list constructor test 3");
     }
     {
-        tlucanti::vector_base<int> a({1, 2, 3}, alloc);
+        ft::vector<int> a({1, 2, 3}, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list + alloc constructor test");
         ASSERT(a._end - a._begin == 3, "initializer list + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list + alloc constructor test 1");
@@ -251,18 +251,18 @@ void fn_assign_test()
 
     {
         vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         a.assign(b.begin(), b.end());
         ASSERT(a.empty(), "iterator assign test 0");
     }
     {
         std_vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         b.assign(a.begin(), a.end());
         vec_cmp("iterator assign test 1", int, b, 1, 2, 3);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         vec_123(b);
         a.assign(b.begin(), b.end());
         vec_cmp("iterator assign test 2", int, a, 1, 2, 3);
@@ -277,12 +277,12 @@ void fn_get_allocator_test()
 
     {
         std::allocator<int> alloc;
-        tlucanti::vector_base<int> a(alloc);
+        ft::vector<int> a(alloc);
         ASSERT(alloc == a.get_allocator(), "get allocator basic test 0");
     }
     {
         std::allocator<std::string> alloc;
-        tlucanti::vector_base<std::string> a(5, alloc);
+        ft::vector<std::string> a(5, alloc);
         ASSERT(alloc == a.get_allocator(), "get allocator basic test 1");
     }
 
@@ -310,7 +310,7 @@ void fn_at_test()
     error_test(_op(a, -5), "reverse out of bound test 2");
     error_test(_op(a, -123123), "reverse out of bound test 3");
 
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
     error_test(_op(b, 0), "empty access test 1");
     error_test(_op(b, 1), "empty access test 2");
     error_test(_op(b, -1), "empty access test 3");
@@ -340,7 +340,7 @@ void access_operator_test()
     error_test(_op(a, -5), "reverse out of bound test 2");
     error_test(_op(a, -123123), "reverse out of bound test 3");
 
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
     error_test(_op(b, 0), "empty access test 1");
     error_test(_op(b, 1), "empty access test 2");
     error_test(_op(b, -1), "empty access test 3");
@@ -361,7 +361,7 @@ void fn_front_test()
     
     ASSERT(_op(a) == 1, "basic " fn " test 1");
     
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
 
     error_test(_op(b), "empty" fn "test 1");
 
@@ -380,7 +380,7 @@ void fn_back_test()
     
     ASSERT(_op(a) == 3, "basic " fn " test 1");
     
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
 
     error_test(_op(b), "empty" fn "test 1");
 
@@ -401,7 +401,7 @@ void fn_data_test()
 
     ASSERT(_op(a) == &a[0], "data pointer test 1");
 
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
 
     ASSERT(_op(b) == nullptr, "data empty pointer test 1");
 
@@ -471,14 +471,14 @@ void F_iterator_test_suite(myVec &a, myVec &b)
 void iterator_test()
 {
     vec_123(a);
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
     F_iterator_test_suite(a, b);
 }
 
 void const_iterator_test()
 {
     const_vec_123(a);
-    const tlucanti::vector_base<int> b;
+    const ft::vector<int> b;
     F_iterator_test_suite(a, b);
 }
 
@@ -542,14 +542,14 @@ void F_reverse_iterator_test_suite(myVec &a, myVec &b)
 void reverse_iterator_test()
 {
     vec_123(a);
-    tlucanti::vector_base<int> b;
+    ft::vector<int> b;
     F_reverse_iterator_test_suite(a, b);
 }
 
 void const_reverse_iterator_test()
 {
     const_vec_123(a);
-    const tlucanti::vector_base<int> b;
+    const ft::vector<int> b;
     F_reverse_iterator_test_suite(a, b);
 }
 
@@ -562,7 +562,7 @@ void fn_empty_tests()
         ASSERT(not a.empty(), "empty basic test 0");
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         ASSERT(a.empty(), "empty basic test 1");
     }
 
@@ -574,12 +574,12 @@ void fn_size_tests()
     start(".size() tests");
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         ASSERT(a.size() == 0, "basic size test 2");
         a.push_back(1);
         ASSERT(a.size() == 1, "basic size test 2");
     } {
-        tlucanti::vector_base<int> a(100);
+        ft::vector<int> a(100);
         ASSERT(a.size() == 100, "basic size test 3");
     }
 
@@ -590,7 +590,7 @@ void fn_max_size_tests()
 {
     start(".max_size() tests");
 
-    tlucanti::vector_base<int> a;
+    ft::vector<int> a;
     ASSERT(a.max_size() == 9223372036854775807, "max_size test 1");
 
     result();
@@ -600,7 +600,7 @@ void fn_reserve_tests()
 {
     start(".reserve() tests");
 
-    tlucanti::vector_base<int> a;
+    ft::vector<int> a;
     a.reserve(0);
     ASSERT(a.capacity() == 0, "reserve test 1");
     a.reserve(1);
@@ -618,7 +618,7 @@ void fn_capacity_tests()
     start(".capacity() tests");
 
     {
-        tlucanti::vector_base<int> v;
+        ft::vector<int> v;
         ASSERT(v.capacity() == 0, "capacity empty test 0");
     }
     {
@@ -626,7 +626,7 @@ void fn_capacity_tests()
         ASSERT(v.capacity() == 7, "capacity sized test 0");
     }
     {
-        tlucanti::vector_base<int> v = {1, 2, 3, 4, 5, 6};
+        ft::vector<int> v = {1, 2, 3, 4, 5, 6};
         ASSERT(v.capacity() == 7, "capacity sized test 1");
         v.push_back(8);
         ASSERT(v.capacity() == 11, "capacity sized test 2");
@@ -640,7 +640,7 @@ void fn_shrink_to_fit_tests()
     start(".shrink_to_fit() tests");
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.shrink_to_fit();
         ASSERT(a.capacity() == 0, "shrink to fit basic test 0");
     }
@@ -650,7 +650,7 @@ void fn_shrink_to_fit_tests()
         ASSERT(v.capacity() == 7, "shrink to fit basic test 1");
     }
     {
-        tlucanti::vector_base<int> a = {1, 2, 3, 4, 5, 6, 7};
+        ft::vector<int> a = {1, 2, 3, 4, 5, 6, 7};
         a.shrink_to_fit();
         ASSERT(a.capacity() == 11, "shrink to fit basic test 2");
     }
@@ -670,7 +670,7 @@ void fn_clear_tests()
         ASSERT(a.capacity() != 0, "clear basic test 1");
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.clear();
         vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc, "clear empty test 1");
     }
@@ -742,17 +742,17 @@ void fn_insert_tests()
         std_vec_cmp(sa, a, "basic insert test 9");
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.insert(a.end(), 123);
         vec_cmp("empty insert test 0", int, a, 123);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.insert(a.end(), 3, 123);
         vec_cmp("empty insert test 1", int, a, 123, 123, 123);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         vec_123(b);
         a.insert(a.end(), b.begin(), b.end());
         vec_cmp("empty insert test 2", int, a, 1, 2, 3);
@@ -832,7 +832,7 @@ void fn_push_back_tests()
     start(".push_back() tests");
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.push_back(123);
         vec_cmp("push back basic test 0", int, a, 123);
     }
@@ -843,7 +843,7 @@ void fn_push_back_tests()
     }
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.push_back(1);
         a.push_back(2);
         a.push_back(3);
@@ -878,7 +878,7 @@ void fn_pop_back_tests()
         vec_cmp("pop back basic test 0", int, a, 1, 2);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.push_back(1);
         a.pop_back();
         ASSERT(a.empty(), "pop back basic test 1");
@@ -892,7 +892,7 @@ void fn_resize_test()
     start(".fn_resize_test() tests");
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.resize(3);
         ASSERT(a.size() == 3, "resize basic test 0");
         ASSERT(a.capacity() == 7, "resize basic test 1");
@@ -903,7 +903,7 @@ void fn_resize_test()
         vec_cmp("resize basic test 2", int, a, 1, 2);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.resize(6);
         a.resize(0);
         ASSERT(a.empty(), "resize basic test 3");
@@ -916,7 +916,7 @@ void fn_resize_test()
     }
 
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.resize(4, 111);
         vec_cmp("resize basic test 8", int, a, 111, 111, 111, 111);
     }
@@ -926,7 +926,7 @@ void fn_resize_test()
         vec_cmp("resize basic test 9", int, a, 1, 2);
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.resize(6, 111);
         a.resize(1, 222);
         vec_cmp("resize basic test 10", int, a, 111);
@@ -958,14 +958,14 @@ void swap_tests()
     }
     {
         vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         a.swap(b);
         ASSERT(a.empty(), "basic swap test 3");
         vec_cmp("basic swap test 4", int, b, 1, 2, 3);
     }
     {
         vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         b.swap(a);
         ASSERT(a.empty(), "basic swap test 3");
         vec_cmp("basic swap test 4", int, b, 1, 2, 3);
@@ -985,7 +985,7 @@ void std_vector_test()
     }
     {
         std_vec_123(a);
-        tlucanti::vector_base<int> b(a.begin(), a.end());
+        ft::vector<int> b(a.begin(), a.end());
         vec_cmp("vector iterator test 1", int, b, 1, 2, 3);
     }
     {
@@ -995,7 +995,7 @@ void std_vector_test()
     }
     {
         std_vec_123(a);
-        tlucanti::vector_base<int> b(a.rbegin(), a.rend());
+        ft::vector<int> b(a.rbegin(), a.rend());
         vec_cmp("vector iterator test 3", int, b, 3, 2, 1);
     }
 
@@ -1007,7 +1007,7 @@ void std_vector_test()
     }
     {
         std_vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         b.assign(a.begin(), a.end());
         vec_cmp("vector iterator test 3", int, b, 1, 2, 3);
     }
@@ -1054,7 +1054,7 @@ void std_vector_test()
     }
     {
         std_vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
 
         b.assign(++a.begin(), ++(++(a.begin())));
         vec_cmp("std iterator operators test 0", int, b, 2);
@@ -1102,13 +1102,13 @@ void user_type_test()
     start("user type tests");
 
     {
-        tlucanti::vector_base<UserClass> a(3);
+        ft::vector<UserClass> a(3);
         ASSERT(UserClass::total_instances == 3, "user type constructor test 1");
     }
     ASSERT(UserClass::total_instances == 0, "user type constructor test 2");
 
     {
-        tlucanti::vector_base<UserClass> a(3);
+        ft::vector<UserClass> a(3);
         ASSERT(a.capacity() == 7, "allocator check 1");
         ASSERT(UserClass::total_instances == 3, "user type constructor test 3");
         a.resize(7);
@@ -1118,7 +1118,7 @@ void user_type_test()
     ASSERT(UserClass::total_instances == 0, "user type constructor test 5");
 
     {
-        tlucanti::vector_base<UserClass> a(3, UserClass(1, 2));
+        ft::vector<UserClass> a(3, UserClass(1, 2));
         ASSERT(UserClass::total_instances == 3, "user type test 6");
         a.resize(11);
         ASSERT(UserClass::total_instances == 11, "user type test 7");
@@ -1132,7 +1132,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a;
+            ft::vector<UserClass> a;
             a.push_back(UserClass());
             vec_cmp_lock("user class modern test 0", ColString, moves, Def, Cpy, Del);
         }
@@ -1153,7 +1153,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a(6);
+            ft::vector<UserClass> a(6);
             make_std_vec_lock(cmp1, ColString, Def * 6);
             std_vec_cmp_lock(cmp1, moves, "user class modern test 2");
             moves.clear();
@@ -1183,7 +1183,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
+            ft::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
             vec_cmp_lock("user class modern test 5", ColString, moves, Cons, Cpy * 11, Del);
             moves.clear();
             a.pop_back(); // 10 left + 1 del
@@ -1218,7 +1218,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a(3);
+            ft::vector<UserClass> a(3);
             vec_cmp_lock("user class modern test 8", ColString, moves, Def * 3);
             moves.clear();
             a.erase(++a.begin());
@@ -1245,7 +1245,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a(5);
+            ft::vector<UserClass> a(5);
             vec_cmp_lock("user class modern test 11", ColString, moves, Def * 5);
             moves.clear();
             a.erase(++a.begin(), --a.end());
@@ -1274,7 +1274,7 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a;
+            ft::vector<UserClass> a;
             ASSERT(UserClass::total_instances == 0, "user type test 15");
             a.insert(a.end(), UserClass(1, 2));
             vec_cmp_lock("user class modern test 14", ColString, moves, Cons, Cpy, Del);
@@ -1299,11 +1299,11 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a(2);
+            ft::vector<UserClass> a(2);
             vec_cmp_lock("user class modern test 16", ColString, moves, Def * 2);
             moves.clear();
             {
-                tlucanti::vector_base<UserClass> b(3, UserClass(4, 5));
+                ft::vector<UserClass> b(3, UserClass(4, 5));
                 vec_cmp_lock("user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
                 moves.clear();
                 a.insert(++a.begin(), b.begin(), b.end());
@@ -1342,10 +1342,10 @@ void user_type_test()
     {
         moves.clear();
         {
-            tlucanti::vector_base<UserClass> a;
+            ft::vector<UserClass> a;
             ASSERT(UserClass::total_instances == 0, "user type test 19");
             {
-                tlucanti::vector_base<UserClass> b(3);
+                ft::vector<UserClass> b(3);
                 vec_cmp_lock("user class modern test 20", ColString, moves, Def * 3);
                 moves.clear();
                 a.insert(a.begin(), b.begin(), b.end());
@@ -1389,8 +1389,8 @@ void operator_vector_test()
     start("operator vector tests");
 
     {
-        tlucanti::vector_base<int> a;
-        const tlucanti::vector_base<int> b;
+        ft::vector<int> a;
+        const ft::vector<int> b;
         ASSERT(a == b, "compare vector test 0");
     }
     {
@@ -1434,7 +1434,7 @@ void operator_vector_test()
         ASSERT(a <= b, "compare vector test 7");
     }
     {
-        const tlucanti::vector_base<int> a;
+        const ft::vector<int> a;
         vec_123(b);
         ASSERT(b > a, "compare vector test 8");
         ASSERT(b >= a, "compare vector test 9");
@@ -1458,14 +1458,14 @@ void std_swap_tests()
     }
     {
         vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         std::swap(a, b);
         ASSERT(a.empty(), "basic swap test 3");
         vec_cmp("basic swap test 4", int, b, 1, 2, 3);
     }
     {
         vec_123(a);
-        tlucanti::vector_base<int> b;
+        ft::vector<int> b;
         std::swap(b, a);
         ASSERT(a.empty(), "basic swap test 3");
         vec_cmp("basic swap test 4", int, b, 1, 2, 3);
@@ -1487,7 +1487,7 @@ void other_tests()
         ASSERT(*a.rend() == *a.crend(), "other test 3");
     }
     {
-        tlucanti::vector_base<int> a;
+        ft::vector<int> a;
         a.insert(a.begin(), {1, 2, 3});
         vec_cmp("other test 4", int, a, 1, 2, 3);
     }

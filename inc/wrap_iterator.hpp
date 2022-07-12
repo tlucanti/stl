@@ -1,4 +1,7 @@
 
+#ifndef WRAP_ITERATOR_HPP
+# define WRAP_ITERATOR_HPP
+
 #include <iterator>
 
 #include "defs.h"
@@ -287,3 +290,5 @@ public:
 };
 
 TLU_NAMESPACE_END
+
+#endif /* WRAP_ITERATOR_HPP */

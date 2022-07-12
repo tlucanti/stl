@@ -10,15 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef VECTOR_HPP
-# define VECTOR_HPP
+#ifndef VECTOR_BASE_HPP
+# define VECTOR_BASE_HPP
 
 # include <limits>
 # include <memory>
 # include <cmath>
 # include "defs.h"
 # include "type_traits.hpp"
-# include "iterator.hpp"
+# include "wrap_iterator.hpp"
 
 TLU_NAMESPACE_BEGIN
 
@@ -295,6 +295,7 @@ public:
             _init(cpy.size());
             _copy(cpy._begin, cpy._end, _begin);
         }
+        return *this;
     }
 
 // -----------------------------------------------------------------------------
@@ -1160,13 +1161,16 @@ constexpr bool operator <=(
 }
 
 // --------------------------- non-member swap ----------------------------
-template <class type_T, class allocator_T>
-void swap(
-        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
-        const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
-    )
+namespace std
 {
-    lhs.swap(rhs);
+    template <class type_T, class allocator_T>
+    void swap(
+            TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
+            TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
+        )
+    {
+        lhs.swap(rhs);
+    }
 }
 
-#endif /* VECTOR_HPP */
+#endif /* VECTOR_BASE_HPP */
