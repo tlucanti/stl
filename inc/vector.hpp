@@ -21,13 +21,13 @@ namespace ft
         ) noexcept : base_class(allocator) {}
 
         constexpr vector(
-            typename base_class::size_type count,
+            typename base_class::difference_type count,
             typename base_class::const_reference value,
             const allocator_type &allocator=allocator_type()
         ) : base_class(count, value, allocator) {}
 
         constexpr explicit vector(
-            typename base_class::size_type count,
+            typename base_class::difference_type count,
             const allocator_type &allocator=allocator_type()
         ) : base_class(count, allocator) {}
 
@@ -52,7 +52,7 @@ namespace ft
             const allocator_type &allocator=allocator_type()
         ) : base_class(init, allocator) {}
 #endif /* CPP11 */
-    };
+    }; /* vector */
 } /* ft */
 
 #endif /* VECTOR_HPP */

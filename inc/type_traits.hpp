@@ -76,7 +76,7 @@ TLU_NAMESPACE_BEGIN
 	template <> struct is_pointer<char *>            : public true_type {};
 #if CPP20
 	template <> struct is_integral<char8_t *>         : public true_type {};
-#endif
+#endif /* CPP20 */
 #if CPP11
 	template <> struct is_pointer<char16_t *>        : public true_type {};
 	template <> struct is_pointer<char32_t *>        : public true_type {};

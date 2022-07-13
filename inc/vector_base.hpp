@@ -693,7 +693,7 @@ public:
     constexpr iterator insert(iterator pos, init_list_type init_list)
     {
         iterator ret = iterator(pos);
-        pointer start = _insert(pos._ptr, init_list.size());
+        pointer start = _insert(pos._ptr, static_cast<difference_type>(init_list.size()));
         _copy(init_list.begin(), init_list.end(), start);
         return ++ret;
     }
@@ -1071,7 +1071,7 @@ PRIVATE:
         _shrink();
     }
 
-};
+}; /* vector_base */
 
 // ----------------------------------------------------------------------------
 # if PRECPP17
@@ -1080,6 +1080,8 @@ const double vector_base<type_T, allocator_T>::golden_ratio = 1.618033988749895;
 # endif /* PRECPP17 */
 
 // ----------------------------------------------------------------------------
+TLU_NAMESPACE_HIDDEN_BEGIN
+
 template <class type_T, class allocator_T>
 constexpr int vector_base_compare(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
@@ -1096,6 +1098,7 @@ constexpr int vector_base_compare(
             lhs.begin(), rhs.begin(), lhs.size()
         );
 }
+TLU_NAMESPACE_HIDDEN_END
 
 TLU_NAMESPACE_END
 
@@ -1107,7 +1110,7 @@ constexpr bool operator ==(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) == 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) == 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1117,7 +1120,7 @@ constexpr bool operator !=(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) != 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) != 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1127,7 +1130,7 @@ constexpr bool operator >(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) > 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) > 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1137,7 +1140,7 @@ constexpr bool operator >=(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) >= 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) >= 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1147,7 +1150,7 @@ constexpr bool operator <(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) < 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) < 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1157,20 +1160,20 @@ constexpr bool operator <=(
         const TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
     )
 {
-    return TLU_NAMESPACE::vector_base_compare<type_T>(lhs, rhs) <= 0;
+    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::vector_base_compare<type_T>(lhs, rhs) <= 0;
 }
 
 // --------------------------- non-member swap ----------------------------
 namespace std
 {
     template <class type_T, class allocator_T>
-    void swap(
+    constexpr void swap(
             TLU_NAMESPACE::vector_base<type_T, allocator_T> &lhs,
             TLU_NAMESPACE::vector_base<type_T, allocator_T> &rhs
         )
     {
         lhs.swap(rhs);
     }
-}
+} /* std */
 
 #endif /* VECTOR_BASE_HPP */

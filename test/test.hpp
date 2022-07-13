@@ -1,17 +1,22 @@
 
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <sstream>
-#include <cstdio>
-#include <csignal>
+#ifndef TEST_HPP
+# define TEST_HPP
 
-#define __DEBUG
-#define __SAFE_TEST 0
+# include <iostream>
+# include <vector>
+# include <memory>
+# include <sstream>
+# include <cstdio>
+# include <csignal>
 
-#include "defs.h"
-#include "vector.hpp"
-#include "color.h"
+# define __DEBUG
+# define __SAFE_TEST 0
+
+# include "defs.h"
+# include "color.h"
+
+# include "vector.hpp"
+# include "pair.hpp"
 
 int all = 0;
 int grand_total = 0;
@@ -22,19 +27,19 @@ std::string current_test = "null";
 template <typename func_T>
 void run_test(func_T func)
 {
-#if __SAFE_TEST
+# if __SAFE_TEST
     try {
         func();
     } catch (std::exception &e) {
         std::cout << R "test fall with exception: " Y << e.what() << S << std::endl;
     }
-#else
+# else
     func();
-#endif
+# endif
 }
 
-#undef ASSERT
-#define ASSERT(e, msg) do { \
+# undef ASSERT
+# define ASSERT(e, msg) do { \
     current_test = msg; \
     ++all; \
     ++grand_total; \
@@ -50,7 +55,7 @@ void run_test(func_T func)
     } \
 } while (0)
 
-#define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
+# define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
     ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
     ASSERT((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
     ASSERT((__vec)._allocated == (__allocated), (__msg)  + std::string(" allocated check")); \
@@ -481,10 +486,10 @@ struct UserClass
 DELETED_MEMBERS:
 //    UserClass(const UserClass &) __DELETE
 //    UserClass &operator =(const UserClass &) __DELETE
-#if CPP11
+# if CPP11
 //    UserClass(UserClass &&) DELETE
 //    UserClass &operator =(UserClass &&) DELETE
-#endif /* CPP11 */
+# endif /* CPP11 */
 };
 int UserClass::c = 3;
 int UserClass::total_instances = 0;
@@ -501,7 +506,9 @@ bool UserClass::monitoring = false;
     make_std_vec(__name, __type, __VA_ARGS__); \
     UserClass::monitoring = true
 
-#define std_vec_cmp_lock(__v1, __v2, __msg) \
+# define std_vec_cmp_lock(__v1, __v2, __msg) \
     UserClass::monitoring = false; \
     std_vec_cmp(__v1, __v2, __msg); \
     UserClass::monitoring = true
+
+#endif /* PAIR_HPP */
