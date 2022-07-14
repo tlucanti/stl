@@ -1,39 +1,29 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2021/11/08 14:54:30 by kostya            #+#    #+#              #
-#    Updated: 2022/07/06 18:01:33 by tlucanti         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
 
 # ------------------------------ compiler options ------------------------------
-NAME		=	ircserv
-CXX			=	g++ -std=c++2a
-CXXFLAGS	=	-Wall -Wextra -Werror -g3
-CXXOPTIONS	=	-O0 -pedantic-errors
+NAME		=	test
+CXX			=	clang++ -std=c++2a
+CXXFLAGS	=	-Wall -Wextra -Werror
+CXXOPTIONS	=	-O3
 CC			=	CC
+
 # --------------------------------- submodules ---------------------------------
 
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
-OBJS_DIR	=	obj
-INCLUDE_DIR	=	inc
-SCRS_DIR	=	src
-DEPS_DIR	=	dep
+OBJS_DIR	=	../obj
+INCLUDE_DIR	=	../inc ../test .
+SCRS_DIR	=	.
+DEPS_DIR	=	../dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
-				main
+				test_vector
 
 # ======================= UNCHANGEABLE PART OF MAKEFILE ========================
 # ------------------------------------------------------------------------------
 RM			=	rm -f
 OBJS		=	$(addprefix ${OBJS_DIR}/,${SRCS:=.o})
 DEPS		=	$(addprefix ${DEPS_DIR}/,${SRCS:=.d})
-INCLUDE		=	-I ${INCLUDE_DIR}
+INCLUDE		=	$(addprefix -I, ${INCLUDE_DIR})
 _DEPS_MV	=	$(addprefix ${OBJS_DIR}/,${SRCS:=.d})
 LIBINIT		=	ar rc
 
@@ -47,38 +37,32 @@ S			=	\e[0m
 SPACE		=	\t                     \t
 
 # ------------------------------------------------------------------------------
-all:			${OBJS_DIR} ${DEPS_DIR} vec
+all:			${OBJS_DIR} ${DEPS_DIR}
 	@$(MAKE)	$(NAME)
 	@printf		"$(G)OK$(S)                                                  \n"
 
 # ------------------------------------------------------------------------------
 $(NAME):		${OBJS}
-	@printf		"$(C)[LD] $(W)Linking CXX Executable ${NAME}$(S)             \r"
+	@echo [LD] Linking CXX Executable ${NAME}
 	@${CXX}		-o ${NAME} ${CXXFLAGS} ${CXXOPTIONS} ${OBJS} ${LIBRARY}
 
 -include ${DEPS}
 
 # ------------------------------------------------------------------------------
 ${OBJS_DIR}/%.o: ${SCRS_DIR}/%.cpp Makefile
-	@printf		"$(G)[${CC}]$(W)\t\tBuilding CXX object $(Y)$<$(S)           \r"
+	@printf		"$(G)[${CC}]$(W)\t\tBuilding CXX object $(Y)$<$(S)$(SPACE)\r"
 	@${CXX}		${CXXFLAGS} ${CXXOPTIONS} -c -MMD -MT $@ -o $@ $< ${INCLUDE}
 	@mv			${@:.o=.d} ${DEPS_DIR}
 
 # ------------------------------------------------------------------------------
 clean:
-	@printf		"$(R)[RM]$(W)\t\t${OBJS} ${DEPS}$(S)\n"
+	@printf		"$(R)[RM]$(W)\t\t${OBJS} ${DEPS}$(S)$(SPACE)\n"
 	@${RM}		${OBJS} ${DEPS}
 
 # ------------------------------------------------------------------------------
 fclean:			clean
-	@printf		"$(R)[RM]$(W)\t\t${LIBRARY}\n"
 	@printf		"$(R)[RM]$(W)\t\t${NAME}\n"
 	@${RM}		${NAME}
-
-# ------------------------------------------------------------------------------
-vec:
-	${CXX}		test/test_vector.cpp ${INCLUDE} -I test -O0 -o tst
-#	./tst
 
 # ------------------------------------------------------------------------------
 re:				fclean all
