@@ -15,8 +15,8 @@
 # include "defs.h"
 # include "color.h"
 
-# include "vector.hpp"
-# include "pair.hpp"
+# include "../vector/vector.hpp"
+# include "../pair/pair.hpp"
 
 int all = 0;
 int grand_total = 0;

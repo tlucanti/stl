@@ -16,6 +16,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
 include_directories(inc)
 include_directories(test)
 
-add_executable(vector_test test/test_vector.cpp)
-add_executable(stack_test test/test_stack.cpp)
-add_executable(pair_test test/pair_test.cpp)
+add_executable(vector_test vector/test_vector.cpp)
+add_executable(stack_test stack/test_stack.cpp)
+add_executable(pair_test pair/test_pair.cpp)
+
+add_executable(vector_speed vector/speed_test.cpp)
+
+add_executable(test test/main.cpp)

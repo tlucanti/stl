@@ -5,5 +5,5 @@
 int main()
 {
     ft::pair<int, int> a;
-
+	(void)a;
 }
