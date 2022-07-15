@@ -28,7 +28,7 @@ class vector_base
 // --------------------------------- typedefs ----------------------------------
 public:
     typedef allocator_T                                 allocator_type;
-    typedef size_t                                      size_type;
+    typedef std::ptrdiff_t                              size_type;
 
     typedef type_T                                      value_type;
     typedef value_type &                                reference;
@@ -877,7 +877,7 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     WUR constexpr pointer _allocate(difference_type alloc_size)
     {
-        AUTO(size_type) alloc_size_unsigned = static_cast<size_type>(alloc_size);
+        AUTO(std::size_t) alloc_size_unsigned = static_cast<std::size_t>(alloc_size);
 #ifdef __DEBUG
         pointer P_ptr = _allocator.allocate(alloc_size_unsigned);
         memset(static_cast<void *>(P_ptr), 0, alloc_size_unsigned);
@@ -964,7 +964,7 @@ PRIVATE:
             _destroy_at(--_end);
         if (do_deallocate && _allocated)
         {
-            AUTO(size_type) allocated_unsigned = static_cast<size_type>(_allocated);
+            AUTO(std::size_t) allocated_unsigned = static_cast<std::size_t>(_allocated);
             _allocator.deallocate(_begin, allocated_unsigned);
             _allocated = 0;
             _begin = nullptr;
