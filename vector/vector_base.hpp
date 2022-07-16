@@ -823,7 +823,7 @@ PRIVATE:
 // -----------------------------------------------------------------------------
     constexpr void _construct_at(pointer ptr)
     {
-        _allocator.construct(ptr);
+        _allocator.construct(ptr, value_type());
     }
 
     constexpr void _construct_at(pointer ptr, const_reference val)

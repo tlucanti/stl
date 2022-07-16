@@ -2,7 +2,7 @@
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
 
-# include <type_traits>
+//# include <type_traits>
 # include "defs.h"
 
 # define IS_INTEGRAL(__type) typename TLU_NAMESPACE::enable_if< \

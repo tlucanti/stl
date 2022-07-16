@@ -3,7 +3,7 @@
 # define PAIR_BASE_HPP
 
 # include "defs.h"
-# include <type_traits>
+//# include <type_traits>
 
 TLU_NAMESPACE_BEGIN
 

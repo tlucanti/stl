@@ -626,7 +626,13 @@ void fn_capacity_tests()
         ASSERT(v.capacity() == 7, "capacity sized test 0");
     }
     {
-        ft::vector<int> v = {1, 2, 3, 4, 5, 6};
+        ft::vector<int> v;
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+        v.push_back(4);
+        v.push_back(5);
+        v.push_back(6);
         ASSERT(v.capacity() == 7, "capacity sized test 1");
         v.push_back(8);
         ASSERT(v.capacity() == 11, "capacity sized test 2");
@@ -639,6 +645,7 @@ void fn_shrink_to_fit_tests()
 {
     start(".shrink_to_fit() tests");
 
+#if CPP11
     {
         ft::vector<int> a;
         a.shrink_to_fit();
@@ -654,6 +661,7 @@ void fn_shrink_to_fit_tests()
         a.shrink_to_fit();
         ASSERT(a.capacity() == 11, "shrink to fit basic test 2");
     }
+#endif /* CPP11 */
 
     result();
 }

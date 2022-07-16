@@ -385,7 +385,7 @@ struct UserClass
         if (verbose)
             std::cout << str() << C " constructor" S "\n";
     }
-    ~UserClass() noexcept(false) {
+    ~UserClass() EXCEPT {
         if (!valid)
             throw std::runtime_error("nullptr in `valid` value");
         if (not *valid)

@@ -84,7 +84,6 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
     abort();
 }
 
-# define non_const
 # if CPP11
 #  ifndef DEFAULT
 #   define DEFAULT =default;
@@ -98,6 +97,10 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef AUTO
 #   define AUTO(__x) auto
 #  endif /* AUTO */
+#  ifndef EXCEPT
+#   define EXCEPT noexcept(false)
+#  endif /* EXCEPT */
+
 # else /* PRECPP11 */
 #  ifndef DEFAULT
 #   define DEFAULT {}
@@ -111,6 +114,9 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef noexcept
 #   define noexcept throw()
 #  endif /* noexcept */
+#  ifndef EXCEPT
+#   define EXCEPT
+#  endif /* EXCEPT */
 #  ifndef override
 #   define override
 #  endif /* override */
@@ -121,6 +127,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define AUTO(__x) __x
 #  endif /* AUTO */
 # endif /* CPP11 */
+
 
 # if PRECPP14
 #  ifndef constexpr
