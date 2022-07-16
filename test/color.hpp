@@ -195,6 +195,46 @@ private:
     t_color bias;
 };
 
+class GradientN
+{
+public:
+    GradientN(const TermColor &c1, const TermColor &c2)
+        : g1(nullptr), g2(nullptr)
+    {
+        g = new Gradient(c1, c2);
+    }
+
+    GradientN(const GradientN &_g1, const GradientN &_g2)
+        : g(nullptr)
+    {
+        g1 = new GradientN(_g1);
+        g2 = new GradientN(_g2);
+    }
+
+    GradientN(const GradientN &cpy)
+        : g(cpy.g), g1(cpy.g1), g2(cpy.g2) {}
+
+    ~GradientN()
+    {
+//        delete g;
+//        delete g1;
+//        delete g2;
+    }
+
+    TermColor operator[](double val)
+    {
+        if (g != nullptr)
+            return g->operator[](val);
+        else if (val < 0.5)
+            return g1->operator[](val * 2);
+        return g2->operator[](val * 2 - 1);
+    }
+
+private:
+    Gradient *g;
+    GradientN *g1, *g2;
+};
+
 class ProgressBar
 {
 public:
@@ -227,7 +267,7 @@ public:
         }
         ss << loads[current_progress];
         ++i;
-        for (; i < width; ++i)
+        for (; i <= width; ++i)
             ss << l0;
         return ss.str();
     }

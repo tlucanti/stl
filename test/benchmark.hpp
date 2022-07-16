@@ -24,9 +24,9 @@ public:
         static bool first_time = true;
 
         if (not first_time)
-            std::cout << G[mid_line] << std::endl;
-        std::cout << Gr[vert] <<
-                  string_middle(len - 2, func.size(),Y[func]) <<
+            std::cout << ' ' << G[mid_line] << std::endl;
+        std::cout << ' ' << Gr[vert] <<
+                  _string_middle(len - 2, func.size(),Y[func]) <<
                   Gr[vert] << std::endl;
 
         first_time = false;
@@ -50,59 +50,73 @@ public:
 private:
     void _start(const std::string &container)
     {
-        std::cout << Gr[upper_box] << std::endl;
-        std::cout << Gr[vert] <<
-                  string_middle(len - 2, 35 + container.size(),
+        std::cout << ' ' << Gr[upper_box] << std::endl;
+        std::cout << ' ' << Gr[vert] <<
+                  _string_middle(len - 2, 35 + container.size(),
                                 Y["Benchmark speed test for "] +
                                 P[container] + Y[" container"]) <<
                   Gr[vert] << std::endl;
-        std::cout << Gr[lower_box] << std::endl;
+        std::cout << ' ' << Gr[lower_box] << std::endl;
 
-        std::cout << Gr[upper_box] << std::endl;
+        std::cout << ' ' << Gr[upper_box] << std::endl;
     }
 
     void _finish()
     {
-        std::cout << Gr[lower_box] << std::endl;
+        std::cout << ' ' << Gr[lower_box] << std::endl;
     }
 
     void _result(const std::string &test_size, double ft_time, double std_time)
     {
-        TermColor ft_col, std_col;
-        Gradient ft_grad(Red, Green);
-        Gradient std_grad(Green, Red);
-        ProgressBar pb(len - 26);
         double div = ft_time / std_time;
+        div = 1 - 1 / (div + 1);
+        GradientN gradient(GradientN(Cyan, Green), GradientN(Orange, Red));
+        ProgressBar progress(len - 26 - 13);
         if (ft_time >= std_time * 20)
-        {
-            ft_col = Red;
-            std_col = Green;
-        }
-        else
-        {
-            ft_col = ft_grad[div / 20];
-            std_col = std_grad[div / 20];
-        }
-        std_col.set_bg(true);
+            div = 1;
+        TermColor ft_col = Cyan;
+        TermColor std_col = Red;
+        if (ft_time > std_time)
+            std::swap(ft_col, std_col);
 
+        std::cout << ' ' << Gr[vert] << _string_mul(" ", len - 2) << Gr[vert] << std::endl;
+        std::string left;
+        std::string right;
+        {
+            std::stringstream _left;
+            std::stringstream _right;
+            _left << ' ' << Gr[vert] << ' '
+                   << test_size
+                   << ft_col["ft"] << ' '
+                   << _time_gen(ft_time) << ' ';
+            _right << Reset << _time_gen(std_time) << std_col[" std"]
+                      << ' ' << Gr[vert] << '\r';
+            left = _left.str();
+            right = _right.str();
+        }
 
-        std::cout << Gr[vert] << ' ' <<
-            test_size <<
-            Y["ft"] << ' ' <<
-            ft_col << std_col <<
-            pb[1 - div / 20] << Reset << Y["  std "] <<
-            Gr[vert] << std::endl;
+        int anim_frames = 40;
+        double anim_step = div / anim_frames;
+        for (int i=0; i < anim_frames; ++i)
+        {
+            double anim_div = i * anim_step;
+            std::cout << left
+                << gradient[anim_div] << progress[anim_div]
+                << right;
+            usleep(8000);
+        }
+        std::cout << std::endl;
     }
 
-    std::string string_middle(int width, int str_size, const std::string &str)
+    std::string _string_middle(int width, int str_size, const std::string &str)
     {
         int delta = width - str_size;
         int left_space = delta / 2;
         int right_space = delta / 2 + delta % 2;
-        return string_mul(" ", left_space) + str + string_mul(" ", right_space);
+        return _string_mul(" ", left_space) + str + _string_mul(" ", right_space);
     }
 
-    std::string string_mul(const std::string &str, int n)
+    std::string _string_mul(const std::string &str, int n)
     {
         std::string out;
         while (n-- > 0)
@@ -110,9 +124,21 @@ private:
         return out;
     }
 
+    std::string _time_gen(double time)
+    {
+        std::stringstream ss;
+        if (time < 1)
+            time = std::round(time * 1000) / 1000.;
+        else
+            time = std::round(time * 100) / 100;
+        ss << time << "s";
+        std::string ret = ss.str();
+        return Purple + ret + _string_mul(" ", 6 - ret.size());
+    }
+
     int len;
     TermColor Gr =TermColor(50, 200, 50, false);
-    std::string line = string_mul("─", len - 2);
+    std::string line = _string_mul("─", len - 2);
     std::string upper_box = "╭" + line + "╮";
     std::string mid_line = "├" + line + "┤";
     std::string lower_box = "╰" + line + "╯";
