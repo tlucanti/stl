@@ -19,6 +19,7 @@
 # include "defs.h"
 # include "type_traits.hpp"
 # include "wrap_iterator.hpp"
+# include "utils.hpp"
 
 TLU_NAMESPACE_BEGIN
 
@@ -664,7 +665,7 @@ public:
             return ;
         }
         pointer start = _insert(pos._ptr, count);
-        difference_type movable = std::min(_end - pos._ptr, count);
+        difference_type movable = min(_end - pos._ptr, count);
         for (difference_type i=0; i < movable; ++i)
             start[i] = value;
         for (difference_type i=movable; i < count; ++i)
@@ -682,7 +683,7 @@ public:
             return ;
         }
         difference_type size = iterator::distance(first, last);
-        difference_type movable = std::min(_end - pos._ptr, size);
+        difference_type movable = min(_end - pos._ptr, size);
         pointer begin = _insert(pos._ptr, size);
         input_it non_movable = _move(first, begin, movable);
         _copy(non_movable, last, begin + movable);

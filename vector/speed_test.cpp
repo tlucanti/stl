@@ -1,5 +1,4 @@
 
-#include <iostream>
 #include "vector.hpp"
 #include <vector>
 #include <sys/time.h>
@@ -9,7 +8,7 @@
 #define LOOP_ITERATION asm("")
 
 template <class T>
-void constructor_test_1(int times)
+void constructor_test_1(UNUSED(std::size_t _), int times)
 {
 	for (long long i=0; i < times; ++i)
 	{
@@ -30,7 +29,7 @@ void constructor_test_2(typename T::size_type size, long long times)
 
 template <class T>
 void constructor_test_3(typename T::size_type size, long long times) {
-    USED(T a(size));
+    T a(size);
     for (long long i = 0; i < times; ++i) {
         USED(T b(a));
         LOOP_ITERATION;
@@ -38,7 +37,7 @@ void constructor_test_3(typename T::size_type size, long long times) {
 }
 
 template <class T>
-void constructor_test_3(long long size, long long times)
+void constructor_test_4(typename T::size_type size, long long times)
 {
     std::vector<int> vec(static_cast<std::size_t>(size));
     for (long long i=0; i < times; ++i)
@@ -48,6 +47,7 @@ void constructor_test_3(long long size, long long times)
     }
 }
 
+#if PRECPP11
 template <class T>
 void assign_operator_test_1(typename T::size_type size, long long times)
 {
@@ -55,9 +55,10 @@ void assign_operator_test_1(typename T::size_type size, long long times)
     T b;
     for (long long i=0; i < times; ++i)
     {
-//        b = a;
+        b = a;
     }
 }
+#endif /* PRECPP11 */
 
 #define E1 10LL
 #define E2 100LL
@@ -99,22 +100,22 @@ double delta(struct timeval start, struct timeval end)
 } while (false)
 
 #define SMALL(__func) do { \
-    run_speed_test(assign_operator_test_1, 5, E10); \
+    run_speed_test(__func, 5, E8); \
     bm.small(ft_time, std_time); \
 } while (false)
 
 #define MEDIUM(__func) do { \
-    run_speed_test(constructor_test_2, E3, E5); \
+    run_speed_test(__func, E3, E5); \
     bm.medium(ft_time, std_time); \
 } while (false)
 
 #define LARGE(__func) do { \
-    run_speed_test(constructor_test_2, E6, E3); \
+    run_speed_test(__func, E6, E3); \
     bm.large(ft_time, std_time); \
 } while (false)
 
 #define RUN_TESTS(__name, __func) do { \
-    bm.next_test("default constructor test"); \
+    bm.next_test(__name); \
     SMALL(__func); \
     MEDIUM(__func); \
     LARGE(__func); \
@@ -134,7 +135,9 @@ int main()
 
     RUN_TESTS("sized constructor test", constructor_test_2);
 
-    RUN_TESTS("iterator constructor test", constructor_test_3);
+    RUN_TESTS("copy constructor test", constructor_test_3);
+
+    RUN_TESTS("iterator constructor test", constructor_test_4);
 
 //    RUN_TESTS("assign operator test", constructor_test_3);
 
