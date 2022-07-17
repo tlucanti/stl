@@ -33,7 +33,7 @@ public:
 PROTECTED:
     explicit constexpr wrap_iterator_base(pointer ptr) : _ptr(ptr) {}
 public:
-    virtual ~wrap_iterator_base() noexcept DEFAULT;
+    virtual ~wrap_iterator_base() noexcept DEFAULT
 
 // --------------------------------- operators ---------------------------------
     virtual value_type &operator *() const noexcept
@@ -96,7 +96,7 @@ PROTECTED:
 public:
     explicit constexpr wrap_iterator(pointer ptr) : base_class(ptr) {} // TODO: return this to protected
     constexpr wrap_iterator() : base_class() {}
-    ~wrap_iterator() noexcept override DEFAULT;
+    ~wrap_iterator() noexcept override DEFAULT
 
     constexpr bool operator ==(const self_type &cmp) const noexcept
     {
@@ -203,7 +203,7 @@ PROTECTED:
 public:
     explicit constexpr wrap_reverse_iterator(pointer ptr) : base_class(ptr) {} // TODO: make this protected
     constexpr wrap_reverse_iterator() : base_class() {}
-    ~wrap_reverse_iterator() noexcept override DEFAULT;
+    ~wrap_reverse_iterator() noexcept override DEFAULT
 
 // =============================================================================
 // --------------------------------- operators ---------------------------------

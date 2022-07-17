@@ -84,7 +84,12 @@ public:
     {
         if (UNLIKELY(value < 0 or value > 1))
             throw std::runtime_error("value can be only in range from 0 to 1");
-        return TermColor(_red * value, _green * value, _blue * value, _bold);
+        return TermColor(
+            static_cast<uint8_t>(_red * value),
+            static_cast<uint8_t>(_green * value),
+            static_cast<uint8_t>(_blue * value),
+            _bold
+        );
     }
 
     std::string operator [](const std::string &str) const
@@ -166,20 +171,20 @@ class Gradient
 public:
     Gradient(const TermColor &start, const TermColor &end)
     {
-        bias = {start.red(), start.green(), start.blue()};
-        coef = {
-                end.red() - start.red(),
-                end.green() - start.green(),
-                end.blue() - start.blue()
+        bias = (t_color){start.red(), start.green(), start.blue()};
+        coef = (t_color){
+            end.red() - start.red(),
+            end.green() - start.green(),
+            end.blue() - start.blue()
         };
     }
 
     TermColor operator [](double value)
     {
         return TermColor(
-            coef.red * value + bias.red,
-            coef.green * value + bias.green,
-            coef.blue * value + bias.blue
+            static_cast<uint8_t>(coef.red * value + bias.red),
+            static_cast<uint8_t>(coef.green * value + bias.green),
+            static_cast<uint8_t>(coef.blue * value + bias.blue)
         );
     }
 
@@ -257,7 +262,7 @@ public:
 
         int len = 9;
         int max_progess = width * len;
-        int current_progress = progress * max_progess;
+        int current_progress = static_cast<int>(progress * max_progess);
         std::stringstream ss;
         int i = 0;
         while (current_progress >= len) {

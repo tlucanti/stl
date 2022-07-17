@@ -9,7 +9,14 @@ class Benchmark
 {
 public:
 
-    Benchmark(const std::string &container, int _len=70) : len(_len)
+    Benchmark(const std::string &container, int _len=70) :
+        len(_len),
+        Gr(TermColor(50, 200, 50, false)),
+        line(_string_mul("─", len - 2)),
+        upper_box("╭" + line + "╮"),
+        mid_line("├" + line + "┤"),
+        lower_box("╰" + line + "╯"),
+        vert("│")
     {
         _start(container);
     }
@@ -24,9 +31,9 @@ public:
         static bool first_time = true;
 
         if (not first_time)
-            std::cout << ' ' << G[mid_line] << std::endl;
+            std::cout << ' ' << Gr[mid_line] << std::endl;
         std::cout << ' ' << Gr[vert] <<
-                  _string_middle(len - 2, func.size(),Y[func]) <<
+                  _string_middle(len - 2, static_cast<int>(func.size()), Y[func]) <<
                   Gr[vert] << std::endl;
 
         first_time = false;
@@ -52,7 +59,7 @@ private:
     {
         std::cout << ' ' << Gr[upper_box] << std::endl;
         std::cout << ' ' << Gr[vert] <<
-                  _string_middle(len - 2, 35 + container.size(),
+                  _string_middle(len - 2, static_cast<int>(35 + container.size()),
                                 Y["Benchmark speed test for "] +
                                 P[container] + Y[" container"]) <<
                   Gr[vert] << std::endl;
@@ -100,9 +107,12 @@ private:
         for (int i=0; i < anim_frames; ++i)
         {
             double anim_div = i * anim_step;
-            std::cout << left
-                << gradient[anim_div] << progress[anim_div]
-                << right;
+            std::string s;
+            s += left;
+            s += gradient[anim_div].str();
+            s += progress[anim_div];
+            s += right;
+            write(1, s.c_str(), s.size());
             usleep(8000);
         }
         std::cout << std::endl;
@@ -133,16 +143,16 @@ private:
             time = std::round(time * 100) / 100;
         ss << time << "s";
         std::string ret = ss.str();
-        return Purple + ret + _string_mul(" ", 6 - ret.size());
+        return Purple + ret + _string_mul(" ", static_cast<int>(6 - ret.size()));
     }
 
     int len;
-    TermColor Gr =TermColor(50, 200, 50, false);
-    std::string line = _string_mul("─", len - 2);
-    std::string upper_box = "╭" + line + "╮";
-    std::string mid_line = "├" + line + "┤";
-    std::string lower_box = "╰" + line + "╯";
-    std::string vert = "│";
+    TermColor Gr;
+    std::string line;
+    std::string upper_box;
+    std::string mid_line;
+    std::string lower_box;
+    std::string vert;
 };
 
 TLU_NAMESPACE_END

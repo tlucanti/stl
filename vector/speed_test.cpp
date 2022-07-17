@@ -49,7 +49,7 @@ void constructor_test_3(long long size, long long times)
 }
 
 template <class T>
-void assign_operator_test_1(long long size, long long times)
+void assign_operator_test_1(typename T::size_type size, long long times)
 {
     T a(size);
     T b;
@@ -89,11 +89,11 @@ double delta(struct timeval start, struct timeval end)
 
 #define run_speed_test(__func, ...) do { \
 	__test_start(); \
-	__func<ft::vector<int>>(__VA_ARGS__); \
+	__func<ft::vector<int> >(__VA_ARGS__); \
 	__test_end(); \
 	ft_time = delta(_start, _end); \
 	__test_start(); \
-	__func<std::vector<int>>(__VA_ARGS__); \
+	__func<std::vector<int> >(__VA_ARGS__); \
 	__test_end(); \
 	std_time = delta(_start, _end); \
 } while (false)
@@ -122,8 +122,8 @@ double delta(struct timeval start, struct timeval end)
 
 int main()
 {
-	struct timeval _start {};
-	struct timeval _end {};
+	struct timeval _start = {};
+	struct timeval _end = {};
     double std_time;
     double ft_time;
 
