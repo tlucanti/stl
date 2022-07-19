@@ -8,6 +8,9 @@
 # include <sstream>
 # include <cstdio>
 # include <csignal>
+# include <map>
+# include <stdexcept>
+# include <set>
 
 # define __DEBUG
 # define __SAFE_TEST 0
@@ -28,7 +31,8 @@ void run_test(func_T func)
     try {
         func();
     } catch (std::exception &e) {
-        std::cout << R "test fall with exception: " Y << e.what() << S << std::endl;
+        std::cout << tlucanti::R << "test fall with exception: "
+        << tlucanti::Y << e.what() << tlucanti::S << std::endl;
     }
 # else
     func();
@@ -156,7 +160,7 @@ void final() {
     if (grand_total_ok == grand_total) {
         c = tlucanti::G;
         status = "       SUCCESS      ";
-    } else if (grand_total_ok >= grand_total * 0.8) {
+    } else if (grand_total_ok >= grand_total * 0.9) {
         c = tlucanti::Y;
         status = "        FAIL        ";
     } else {
@@ -177,17 +181,32 @@ void final() {
 
 void sigsegv_catcher(UNUSED(int sig))
 {
+#if __SAFE_TEST
     throw std::runtime_error("test fall with SIGSEGV");
+#else
+    std::cout << tlucanti::R["test fall with SIGSEGV\n"];
+    exit(1);
+#endif
 }
 
 void sigill_cathcer(UNUSED(int sig))
 {
+#if __SAFE_TEST
     throw std::runtime_error("test fall with SIGILL");
+#else
+    std::cout << tlucanti::R["test fall with SIGILL\n"];
+    exit(1);
+#endif
 }
 
 void sigabrt_catcher(UNUSED(int sig))
 {
+#if __SAFE_TEST
     throw std::runtime_error("test fall with SIGABRT");
+#else
+    std::cout << tlucanti::R["test fall with SIGABRT\n"];
+    exit(1);
+#endif
 }
 
 # define vec_123(__vec) ft::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
@@ -623,5 +642,77 @@ void print_rb_tree(rb_tree *tree, const char *msg)
 
 # define _R _Rb_Red
 # define _B _Rb_Black
+
+# define FIND_ASSERT(__tree, __val, __msg) do { \
+    rb_insert(&__tree, PTR(__val), int_compare); \
+    ASSERT(rb_find(&__tree, PTR(__val), int_compare) == PTR(__val), __msg); \
+} while (false)
+
+int random(int start, int stop)
+{
+    int		ret;
+    do {
+        ret = rand();
+    } while (ret >= RAND_MAX - RAND_MAX % (stop - start + 1));
+    return ret % (stop - start + 1) + start;
+}
+
+void _rb_dfs_black_height_check(
+        _Rb_node *node,
+        int cur,
+        std::set<int> &height_set
+    )
+{
+    assert(node);
+
+    if (node->color == _Rb_Black)
+        ++cur;
+    if (node->left)
+        _rb_dfs_black_height_check(node->left, cur, height_set);
+    else
+        height_set.insert(cur);
+    if (node->right)
+        _rb_dfs_black_height_check(node->right, cur, height_set);
+    else
+        height_set.insert(cur);
+}
+
+void _rb_dfs_parent_check(_Rb_node *node)
+{
+    assert(node->parent);
+    if (node->color == _Rb_Red and node->parent->color == _Rb_Red)
+        throw std::logic_error("two red nodes in row");
+    if (node->left)
+        _rb_dfs_parent_check(node->left);
+    if (node->right)
+        _rb_dfs_parent_check(node->right);
+}
+
+void check_valid_rb_tree(rb_tree *tree)
+{
+    assert(tree);
+    assert(tree->root);
+    if (tree->root->color == _Rb_Red)
+        throw std::logic_error("root is Red");
+    std::set<int> depth_map;
+    _rb_dfs_black_height_check(tree->root, 0, depth_map);
+    if (depth_map.size() > 1)
+        throw std::logic_error("tree has various black height");
+    if (tree->root->left)
+        _rb_dfs_parent_check(tree->root->left);
+    if (tree->root->right)
+        _rb_dfs_parent_check(tree->root->right);
+}
+
+# define RB_PRINT_LOCK(__msg) do { \
+    _rb_print_toggle = false; \
+    print_rb_tree(&tree, "added node " __msg); \
+    _rb_print_toggle = false; \
+} while (false)
+
+# define RB_INSERT_PRINT_LOCK(__val) do { \
+    rb_insert(&tree, PTR(__val), int_compare); \
+    RB_PRINT_LOCK(#__val); \
+} while (false)
 
 #endif /* PAIR_HPP */

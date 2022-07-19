@@ -17,6 +17,9 @@ extern "C" {
 #  endif
 # endif
 
+#include <stdio.h>
+//#warning "remove stdio"
+
 typedef enum e_Rb_colors
 {
 	_Rb_Red,

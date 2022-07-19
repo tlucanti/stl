@@ -4,15 +4,24 @@
 
 void insert_tests();
 void find_tests();
+void random_insert_find_tests();
+void random_insert_find_small_tests();
+void random_insert_find_medium_tests();
+void random_insert_find_large_tests();
 
 int main()
 {
-//    signal(SIGSEGV, sigsegv_catcher);
-//    signal(SIGILL, sigill_cathcer);
-//    signal(SIGABRT, sigabrt_catcher);
+    signal(SIGSEGV, sigsegv_catcher);
+    signal(SIGILL, sigill_cathcer);
+    signal(SIGABRT, sigabrt_catcher);
+    srand(time(nullptr));
 
     run_test(insert_tests);
     run_test(find_tests);
+
+    run_test(random_insert_find_small_tests);
+    run_test(random_insert_find_medium_tests);
+    run_test(random_insert_find_large_tests);
 
     final();
 }
@@ -146,6 +155,28 @@ void insert_tests()
         CHECK_EDGE(tree.root->left, left, 4, 3, _B, _R, "triangle insert left test 0");
         CHECK_EDGE(tree.root->left, right, 4, 5, _B, _R, "triangle insert left test 1");
     }
+    {
+        rb_tree tree = {nullptr};
+        // 338 264 813 620 823 116 285 413 738 532 937 973 606 529 676 659 206
+        RB_INSERT_PRINT_LOCK(338);
+        RB_INSERT_PRINT_LOCK(264);
+        RB_INSERT_PRINT_LOCK(813);
+        RB_INSERT_PRINT_LOCK(620);
+        RB_INSERT_PRINT_LOCK(823);
+        RB_INSERT_PRINT_LOCK(116);
+        RB_INSERT_PRINT_LOCK(285);
+        RB_INSERT_PRINT_LOCK(413);
+        RB_INSERT_PRINT_LOCK(738);
+        RB_INSERT_PRINT_LOCK(532);
+        RB_INSERT_PRINT_LOCK(937);
+        RB_INSERT_PRINT_LOCK(973);
+        RB_INSERT_PRINT_LOCK(606);
+        RB_INSERT_PRINT_LOCK(529);
+        RB_INSERT_PRINT_LOCK(676);
+        RB_INSERT_PRINT_LOCK(659);
+        RB_INSERT_PRINT_LOCK(206);
+        check_valid_rb_tree(&tree);
+    }
 
     result();
 }
@@ -158,10 +189,96 @@ void find_tests()
         rb_tree tree = {nullptr};
 
         ASSERT(rb_find(&tree, PTR(0), int_compare) == nullptr, "empty find test 0");
-        rb_insert(&tree, PTR(1), int_compare);
-        ASSERT(rb_find(&tree, PTR(1), int_compare) == PTR(1), "find basic test 0");
-        rb_insert(&tree, PTR(0), int_compare);
+        FIND_ASSERT(tree, 1, "find basic test 0");
+        FIND_ASSERT(tree, 0, "find basic test 1");
+        FIND_ASSERT(tree, 3, "find basic test 2");
+    }
+    {
+        rb_tree tree = {nullptr};
+        FIND_ASSERT(tree, 50, "find recoloring test 0");
+        FIND_ASSERT(tree, 40, "find recoloring test 1");
+        FIND_ASSERT(tree, 60, "find recoloring test 2");
+        FIND_ASSERT(tree, 20, "find recoloring test 3");
+        FIND_ASSERT(tree, 70, "find recoloring test 4");
+        FIND_ASSERT(tree, 10, "find recoloring test 5");
+        FIND_ASSERT(tree, 80, "find recoloring test 6");
+    }
+    {
+        rb_tree tree = {nullptr};
+        FIND_ASSERT(tree, 1, "find left-rotate test 0");
+        FIND_ASSERT(tree, 2, "find left-rotate test 1");
+        FIND_ASSERT(tree, 3, "find left-rotate test 2");
+    }
+    {
+        rb_tree tree = {nullptr};
+        FIND_ASSERT(tree, 3, "find right-rotate test 0");
+        FIND_ASSERT(tree, 2, "find right-rotate test 1");
+        FIND_ASSERT(tree, 1, "find right-rotate test 2");
+    }
+    {
+        rb_tree tree = {nullptr};
+        FIND_ASSERT(tree, 2, "find right-triangle-rotate test 0");
+        FIND_ASSERT(tree, 1, "find right-triangle-rotate test 1");
+        FIND_ASSERT(tree, 3, "find right-triangle-rotate test 2");
+        FIND_ASSERT(tree, 5, "find right-triangle-rotate test 3");
+        FIND_ASSERT(tree, 4, "find right-triangle-rotate test 4");
+    }
+    {
+        rb_tree tree = {nullptr};
+        FIND_ASSERT(tree, 7, "find left-triangle-rotate test 0");
+        FIND_ASSERT(tree, 6, "find left-triangle-rotate test 1");
+        FIND_ASSERT(tree, 5, "find left-triangle-rotate test 2");
+        FIND_ASSERT(tree, 3, "find left-triangle-rotate test 3");
+        FIND_ASSERT(tree, 4, "find left-triangle-rotate test 4");
     }
 
     result();
+}
+
+void _random_insert_find_sized_tests(int div, const std::string &name)
+{
+    start(("random " + name + " insert/find tests").c_str());
+
+    for (int test = 0; test < 1000; ++test)
+    {
+//        std::cout << test << std::endl;
+        std::vector<int> _moves;
+        rb_tree tree = {nullptr};
+        try {
+            for (int cnt = 0; cnt < 1000; ++cnt)
+            {
+                int r = rand() % div;
+                //            _moves.push_back(r);
+                //            std::cout << "adding " << r << std::endl;
+                FIND_ASSERT(tree, r, name + " random test");
+                check_valid_rb_tree(&tree);
+            }
+        } catch (std::logic_error &e) {
+            std::cout << e.what() << std::endl;
+            _rb_print_toggle = true;
+            print_rb_tree(&tree, "invalid tree");
+            std::cout << "moves:";
+            for (int i=0; i < _moves.size(); ++i)
+                std::cout << ' ' << _moves[i];
+            std::cout << std::endl;
+            throw ;
+        }
+    }
+
+    result();
+}
+
+void random_insert_find_small_tests()
+{
+    _random_insert_find_sized_tests(10, "small");
+}
+
+void random_insert_find_medium_tests()
+{
+    _random_insert_find_sized_tests(1000, "medium");
+}
+
+void random_insert_find_large_tests()
+{
+    _random_insert_find_sized_tests(2147483647, "large");
 }

@@ -227,7 +227,7 @@ static _Rb_node    *_BST_find(_Rb_node *root, void *value, int (*compare)(void *
         int cmp = compare(value, root->key);
         if (cmp == 0)
             return root;
-        if (compare(root->key, value) < 0)
+        if (cmp < 0)
         {
             if (root->left == NULL)
                 return NULL;
@@ -245,11 +245,11 @@ static _Rb_node    *_BST_find(_Rb_node *root, void *value, int (*compare)(void *
 static _Rb_node    *_Rb_recolor(_Rb_node *node)
 /*
     function does recoloring to serval neighbours:
-     - uncle is colo_Rb_Red _Rb_Black
-     - parent is colo_Rb_Red _Rb_Black
-     - grandparent is colo_Rb_Red _Rb_Red
+     - uncle is colored Black
+     - parent is colored Black
+     - grandparent is colored Red
 
-    in this example [a] means _Rb_Black node, and (a) - is _Rb_Red, {a} means any color
+    in this example [a] means black node, and (a) - is red, {a} means any color
 
              /                               /
        {grandparent}                   (grandparent)
@@ -272,12 +272,12 @@ static _Rb_node    *_Rb_recolor(_Rb_node *node)
 static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
 /*
     function eliminates violations after inserting node to tree
-    in examples [a] means _Rb_Black node, (a) - is _Rb_Red, {a} means, that color does
-    not mater. {*} means, that this sub-tree has same _Rb_Black-height
+    in examples [a] means black node, (a) - is red, {a} means, that color does
+    not mater. {*} means, that this sub-tree has same black-height
 
     case one means that we can do recoloring and move violation to the upper
     level (to grandparent and grand-grandparent), until we hit the root of the
-    tree case one can be applied, only if uncle and parent has same (_Rb_Red) color
+    tree case one can be applied, only if uncle and parent has same (red) color
 
              /                               /
        [grandparent]                   (grandparent)
@@ -286,11 +286,11 @@ static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **r
       /   \     /    \               /   \     /    \
     {*}   {*} {*}   (node)         {*}   {*} {*}   (node)
     
-    case two means the we cannot do recoloring due to different colors of
-    (uncle) and (parent), because otherwise we will violate `_Rb_Black-height` rule
+    case two means that we cannot do recoloring due to different colors of
+    (uncle) and (parent), because otherwise we will violate `black-height` rule,
     so we need to do rotation to balance _Rb_Red nodes between _Rb_Black ones, but
-    before this we need to straighten the node-parent-grandprent line in order
-    to not break `_Rb_Black-height` rule in next rotation
+    before this we need to straighten the node-parent-grandparent line in order
+    to not break `black-height` rule in next rotation
 
     
 
@@ -331,6 +331,7 @@ static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **r
     }
 }
 
+extern _rb_print_toggle;
 static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void *, void *))
 {
     assert(root);
@@ -345,11 +346,18 @@ static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void
     if (inserted != NULL)
         return inserted;
     _print_rb_tree(*root, "after BST insert");
-    if (node->parent->color == _Rb_Black)
-        return node;
     while (node != *root && node->color == _Rb_Red)
     {
+        if (node->parent->color == _Rb_Black)
+            return node;
         _Rb_node *gp = _Rb_grandparent(node);
+        if (gp == NULL)
+            break ;
+//        {
+//            _rb_print_toggle = 1;
+//            printf("now on %p\n", node->key);
+//            _print_rb_tree(*root, "grandparent is null");
+//        }
         if (node->parent == gp->left) // left cases
             node = _Rb_insert_case_1(node, gp, root);
         else // right cases
