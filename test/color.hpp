@@ -6,6 +6,7 @@
 # include <cstring>
 # include <stdexcept>
 # include <sstream>
+# include <stdint.h>
 # include "defs.h"
 
 TLU_NAMESPACE_BEGIN
@@ -95,6 +96,19 @@ public:
     std::string operator [](const std::string &str) const
     {
         return this->str() + str + "\033[0m";
+    }
+
+    TermColor &operator =(const TermColor &cpy)
+    {
+        if (this == &cpy)
+            return *this;
+        _red = cpy._red;
+        _green = cpy._green;
+        _blue = cpy._blue;
+        _bold = cpy._bold;
+        _bg = cpy._bg;
+        std::memcpy(_buff, cpy._buff, 22);
+        return *this;
     }
 
 private:

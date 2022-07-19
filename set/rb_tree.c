@@ -1,7 +1,34 @@
 
 #include "rb_tree.h"
 
-_Rb_node   *_Rb_grandparent(_Rb_node *node)
+#ifdef __cplusplus
+static _Rb_node   *_Rb_node_create(void *key)
+{
+    _Rb_node *ret = new _Rb_node;
+    ret->parent = NULL;
+    ret->left = NULL;
+    ret->right = NULL;
+    ret->color = _Rb_Red;
+    ret->key = key;
+    return ret;
+}
+
+#else /* C */
+static _Rb_node    *_Rb_node_create(void *key)
+{
+    _Rb_node    *ret;
+
+    ret = (_Rb_node *)malloc(sizeof(_Rb_node));
+    ret->parent = NULL;
+    ret->left = NULL;
+    ret->right = NULL;
+    ret->color = _Rb_Red;
+    ret->key = key;
+    return ret;
+}
+#endif
+
+static _Rb_node   *_Rb_grandparent(_Rb_node *node)
 /*
     function returns grandparent of node
 
@@ -20,7 +47,7 @@ _Rb_node   *_Rb_grandparent(_Rb_node *node)
 //    return NULL;
 }
 
-_Rb_node   *_Rb_uncle(_Rb_node *node)
+static _Rb_node   *_Rb_uncle(_Rb_node *node)
 /*
     function returns uncle of node
     there are two cases of uncles:
@@ -52,7 +79,7 @@ _Rb_node   *_Rb_uncle(_Rb_node *node)
     return gp->left;
 }
 
-void _Rb_rotate_right(_Rb_node *node)
+static _Rb_node    *_Rb_rotate_right(_Rb_node *node)
 /*
     function applies right-rotation to node
     right rotation has 2 steps
@@ -80,16 +107,30 @@ void _Rb_rotate_right(_Rb_node *node)
     _Rb_node    *pivot;
 
     assert(node);
+    _print_rb_tree(node->parent, "before right rotation");
     pivot = node->left;
-    pivot->parent = node->parent;
-    node->left = pivot->right;
-    node->left->parent = node;
-    pivot->left = node;
-    node->parent = pivot;
-    return pivot;
+    if (node->parent)
+    {
+        if (node == node->parent->left)
+            node->parent->left = pivot;
+        else
+            node->parent->right = pivot;
+    }
+    pivot->parent = node->parent; // step 1
+    _print_rb_tree(node->parent, "step 1");
+    node->left = pivot->right; // step 2
+    _print_rb_tree(node->parent, "step 2");
+    _print_rb_tree(pivot, "step 2 pivot");
+    if (node->left)
+        node->left->parent = node; // step 3
+    pivot->right = node; // step 4
+    _print_rb_tree(pivot, "step 4 pivot");
+    node->parent = pivot; // step 5
+    _print_rb_tree(node->parent, "step 5");
+    return node;
 }
 
-_Rb_node    *_Rb_rotate_left(_Rb_node *node)
+static _Rb_node    *_Rb_rotate_left(_Rb_node *node)
 /*
     functions applies left-rotation to node
     left rotation has 2 steps:
@@ -115,30 +156,50 @@ _Rb_node    *_Rb_rotate_left(_Rb_node *node)
     _Rb_node    *pivot;
 
     assert(node);
+    _print_rb_tree(node, "before left rotation");
     pivot = node->right;
+    if (node->parent)
+    {
+        if (node == node->parent->left)
+            node->parent->left = pivot;
+        else
+            node->parent->right = pivot;
+    }
     pivot->parent = node->parent;
+    _print_rb_tree(node, "step 1");
     node->right = pivot->left;
-    node->right->parent = node;
-    pivot->right = node;
+    _print_rb_tree(node, "step 2");
+    _print_rb_tree(pivot, "step 1 pivot");
+
+    if (node->right)
+        node->right->parent = node;
+    pivot->left = node;
+    _print_rb_tree(node, "step 3");
+
     node->parent = pivot;
     return node;
 }
 
-void _BST_insert(_Rb_node *root, _Rb_node *node)
+static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, int (*compare)(void *, void *))
 /*
     function inserts element `node` to Binary Search Tree with root `root`
 */
 {
     assert(root);
     assert(node);
+    assert(compare);
     while (1)
     {
-        if (node->key < root->key)
+        int cmp = compare(node->key, root->key);
+        if (cmp == 0)
+            return root;
+        if (cmp < 0)
         {
             if (root->left == NULL)
             {
                 root->left = node;
-                return ;
+                node->parent = root;
+                return NULL;
             }
             root = root->left;
         }
@@ -147,21 +208,48 @@ void _BST_insert(_Rb_node *root, _Rb_node *node)
             if (root->right == NULL)
             {
                 root->right = node;
-                return ;
+                node->parent = root;
+                return NULL;
             }
             root = root->right;
         }
     }
 }
 
-_Rb_node    *_Rb_recolor(_Rb_node *node)
+static _Rb_node    *_BST_find(_Rb_node *root, void *value, int (*compare)(void *, void *))
+{
+    assert(compare);
+
+    if (root == NULL)
+        return NULL;
+    while (1)
+    {
+        int cmp = compare(value, root->key);
+        if (cmp == 0)
+            return root;
+        if (compare(root->key, value) < 0)
+        {
+            if (root->left == NULL)
+                return NULL;
+            root = root->left;
+        }
+        else
+        {
+            if (root->right == NULL)
+                return NULL;
+            root = root->right;
+        }
+    }
+}
+
+static _Rb_node    *_Rb_recolor(_Rb_node *node)
 /*
     function does recoloring to serval neighbours:
-     - uncle is colored Black
-     - parent is colored Black
-     - grandparent is colored Red
+     - uncle is colo_Rb_Red _Rb_Black
+     - parent is colo_Rb_Red _Rb_Black
+     - grandparent is colo_Rb_Red _Rb_Red
 
-    in this example [a] means Black node, and (a) - is Red, {a} means any color
+    in this example [a] means _Rb_Black node, and (a) - is _Rb_Red, {a} means any color
 
              /                               /
        {grandparent}                   (grandparent)
@@ -175,21 +263,21 @@ _Rb_node    *_Rb_recolor(_Rb_node *node)
 
     assert(node);
     gp = _Rb_grandparent(node);
-    gp->color = Red;
-    gp->left->color = Black;
-    gp->right->color = Black;
+    gp->color = _Rb_Red;
+    gp->left->color = _Rb_Black;
+    gp->right->color = _Rb_Black;
     return gp;
 }
 
-_Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp)
+static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
 /*
     function eliminates violations after inserting node to tree
-    in examples [a] means Black node, (a) - is Red, {a} means, that color does
-    not mater. {*} means, that this sub-tree has same black-height
+    in examples [a] means _Rb_Black node, (a) - is _Rb_Red, {a} means, that color does
+    not mater. {*} means, that this sub-tree has same _Rb_Black-height
 
     case one means that we can do recoloring and move violation to the upper
     level (to grandparent and grand-grandparent), until we hit the root of the
-    tree case one can be applied, only if uncle and parent has same (Red) color
+    tree case one can be applied, only if uncle and parent has same (_Rb_Red) color
 
              /                               /
        [grandparent]                   (grandparent)
@@ -199,10 +287,10 @@ _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp)
     {*}   {*} {*}   (node)         {*}   {*} {*}   (node)
     
     case two means the we cannot do recoloring due to different colors of
-    (uncle) and (parent), because otherwise we will violate `black-height` rule
-    so we need to do rotation to balance red nodes between black ones, but
+    (uncle) and (parent), because otherwise we will violate `_Rb_Black-height` rule
+    so we need to do rotation to balance _Rb_Red nodes between _Rb_Black ones, but
     before this we need to straighten the node-parent-grandprent line in order
-    to not break `black-height` rule in next rotation
+    to not break `_Rb_Black-height` rule in next rotation
 
     
 
@@ -210,53 +298,77 @@ _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp)
 {
     assert(node);
     assert(gp);
-    if (gp->right->color == Red)
+    if (gp->right && gp->right->color == _Rb_Red)
         return _Rb_recolor(node); // case 1
     else
     {
         if (node == node->parent->right)
             node = _Rb_rotate_left(node->parent); // case 2
-        _Rb_rotate_right(gp)->color = Red; // case 3
-        node->parent->color = Black;
+        _Rb_rotate_right(gp)->color = _Rb_Red; // case 3
+        node->parent->color = _Rb_Black;
+        if (gp == *root)
+            *root = node->parent;
+        _print_rb_tree(node->parent, "after rotate");
         return node->parent;
     }
 }
 
-_Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp)
+static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
 {
     assert(node);
     assert(gp);
-    if (gp->left->color == Red)
+    if (gp->left && gp->left->color == _Rb_Red)
         return _Rb_recolor(node); // case 1
     else
     {
         if (node == node->parent->left)
             node = _Rb_rotate_right(node->parent); // case 2
-        _Rb_rotate_left(gp)->color = Red; // case 3
-        node->parent->color = Black;
+        _Rb_rotate_left(gp)->color = _Rb_Red; // case 3
+        node->parent->color = _Rb_Black;
+        if (gp == *root)
+            *root = node->parent;
         return node->parent;
     }
 }
 
-void _Rb_insert(_Rb_node **root, _Rb_node *node)
+static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void *, void *))
 {
     assert(root);
     assert(node);
     if (*root == NULL)
     {
         *root = node;
-        node->color = Black;
-        return ;
+        node->color = _Rb_Black;
+        return node;
     }
-    _BST_insert(root, node);
-    node->color = Red;
-    while (node != *root && node->color == Red)
+    _Rb_node *inserted = _BST_insert(*root, node, compare);
+    if (inserted != NULL)
+        return inserted;
+    _print_rb_tree(*root, "after BST insert");
+    if (node->parent->color == _Rb_Black)
+        return node;
+    while (node != *root && node->color == _Rb_Red)
     {
-        _Rb_node gp = _Rb_grandparent(node);
+        _Rb_node *gp = _Rb_grandparent(node);
         if (node->parent == gp->left) // left cases
-            node = _Rb_insert_case_1(node, gp);
+            node = _Rb_insert_case_1(node, gp, root);
         else // right cases
-            node = _Rb_insert_case_2(node, gp);
+            node = _Rb_insert_case_2(node, gp, root);
     }
-    (*root)->color = Black;
+    (*root)->color = _Rb_Black;
+    return node;
+}
+
+void *rb_insert(rb_tree *root, void *key, int (*compare)(void *, void *))
+{
+    _Rb_node *node = _Rb_node_create(key);
+    return _Rb_insert(&(root->root), node, compare)->key;
+}
+
+void *rb_find(rb_tree *root, void *key, int (*compare)(void *, void *))
+{
+    _Rb_node *result = _BST_find(root->root, key, compare);
+    if (result == NULL)
+        return NULL;
+    return result->key;
 }

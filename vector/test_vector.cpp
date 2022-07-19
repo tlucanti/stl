@@ -1,4 +1,5 @@
 
+#include "vector.hpp"
 #include "test.hpp"
 
 void constructor_test();

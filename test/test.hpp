@@ -13,10 +13,7 @@
 # define __SAFE_TEST 0
 
 # include "defs.h"
-# include "color.h"
-
-# include "../vector/vector.hpp"
-# include "../pair/pair.hpp"
+# include "color.hpp"
 
 int all = 0;
 int grand_total = 0;
@@ -45,13 +42,13 @@ void run_test(func_T func)
     ++grand_total; \
     try { \
         if (not (e)) \
-            std::cout << R "assertion fail: " Y << (msg) << S << std::endl; \
+            std::cout << tlucanti::R << "assertion fail: " << tlucanti::Y << (msg) << tlucanti::S << std::endl; \
         else { \
             ++ok; \
             ++grand_total_ok; \
         } \
     } catch (std::exception &ex) { \
-        std::cout << R "task fall with exception: " Y << ex.what() << S << std::endl; \
+        std::cout << tlucanti::R << "task fall with exception: " << tlucanti::Y << ex.what() << tlucanti::S << std::endl; \
     } \
 } while (0)
 
@@ -144,34 +141,38 @@ void __to_trash(T &_) {(void)_;}
 void start(const char *msg) {
     all = 0;
     ok = 0;
-    std::cout << P "** results for " << msg << "**" S "\n";
+    std::cout << tlucanti::P << "** results for " << msg << "**" << tlucanti::S << "\n";
 }
 void result() {
     if (ok == all)
-        std::cout << G "[ OK ] all " C << all << G " tests passed " S "\n\n";
+        std::cout << tlucanti::G << "[ OK ] all " << tlucanti::C << all << tlucanti::G << " tests passed " << tlucanti::S << "\n\n";
     else
-        std::cout << R "[FAIL] " C << ok << " / " << all << R " tests passed\n\n";
+        std::cout << tlucanti::R << "[FAIL] " << tlucanti::C << ok << " / " << all << tlucanti::R << " tests passed\n\n";
 }
 
 void final() {
     const char *status;
-    const char *c;
+    tlucanti::TermColor c;
     if (grand_total_ok == grand_total) {
-        c = G;
+        c = tlucanti::G;
         status = "       SUCCESS      ";
     } else if (grand_total_ok >= grand_total * 0.8) {
-        c = Y;
+        c = tlucanti::Y;
         status = "        FAIL        ";
     } else {
-        c = R;
+        c = tlucanti::R;
         status = "      YOU SUCK      ";
     }
-    std::cout << c << "╭────────────────────╮" S "\n";
-    std::cout << c << "│" << status << "│" S "\n";
-    std::cout << c << "│ " << "TOTAL TESTS PASSED " << c << "│" S "\n";
+    std::cout << c << "╭────────────────────╮" << tlucanti::S << "\n";
+    std::cout << c << "│" << status << "│"<< tlucanti::S << "\n";
+    std::cout << c << "│ " << "TOTAL TESTS PASSED " << c << "│" << tlucanti::S << "\n";
 
-    printf("%s│     " C "%3d / %3d %s     │" C "\n", c, grand_total_ok, grand_total, c);
-    std::cout << c << "╰────────────────────╯" S "\n";
+    printf("%s│     ", c.str().c_str());
+    printf("%s", tlucanti::C.str().c_str());
+    printf("%3d / %3d %s     │", grand_total_ok, grand_total, c.str().c_str());
+    printf("%s", tlucanti::C.str().c_str());
+    printf("\n");
+    std::cout << c << "╰────────────────────╯" << tlucanti::S << "\n";
 }
 
 void sigsegv_catcher(UNUSED(int sig))
@@ -250,12 +251,12 @@ void std_vec_cmp(const v1T &expected, const v2T &got, const std::string &msg)
 
 typedef enum e_colors
 {
-    Green,
-    Cyan,
-    Red,
-    Blue,
-    Purple,
-    Black
+    _ColStr_Green,
+    _ColStr_Cyan,
+    _ColStr_Red,
+    _ColStr_Blue,
+    _ColStr_Purple,
+    _ColStr_Black
 } colors;
 
 struct ColString
@@ -271,12 +272,12 @@ struct ColString
         _col_e = col;
         switch (col)
         {
-            case Green: _col = G; break;
-            case Cyan: _col = C; break;
-            case Red: _col = R; break;
-            case Blue: _col = B; break;
-            case Purple: _col = P; break;
-            case Black: _col = B; break;
+            case _ColStr_Green: _col = tlucanti::G.str().c_str(); break;
+            case _ColStr_Cyan: _col = tlucanti::C.str().c_str(); break;
+            case _ColStr_Red: _col = tlucanti::R.str().c_str(); break;
+            case _ColStr_Blue: _col = tlucanti::B.str().c_str(); break;
+            case _ColStr_Purple: _col = tlucanti::P.str().c_str(); break;
+            case _ColStr_Black: _col = tlucanti::B.str().c_str(); break;
         }
     }
 
@@ -291,7 +292,7 @@ struct ColString
         ss << _col << _str;
         if (_cnt > 1)
             ss << "(x" << _cnt << ')';
-        ss << Y;
+        ss << tlucanti::Y;
         return ss.str();
     }
 
@@ -317,13 +318,13 @@ std::ostream &operator <<(std::ostream &out, const ColString &s)
     return out;
 }
 
-ColString Def("def", Green); // = G + std::string("def") + Y;
-ColString Cons("cons", Cyan); // = C + std::string("cons") + Y;
-ColString Del("del", Red); // = R + std::string("del") + Y;
-ColString Cpy("cpy", Blue); // = C + std::string("cpy") + Y;
-ColString Icpy("icpy", Blue); // = B + std::string("icpy") + Y;
-ColString Mv("mv", Purple); // = P + std::string("mv") + Y;
-ColString Imv("imv", Black); // = K + std::string("imv") + Y;
+ColString Def("def", _ColStr_Green); // = G + std::string("def") + Y;
+ColString Cons("cons", _ColStr_Cyan); // = C + std::string("cons") + Y;
+ColString Del("del", _ColStr_Red); // = R + std::string("del") + Y;
+ColString Cpy("cpy", _ColStr_Blue); // = C + std::string("cpy") + Y;
+ColString Icpy("icpy", _ColStr_Blue); // = B + std::string("icpy") + Y;
+ColString Mv("mv", _ColStr_Purple); // = P + std::string("mv") + Y;
+ColString Imv("imv", _ColStr_Black); // = K + std::string("imv") + Y;
 
 std::vector<ColString> moves;
 std::vector<ColString> moves_std;
@@ -371,7 +372,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << G " default" S "\n";
+            std::cout << str() << tlucanti::G << " default" << tlucanti::S << "\n";
     }
     UserClass(int _a, int _b) : a(_a), b(_b) {
         valid = new(bool);
@@ -383,7 +384,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << C " constructor" S "\n";
+            std::cout << str() << tlucanti::C << " constructor" << tlucanti::S << "\n";
     }
     ~UserClass() EXCEPT {
         if (!valid)
@@ -397,18 +398,18 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << R " destructor" S "\n";
+            std::cout << str() << tlucanti::R << " destructor" << tlucanti::S << "\n";
     }
-    WUR const char *cl() const {
+    WUR std::string cl() const {
         switch (my_c % 7) {
-            case 0: return K;
-            case 1: return R;
-            case 2: return G;
-            case 3: return Y;
-            case 4: return B;
-            case 5: return P;
-            case 6: return C;
-            default: return W;
+            case 0: return tlucanti::K.str();
+            case 1: return tlucanti::R.str();
+            case 2: return tlucanti::G.str();
+            case 3: return tlucanti::Y.str();
+            case 4: return tlucanti::B.str();
+            case 5: return tlucanti::P.str();
+            case 6: return tlucanti::C.str();
+            default: return tlucanti::W.str();
         }
     }
     UserClass(const UserClass &cpy) : a(cpy.a), b(cpy.b) {
@@ -425,7 +426,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << Y " copy" S "\n";
+            std::cout << str() << tlucanti::Y << " copy" << tlucanti::S << "\n";
     }
     UserClass &operator =(const UserClass &cpy) {
         if (!cpy.valid)
@@ -446,7 +447,7 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << C " copy assign" S "\n";
+            std::cout << str() << tlucanti::C << " << copy assign" << tlucanti::S << "\n";
         return *this;
     }
 
@@ -510,5 +511,117 @@ bool UserClass::monitoring = false;
     UserClass::monitoring = false; \
     std_vec_cmp(__v1, __v2, __msg); \
     UserClass::monitoring = true
+
+# define PTR(__x) reinterpret_cast<void *>(__x)
+# define SINGLE_OP_INIT \
+    int __single_op_list [200]; \
+    std::memset(__single_op_list, 0, sizeof(int) * 200); \
+    int __single_op_num = 0; \
+
+# define SINGLE_OPERATION(__op, __label, __num) do { \
+    if (__single_op_list[__num] == 0) \
+    { \
+        __op; \
+        __single_op_list[__num] = 1; \
+        goto __label; \
+    } \
+} while (false)
+
+int _rb_tree_height_dfs(_Rb_node *node, int cur=1)
+{
+    int left = 0;
+    int right = 0;
+    if (node == nullptr)
+        return cur;
+    if (node->left)
+        left = _rb_tree_height_dfs(node->left, cur + 1);
+    if (node->right)
+        right = _rb_tree_height_dfs(node->right, cur + 1);
+    return std::max(std::max(left, right), cur);
+}
+
+void _print_rb_level(_Rb_node *node, int level, std::vector<_Rb_node *> &line, int cur=0)
+{
+    if (cur == level)
+    {
+        line.push_back(node);
+        return ;
+    }
+    if (node == nullptr)
+    {
+        _print_rb_level(nullptr, level, line, cur + 1);
+        _print_rb_level(nullptr, level, line, cur + 1);
+    } else {
+        _print_rb_level(node->left, level, line, cur + 1);
+        _print_rb_level(node->right, level, line, cur + 1);
+    }
+}
+
+std::string string_mul(const std::string &str, size_t mul)
+{
+    std::string ret;
+    while (mul-- > 0)
+        ret += str;
+    return ret;
+}
+
+long long ipow(long long base, long long power)
+{
+    if (power == 0)
+        return 1;
+    else if (power == 1)
+        return base;
+    else if (power % 2 == 1)
+        return base * ipow(base, power - 1);
+    long long pow_half = ipow(base, power / 2);
+    return pow_half * pow_half;
+}
+
+extern bool _rb_print_toggle;
+void _print_rb_tree(_Rb_node *tree, const char *msg)
+{
+    if (!_rb_print_toggle)
+        return ;
+    std::cout << tlucanti::W[msg] << std::endl;
+    int h = _rb_tree_height_dfs(tree);
+    for (int level=0; level < h; ++level)
+    {
+        std::vector<_Rb_node *> line;
+        _print_rb_level(tree, level, line);
+        std::cout << string_mul("    ", ipow(2, h - level - 1) - 1);
+        for (size_t i=0; i < line.size(); ++i)
+        {
+            std::string space = string_mul("    ", ipow(2, h - level) - 1);
+            if (line[i] == nullptr)
+            {
+                std::cout << " .  " << space;
+                continue ;
+            }
+            tlucanti::TermColor col = tlucanti::Red;
+            if (line[i]->color == _Rb_Black)
+                col = tlucanti::White;
+            std::cout << col << '[' << reinterpret_cast<long>(line[i]->key) << ']' << tlucanti::Reset << space;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+void print_rb_tree(rb_tree *tree, const char *msg)
+{
+    _print_rb_tree(tree->root, msg);
+}
+
+# define CHECK_EDGE(__root, __dir, __root_key, __dir_key, __root_col, __dir_col, __msg) \
+    ASSERT(__root, __msg + std::string(" root check")); \
+    ASSERT(__root->__dir, __msg + std::string(" dir check")); \
+    ASSERT(__root->key == PTR(__root_key), __msg + std::string(" root key check")); \
+    ASSERT(__root->__dir->key == PTR(__dir_key), __msg + std::string(" dir key check")); \
+    ASSERT(__root->color == __root_col, __msg + std::string(" root color check")); \
+    ASSERT(__root->__dir->color == __dir_col, __msg + std::string(" dir color check")); \
+    ASSERT(__root->__dir->parent == __root, __msg + std::string(" dir parent check"))
+
+# define _R _Rb_Red
+# define _B _Rb_Black
 
 #endif /* PAIR_HPP */
