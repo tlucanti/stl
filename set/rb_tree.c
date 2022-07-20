@@ -14,6 +14,27 @@ static _Rb_node   *_Rb_node_create(void *key)
 }
 
 #else /* C */
+
+static _Rb_node     *_Rb_node_create(void *key);
+static _Rb_node     *_Rb_grandparent(_Rb_node *node);
+static _Rb_node     *_Rb_uncle(_Rb_node *node);
+static _Rb_node     *_Rb_rotate_right(_Rb_node *node);
+static _Rb_node     *_Rb_rotate_left(_Rb_node *node);
+static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, int (*compare)(void *, void *));
+static _Rb_node     *_BST_find(_Rb_node *root, void *value, int (*compare)(void *, void *));
+static _Rb_node     *_Rb_recolor(_Rb_node *node);
+static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
+static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
+static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void *, void *));
+static void         _BST_remove_case_1(_Rb_node *node);
+static _Rb_node     *_BST_max(_Rb_node *node);
+static void         _BST_remove_case_2(_Rb_node *node);
+static void         _BST_remove(_Rb_node *node);
+
+void *rb_insert(rb_tree *root, void *key, int (*compare)(void *, void *));
+void *rb_find(rb_tree *root, void *key, int (*compare)(void *, void *));
+
+
 static _Rb_node    *_Rb_node_create(void *key)
 {
     _Rb_node    *ret;
@@ -227,7 +248,7 @@ static _Rb_node    *_BST_find(_Rb_node *root, void *value, int (*compare)(void *
         int cmp = compare(value, root->key);
         if (cmp == 0)
             return root;
-        if (cmp < 0)
+        else if (cmp < 0)
         {
             if (root->left == NULL)
                 return NULL;
@@ -241,6 +262,36 @@ static _Rb_node    *_BST_find(_Rb_node *root, void *value, int (*compare)(void *
         }
     }
 }
+
+//static _Rb_node     *_BST_remove(_Rb_node *root, void *value, int (*compare)(void *, void *))
+//{
+//    assert(root);
+//    assert(compare);
+//    while (1)
+//    {
+//        int cmp = compare(value, root->key);
+//        if (cmp == 0)
+//        {
+//            if (root->parent->left == root)
+//                root->parent->left = NULL;
+//            else
+//                root->parent->right = NULL;
+//            return root;
+//        }
+//        else if (cmp < 0)
+//        {
+//            if (root->left == NULL)
+//                return NULL;
+//            root = root->left;
+//        }
+//        else
+//        {
+//            if (root->right == NULL)
+//                return NULL;
+//            root = root->right;
+//        }
+//    }
+//}
 
 static _Rb_node    *_Rb_recolor(_Rb_node *node)
 /*
@@ -298,6 +349,7 @@ static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **r
 {
     assert(node);
     assert(gp);
+    assert(root);
     if (gp->right && gp->right->color == _Rb_Red)
         return _Rb_recolor(node); // case 1
     else
@@ -317,6 +369,7 @@ static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **r
 {
     assert(node);
     assert(gp);
+    assert(root);
     if (gp->left && gp->left->color == _Rb_Red)
         return _Rb_recolor(node); // case 1
     else
@@ -331,11 +384,11 @@ static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **r
     }
 }
 
-extern _rb_print_toggle;
 static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void *, void *))
 {
     assert(root);
     assert(node);
+    assert(compare);
     if (*root == NULL)
     {
         *root = node;
@@ -365,6 +418,107 @@ static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, int (*compare)(void
     }
     (*root)->color = _Rb_Black;
     return node;
+}
+
+static void _BST_remove_case_1(_Rb_node *node)
+{
+    if (node->right == NULL && node->left == NULL)
+    {
+        if (node->parent->left == node)
+            node->parent->left = NULL;
+        else
+            node->parent->right = NULL;
+    }
+    else
+    {
+        _Rb_node *child;
+        if (node->right == NULL)
+            child = node->left;
+        else
+            child = node->right;
+        if (node->parent->left == node)
+            node->parent->left = child;
+        else
+            node->parent->right = child;
+        child->color = node->color;
+    }
+}
+
+static _Rb_node *_BST_max(_Rb_node *node)
+{
+    assert(node);
+    while (1)
+    {
+        if (node->right == NULL)
+            return node;
+        node = node->right;
+    }
+}
+
+static void _BST_remove_case_2(_Rb_node *node)
+{
+    assert(node);
+    _Rb_node *accessor = _BST_max(node->left);
+    node->key = accessor->key;
+    _BST_remove(accessor);
+}
+
+static void _BST_remove(_Rb_node *node)
+{
+    assert(node);
+
+    if (node->left == NULL || node->right == NULL)
+        _BST_remove_case_1(node);
+    _BST_remove_case_2(node);
+}
+
+static int _Rb_is_black_children(_Rb_node *node)
+{
+    return (node->left == NULL || node->left->color == _Rb_Black)
+        && (node->right == NULL || node->right->color == _Rb_Black);
+}
+
+static 
+
+static void *_Rb_remove(_Rb_node **root, _Rb_node *node, int (*compare)(void *, void *))
+{
+    assert(root);
+    assert(node);
+    assert(compare);
+    if (*root == NULL)
+        return NULL;
+    _Rb_node *rm = _BST_find(*root, node->key, compare);
+    if (rm == NULL)
+        return NULL;
+    if (!_Rb_is_black_children(rm))
+    {
+        void *retval = rm->key;
+        _BST_remove(rm);
+        return retval;
+    }
+    _Rb_node *sibling;
+    if (rm->parent->left == rm)
+        sibling = rm->parent->right;
+    else
+        sibling = rm->parent->left;
+    if (sibling->color == _Rb_Black)
+    {
+        if (rm->parent->color == _Rb_Red)
+        {
+            rm->parent->color = _Rb_Black;
+            sibling->color = _Rb_Red;
+            return rm;
+        }
+    }
+
+
+    // case 1
+    if (rm->left == NULL || rm->right == NULL)
+        return _Rb_remove_case_1(rm);
+
+
+    if (rm->color == _Rb_Red)
+        return removed;
 }
 
 void *rb_insert(rb_tree *root, void *key, int (*compare)(void *, void *))

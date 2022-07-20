@@ -535,7 +535,6 @@ bool UserClass::monitoring = false;
 # define SINGLE_OP_INIT \
     int __single_op_list [200]; \
     std::memset(__single_op_list, 0, sizeof(int) * 200); \
-    int __single_op_num = 0; \
 
 # define SINGLE_OPERATION(__op, __label, __num) do { \
     if (__single_op_list[__num] == 0) \
@@ -584,7 +583,7 @@ std::string string_mul(const std::string &str, size_t mul)
     return ret;
 }
 
-long long ipow(long long base, long long power)
+unsigned long long ipow(unsigned long long base, unsigned long long power)
 {
     if (power == 0)
         return 1;
@@ -592,7 +591,7 @@ long long ipow(long long base, long long power)
         return base;
     else if (power % 2 == 1)
         return base * ipow(base, power - 1);
-    long long pow_half = ipow(base, power / 2);
+    unsigned long long pow_half = ipow(base, power / 2);
     return pow_half * pow_half;
 }
 
@@ -607,10 +606,10 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     {
         std::vector<_Rb_node *> line;
         _print_rb_level(tree, level, line);
-        std::cout << string_mul("    ", ipow(2, h - level - 1) - 1);
+        std::cout << string_mul("    ", ipow(2, static_cast<unsigned long long>(h - level - 1)) - 1);
         for (size_t i=0; i < line.size(); ++i)
         {
-            std::string space = string_mul("    ", ipow(2, h - level) - 1);
+            std::string space = string_mul("    ", ipow(2, static_cast<unsigned long long>(h - level)) - 1);
             if (line[i] == nullptr)
             {
                 std::cout << " .  " << space;

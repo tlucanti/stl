@@ -14,7 +14,7 @@ int main()
     signal(SIGSEGV, sigsegv_catcher);
     signal(SIGILL, sigill_cathcer);
     signal(SIGABRT, sigabrt_catcher);
-    srand(time(nullptr));
+    srand(static_cast<unsigned int>(time(nullptr)));
 
     run_test(insert_tests);
     run_test(find_tests);
@@ -258,7 +258,7 @@ void _random_insert_find_sized_tests(int div, const std::string &name)
             _rb_print_toggle = true;
             print_rb_tree(&tree, "invalid tree");
             std::cout << "moves:";
-            for (int i=0; i < _moves.size(); ++i)
+            for (std::size_t i=0; i < _moves.size(); ++i)
                 std::cout << ' ' << _moves[i];
             std::cout << std::endl;
             throw ;
