@@ -642,6 +642,18 @@ void print_rb_tree(rb_tree *tree, const char *msg)
 # define _R _Rb_Red
 # define _B _Rb_Black
 
+# define RB_INSERT(__val) do { \
+    rb_insert(&tree, PTR(__val), int_compare); \
+} while (false)
+
+# define RB_REMOVE(__val) do { \
+    rb_remove(&tree, PTR(__val), int_compare); \
+} while (false)
+
+# define RB_NOT_FOUND(__val, __msg) do { \
+    ASSERT(rb_find(&tree, PTR(__val), int_compare) == nullptr, __msg); \
+} while (false)
+
 # define FIND_ASSERT(__tree, __val, __msg) do { \
     rb_insert(&__tree, PTR(__val), int_compare); \
     ASSERT(rb_find(&__tree, PTR(__val), int_compare) == PTR(__val), __msg); \

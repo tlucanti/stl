@@ -41,8 +41,11 @@ typedef struct s_rb_tree
     _Rb_node *root;
 } rb_tree;
 
-void *rb_insert(rb_tree *root, void *key, int (*compare)(void *, void *));
-void *rb_find(rb_tree *root, void *key, int (*compare)(void *, void *));
+typedef int (*compare_fun)(void *, void *);
+
+void *rb_insert(rb_tree *root, void *key, compare_fun compare);
+void *rb_find(rb_tree *root, void *key, compare_fun compare);
+void *rb_remove(rb_tree *root, void *key, compare_fun compare);
 
 extern void _print_rb_tree(_Rb_node *tree, const char *msg);
 

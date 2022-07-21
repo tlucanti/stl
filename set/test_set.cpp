@@ -4,7 +4,8 @@
 
 void insert_tests();
 void find_tests();
-void random_insert_find_tests();
+void remove_tests();
+
 void random_insert_find_small_tests();
 void random_insert_find_medium_tests();
 void random_insert_find_large_tests();
@@ -18,10 +19,11 @@ int main()
 
     run_test(insert_tests);
     run_test(find_tests);
+    run_test(remove_tests);
 
-    run_test(random_insert_find_small_tests);
-    run_test(random_insert_find_medium_tests);
-    run_test(random_insert_find_large_tests);
+//    run_test(random_insert_find_small_tests);
+//    run_test(random_insert_find_medium_tests);
+//    run_test(random_insert_find_large_tests);
 
     final();
 }
@@ -281,4 +283,58 @@ void random_insert_find_medium_tests()
 void random_insert_find_large_tests()
 {
     _random_insert_find_sized_tests(2147483647, "large");
+}
+
+void remove_tests()
+{
+    start("rb_remove tests");
+
+    {
+        rb_tree tree = {nullptr};
+        RB_REMOVE(1);
+        ASSERT(tree.root == nullptr, "empty remove test 0");
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(1);
+        RB_REMOVE(1);
+        ASSERT(tree.root == nullptr, "root remove test 0");
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(2);
+        RB_INSERT(1);
+        RB_INSERT(3);
+
+        RB_REMOVE(1);
+        RB_REMOVE(3);
+
+        RB_NOT_FOUND(1, "red leaf remove test 0");
+        RB_NOT_FOUND(1, "red leaf remove test 1");
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(5);
+        RB_INSERT(2);
+        RB_INSERT(7);
+        RB_INSERT(3);
+
+        RB_REMOVE(2);
+
+        RB_NOT_FOUND(2, "replacement removal test 0");
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(5);
+        RB_INSERT(3);
+        RB_INSERT(7);
+        RB_INSERT(1);
+        RB_INSERT(4);
+
+        RB_REMOVE(2);
+
+        RB_NOT_FOUND(5, "inorder successor removal test 0");
+    }
+
+    result();
 }
