@@ -454,7 +454,9 @@ static _Rb_node *_BST_remove(_Rb_node *node)
             child = node->left;
         else
             child = node->right;
-        if (node->parent->left == node)
+        if (node->parent == NULL)
+            return node;
+        else if (node->parent->left == node)
             node->parent->left = child;
         else
             node->parent->right = child;
@@ -513,7 +515,7 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
         _Rb_fix_double_black_left(node, root);
         return ;
     }
-    else if (sibling->right->color == _Rb_Black)
+    else if (sibling->right == NULL || sibling->right->color == _Rb_Black)
     // case 5
     {
         _Rb_colors sib_col = sibling->color;
@@ -525,7 +527,8 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
     _Rb_colors sib_col = sibling->color;
     sibling->color = parent->color;
     parent->color = sib_col;
-    sibling->right->color = _Rb_Black;
+    if (sibling->right)
+        sibling->right->color = _Rb_Black;
     _Rb_rotate_left(parent);
 }
 
@@ -557,7 +560,7 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
         _Rb_fix_double_black_right(node, root);
         return ;
     }
-    else if (sibling->left->color == _Rb_Black)
+    else if (sibling->left == NULL || sibling->left->color == _Rb_Black)
         // case 5
     {
         _Rb_colors sib_col = sibling->color;
@@ -569,7 +572,8 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
     _Rb_colors sib_col = sibling->color;
     sibling->color = parent->color;
     parent->color = sib_col;
-    sibling->left->color = _Rb_Black;
+    if (sibling->left)
+        sibling->left->color = _Rb_Black;
     _Rb_rotate_right(parent);
 }
 
@@ -585,8 +589,23 @@ static _Rb_node *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
     _Rb_node *leaf = _BST_remove(rm);
     if (leaf == NULL)
         return rm;
+    if (leaf == *root)
+    {
+        if (leaf->left)
+            *root = leaf->left;
+        else if (leaf->right)
+            *root = leaf->right;
+        else
+            *root = NULL;
+        if (*root)
+        {
+            (*root)->parent = NULL;
+            (*root)->color = _Rb_Black;
+        }
+        return rm;
+    }
     if (leaf->color != _Rb_Red)
-        _Rb_fix_double_black(rm, *root);
+        _Rb_fix_double_black(leaf, *root);
     if (leaf->parent->left == leaf)
         leaf->parent->left = NULL;
     else

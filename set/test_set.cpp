@@ -10,6 +10,10 @@ void random_insert_find_small_tests();
 void random_insert_find_medium_tests();
 void random_insert_find_large_tests();
 
+void random_remove_small_tests();
+void random_remove_medium_tests();
+void random_remove_large_tests();
+
 int main()
 {
     signal(SIGSEGV, sigsegv_catcher);
@@ -25,15 +29,11 @@ int main()
 //    run_test(random_insert_find_medium_tests);
 //    run_test(random_insert_find_large_tests);
 
-    final();
-}
+    run_test(random_remove_small_tests);
+    run_test(random_remove_medium_tests);
+    run_test(random_remove_large_tests);
 
-int int_compare(void *lhs, void *rhs)
-{
-    return static_cast<int>(
-        reinterpret_cast<std::ptrdiff_t>(lhs)
-        - reinterpret_cast<std::ptrdiff_t>(rhs)
-    );
+    final();
 }
 
 bool _rb_print_toggle = false;
@@ -160,23 +160,23 @@ void insert_tests()
     {
         rb_tree tree = {nullptr};
         // 338 264 813 620 823 116 285 413 738 532 937 973 606 529 676 659 206
-        RB_INSERT_PRINT_LOCK(338);
-        RB_INSERT_PRINT_LOCK(264);
-        RB_INSERT_PRINT_LOCK(813);
-        RB_INSERT_PRINT_LOCK(620);
-        RB_INSERT_PRINT_LOCK(823);
-        RB_INSERT_PRINT_LOCK(116);
-        RB_INSERT_PRINT_LOCK(285);
-        RB_INSERT_PRINT_LOCK(413);
-        RB_INSERT_PRINT_LOCK(738);
-        RB_INSERT_PRINT_LOCK(532);
-        RB_INSERT_PRINT_LOCK(937);
-        RB_INSERT_PRINT_LOCK(973);
-        RB_INSERT_PRINT_LOCK(606);
-        RB_INSERT_PRINT_LOCK(529);
-        RB_INSERT_PRINT_LOCK(676);
-        RB_INSERT_PRINT_LOCK(659);
-        RB_INSERT_PRINT_LOCK(206);
+        RB_INSERT(338);
+        RB_INSERT(264);
+        RB_INSERT(813);
+        RB_INSERT(620);
+        RB_INSERT(823);
+        RB_INSERT(116);
+        RB_INSERT(285);
+        RB_INSERT(413);
+        RB_INSERT(738);
+        RB_INSERT(532);
+        RB_INSERT(937);
+        RB_INSERT(973);
+        RB_INSERT(606);
+        RB_INSERT(529);
+        RB_INSERT(676);
+        RB_INSERT(659);
+        RB_INSERT(206);
         check_valid_rb_tree(&tree);
     }
 
@@ -245,14 +245,17 @@ void _random_insert_find_sized_tests(int div, const std::string &name)
     {
 //        std::cout << test << std::endl;
         std::vector<int> _moves;
+        std::set<int> std_tree;
         rb_tree tree = {nullptr};
         try {
             for (int cnt = 0; cnt < 1000; ++cnt)
             {
-                int r = rand() % div;
+                int r = rand() % div + 1;
                 //            _moves.push_back(r);
                 //            std::cout << "adding " << r << std::endl;
+                std_tree.insert(r);
                 FIND_ASSERT(tree, r, name + " random test");
+                compare_trees(&tree, std_tree);
                 check_valid_rb_tree(&tree);
             }
         } catch (std::logic_error &e) {
@@ -331,10 +334,124 @@ void remove_tests()
         RB_INSERT(1);
         RB_INSERT(4);
 
-        RB_REMOVE(2);
+//        RB_PRINT_LOCK("before removal");
+        RB_REMOVE(5);
+//        RB_PRINT_LOCK("after removal");
 
         RB_NOT_FOUND(5, "inorder successor removal test 0");
+        check_valid_rb_tree(&tree);
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(5);
+        RB_INSERT(3);
+        RB_INSERT(6);
+        RB_INSERT(1);
+        RB_INSERT(4);
+        RB_INSERT(2);
+
+//        RB_PRINT_LOCK("before removal");
+        RB_REMOVE(5);
+//        RB_PRINT_LOCK("after removal");
+        check_valid_rb_tree(&tree);
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(5);
+        RB_INSERT(2);
+        RB_INSERT(9);
+        RB_INSERT(1);
+        RB_INSERT(4);
+        RB_INSERT(8);
+        RB_INSERT(10);
+        RB_INSERT(0);
+
+        RB_REMOVE(0);
+//        RB_PRINT_LOCK("before removal");
+        RB_REMOVE(5);
+//        RB_PRINT_LOCK("after removal");
+        check_valid_rb_tree(&tree);
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(3);
+        RB_INSERT(1);
+
+//        RB_PRINT_LOCK("before removal");
+        RB_REMOVE(3);
+//        RB_PRINT_LOCK("after removal");
+        check_valid_rb_tree(&tree);
+    }
+    {
+        rb_tree tree = {nullptr};
+        RB_INSERT(3);
+        RB_INSERT(1);
+        RB_INSERT(7);
+        RB_INSERT(6);
+        RB_INSERT(9);
+        RB_INSERT(10);
+
+        RB_PRINT_LOCK("before removal");
+        RB_REMOVE(3);
+        RB_PRINT_LOCK("after removal");
+        check_valid_rb_tree(&tree);
     }
 
     result();
+}
+
+void _random_remove_sized_tests(int div, const std::string &name)
+{
+    start(("random " + name + " remove tests").c_str());
+
+    for (int test = 0; test < 1000; ++test)
+    {
+        std::vector<int> insert_moves;
+        std::set<int> std_tree;
+        rb_tree tree = {nullptr};
+        rb_tree starting_tree = {nullptr};
+        generate_rb_tree(&tree, insert_moves, 1000, div, &starting_tree);
+        int cnt = 0;
+        try {
+            for (; cnt < insert_moves.size(); ++cnt)
+            {
+                RB_PRINT_LOCK("before removing");
+                std::cout << "removing " << insert_moves[cnt] << std::endl;
+                rb_remove(&tree, PTR(insert_moves[cnt]), int_compare);
+                RB_PRINT_LOCK("after removal");
+                std_tree.erase(insert_moves[cnt]);
+                RB_NOT_FOUND(PTR(insert_moves[cnt]), name + " random test");
+                compare_trees(&tree, std_tree);
+                check_valid_rb_tree(&tree);
+            }
+        } catch (std::exception &e) {
+            std::cout << e.what() << std::endl;
+            _rb_print_toggle = true;
+            print_rb_tree(&starting_tree, "staring tree");
+            print_rb_tree(&tree, "invalid tree");
+            std::cout << "moves:";
+            for (std::size_t i=0; i < insert_moves.size(); ++i)
+                std::cout << ' ' << insert_moves[i];
+            std::cout << std::endl << "test fall at case " << insert_moves[cnt]
+                << "(index " << cnt << ')' << std::endl;
+            throw ;
+        }
+    }
+
+    result();
+}
+
+void random_remove_small_tests()
+{
+    _random_remove_sized_tests(10, "small");
+}
+
+void random_remove_medium_tests()
+{
+    _random_remove_sized_tests(1000, "medium");
+}
+
+void random_remove_large_tests()
+{
+    _random_remove_sized_tests(2147483647, "large");
 }

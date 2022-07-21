@@ -625,9 +625,9 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     std::cout << std::endl;
 }
 
-void print_rb_tree(rb_tree *tree, const char *msg)
+void print_rb_tree(rb_tree *tree, const std::string &msg)
 {
-    _print_rb_tree(tree->root, msg);
+    _print_rb_tree(tree->root, msg.c_str());
 }
 
 # define CHECK_EDGE(__root, __dir, __root_key, __dir_key, __root_col, __dir_col, __msg) \
@@ -702,7 +702,8 @@ void _rb_dfs_parent_check(_Rb_node *node)
 void check_valid_rb_tree(rb_tree *tree)
 {
     assert(tree);
-    assert(tree->root);
+    if (tree->root == nullptr)
+        return ;
     if (tree->root->color == _Rb_Red)
         throw std::logic_error("root is Red");
     std::set<int> depth_map;
@@ -716,14 +717,47 @@ void check_valid_rb_tree(rb_tree *tree)
 }
 
 # define RB_PRINT_LOCK(__msg) do { \
-    _rb_print_toggle = false; \
-    print_rb_tree(&tree, "added node " __msg); \
+    _rb_print_toggle = true; \
+    print_rb_tree(&tree, __msg); \
     _rb_print_toggle = false; \
 } while (false)
 
 # define RB_INSERT_PRINT_LOCK(__val) do { \
     rb_insert(&tree, PTR(__val), int_compare); \
-    RB_PRINT_LOCK(#__val); \
+    RB_PRINT_LOCK(std::string("added node ") + #__val); \
 } while (false)
+
+int int_compare(void *lhs, void *rhs)
+{
+    return static_cast<int>(
+            reinterpret_cast<std::ptrdiff_t>(lhs)
+            - reinterpret_cast<std::ptrdiff_t>(rhs)
+    );
+}
+
+void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int max, rb_tree *tree2)
+{
+    for (int i=0; i < count; ++i)
+    {
+        int r = rand() % max + 1;
+        _moves.push_back(r);
+        rb_insert(tree, PTR(r), int_compare);
+        if (tree2 != nullptr)
+            rb_insert(tree2, PTR(r), int_compare);
+    }
+}
+
+void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
+{
+    for (std::set<int>::iterator i=std_tree.begin(); i != std_tree.end(); ++i)
+    {
+        if (rb_find(tree, PTR(*i), int_compare) == nullptr)
+        {
+            std::stringstream ss;
+            ss << "rb_tree has not element " << (*i);
+            throw std::logic_error(ss.str());
+        }
+    }
+}
 
 #endif /* PAIR_HPP */
