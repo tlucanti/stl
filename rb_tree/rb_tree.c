@@ -27,33 +27,47 @@ static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **
 static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
 static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare);
 static _Rb_node     *_BST_max(_Rb_node *node);
+static _Rb_node     *_BST_min(_Rb_node *node);
 static _Rb_node     *_BST_remove(_Rb_node *node);
 static int          _Rb_is_black_children(_Rb_node *node);
 static void         _Rb_fix_double_black(_Rb_node *node, _Rb_node **root);
 static void         _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root);
 static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root);
 static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare);
+static _Rb_node     *_Rb_next(_Rb_node *node);
+static _Rb_node     *_Rb_prev(_Rb_node *node);
 
-void *rb_insert(rb_tree *root, void *key, compare_fun compare)
+void    *rb_get_key(rb_node node)
+{
+    if (node.node)
+        return node.node->key;
+    return NULL;
+}
+
+rb_node rb_next(rb_node node)
+{
+    return (rb_node){_Rb_next(node.node)};
+}
+
+rb_node rb_prev(rb_node node)
+{
+    return (rb_node){_Rb_prev(node.node)};
+}
+
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
 {
     _Rb_node *node = _Rb_node_create(key);
-    return _Rb_insert(&(root->root), node, compare)->key;
+    return (rb_node){_Rb_insert(&(root->root), node, compare)};
 }
 
-void *rb_find(rb_tree *root, void *key, compare_fun compare)
+rb_node rb_find(rb_tree *root, void *key, compare_fun compare)
 {
-    _Rb_node *result = _BST_find(root->root, key, compare);
-    if (result == NULL)
-        return NULL;
-    return result->key;
+    return (rb_node){_BST_find(root->root, key, compare)};
 }
 
-void *rb_remove(rb_tree *root, void *key, compare_fun compare)
+rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
 {
-    _Rb_node *result = _Rb_remove(&(root->root), key, compare);
-    if (result == NULL)
-        return NULL;
-    return result->key;
+    return (rb_node){_Rb_remove(&(root->root), key, compare)};
 }
 
 static _Rb_node     *_Rb_node_create(void *key)
@@ -401,12 +415,17 @@ static _Rb_node     *_BST_max(_Rb_node *node)
 */
 {
     assert(node);
-    while (1)
-    {
-        if (node->right == NULL)
-            return node;
+    while (node->right != NULL)
         node = node->right;
-    }
+    return node;
+}
+
+static _Rb_node     *_BST_min(_Rb_node *node)
+{
+    assert(node);
+    while (node->left != NULL)
+        node = node->left;
+    return node;
 }
 
 static _Rb_node     *_BST_remove(_Rb_node *node)
@@ -621,4 +640,24 @@ static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compar
     else
         leaf->parent->right = NULL;
     return rm;
+}
+
+static _Rb_node    *_Rb_next(_Rb_node *node)
+{
+    assert(node);
+    if (node->right)
+        return _BST_min(node->right);
+    while (node->parent->right == node)
+        node = node->parent;
+    return node->parent;
+}
+
+static _Rb_node    *_Rb_prev(_Rb_node *node)
+{
+    assert(node);
+    if (node->left)
+        return _BST_max(node->left);
+    while (node->parent->left == node)
+        node = node->parent;
+    return node->parent;
 }

@@ -651,12 +651,12 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
 } while (false)
 
 # define RB_NOT_FOUND(__val, __msg) do { \
-    ASSERT(rb_find(&tree, PTR(__val), int_compare) == nullptr, __msg); \
+    ASSERT(rb_get_key(rb_find(&tree, PTR(__val), int_compare)) == nullptr, __msg); \
 } while (false)
 
 # define FIND_ASSERT(__tree, __val, __msg) do { \
     rb_insert(&__tree, PTR(__val), int_compare); \
-    ASSERT(rb_find(&__tree, PTR(__val), int_compare) == PTR(__val), __msg); \
+    ASSERT(rb_get_key(rb_find(&__tree, PTR(__val), int_compare)) == PTR(__val), __msg); \
 } while (false)
 
 int random(int start, int stop)
@@ -753,7 +753,7 @@ int int_compare(void *lhs, void *rhs)
     );
 }
 
-void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int max, rb_tree *tree2)
+void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int max, rb_tree *tree2=nullptr)
 {
     for (int i=0; i < count; ++i)
     {
@@ -769,7 +769,7 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 {
     for (std::set<int>::iterator i=std_tree.begin(); i != std_tree.end(); ++i)
     {
-        if (rb_find(tree, PTR(*i), int_compare) == nullptr)
+        if (rb_get_key(rb_find(tree, PTR(*i), int_compare)) == nullptr)
         {
             std::stringstream ss;
             ss << "rb_tree has not element " << (*i);

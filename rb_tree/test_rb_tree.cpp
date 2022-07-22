@@ -5,6 +5,7 @@
 void insert_tests();
 void find_tests();
 void remove_tests();
+void iterator_test();
 
 void random_insert_find_small_tests();
 void random_insert_find_medium_tests();
@@ -28,6 +29,7 @@ int main()
     run_test(insert_tests);
     run_test(find_tests);
     run_test(remove_tests);
+    run_test(iterator_test);
 
     run_test(random_insert_find_small_tests);
     run_test(random_insert_find_medium_tests);
@@ -198,7 +200,7 @@ void find_tests()
     {
         rb_tree tree = {nullptr};
 
-        ASSERT(rb_find(&tree, PTR(0), int_compare) == nullptr, "empty find test 0");
+        ASSERT(rb_get_key(rb_find(&tree, PTR(0), int_compare)) == nullptr, "empty find test 0");
         FIND_ASSERT(tree, 1, "find basic test 0");
         FIND_ASSERT(tree, 0, "find basic test 1");
         FIND_ASSERT(tree, 3, "find basic test 2");
@@ -451,6 +453,69 @@ void remove_tests()
         RB_REMOVE(10);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+    }
+
+    result();
+}
+
+void iterator_test()
+{
+    start("iterator tests");
+
+    {
+        rb_tree tree = {nullptr};
+
+        RB_INSERT(1);
+        RB_INSERT(2);
+        RB_INSERT(3);
+        RB_INSERT(4);
+        RB_INSERT(5);
+        RB_INSERT(6);
+        RB_INSERT(7);
+        RB_INSERT(8);
+        RB_INSERT(9);
+        RB_INSERT(10);
+
+//        RB_PRINT_LOCK("search tree");
+        rb_node node = rb_find(&tree, PTR(1), int_compare);
+        ASSERT(rb_get_key(node) == PTR(1), "iterator test 0");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(2), "iterator test 1");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(3), "iterator test 2");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(4), "iterator test 3");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(5), "iterator test 4");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(6), "iterator test 5");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(7), "iterator test 6");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(8), "iterator test 7");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(9), "iterator test 8");
+        node = rb_next(node);
+        ASSERT(rb_get_key(node) == PTR(10), "iterator test 9");
+
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(9), "iterator test 10");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(8), "iterator test 11");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(7), "iterator test 12");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(6), "iterator test 13");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(5), "iterator test 14");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(4), "iterator test 15");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(3), "iterator test 16");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(2), "iterator test 17");
+        node = rb_prev(node);
+        ASSERT(rb_get_key(node) == PTR(1), "iterator test 18");
     }
 
     result();

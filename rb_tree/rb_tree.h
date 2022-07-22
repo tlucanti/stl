@@ -38,11 +38,19 @@ typedef struct s_rb_tree
     _Rb_node *root;
 }   rb_tree;
 
+typedef struct s_rb_node
+{
+    _Rb_node *node;
+}   rb_node;
+
 typedef int (*compare_fun)(void *, void *);
 
-void *rb_insert(rb_tree *root, void *key, compare_fun compare);
-void *rb_find(rb_tree *root, void *key, compare_fun compare);
-void *rb_remove(rb_tree *root, void *key, compare_fun compare);
+void    *rb_get_key(rb_node node);
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare);
+rb_node rb_find(rb_tree *root, void *key, compare_fun compare);
+rb_node rb_remove(rb_tree *root, void *key, compare_fun compare);
+rb_node rb_next(rb_node node);
+rb_node rb_prev(rb_node node);
 
 #ifdef __cplusplus
 }
