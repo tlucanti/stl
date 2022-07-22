@@ -1,6 +1,6 @@
 
-#ifndef RB_TREE_H
-# define RB_TREE_H
+#ifndef _RB_TREE_H
+# define _RB_TREE_H
 
 # ifdef __cplusplus
 extern "C" {
@@ -16,9 +16,6 @@ extern "C" {
 #   include <stdlib.h>
 #  endif
 # endif
-
-#include <stdio.h>
-//#warning "remove stdio"
 
 typedef enum e_Rb_colors
 {
@@ -39,7 +36,7 @@ typedef struct s_Rb_node
 typedef struct s_rb_tree
 {
     _Rb_node *root;
-} rb_tree;
+}   rb_tree;
 
 typedef int (*compare_fun)(void *, void *);
 
@@ -47,10 +44,8 @@ void *rb_insert(rb_tree *root, void *key, compare_fun compare);
 void *rb_find(rb_tree *root, void *key, compare_fun compare);
 void *rb_remove(rb_tree *root, void *key, compare_fun compare);
 
-extern void _print_rb_tree(_Rb_node *tree, const char *msg);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* RB_TREE_H */
+#endif /* _RB_TREE_H */

@@ -28,13 +28,35 @@ static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **
 static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare);
 static _Rb_node     *_BST_max(_Rb_node *node);
 static _Rb_node     *_BST_remove(_Rb_node *node);
+static int          _Rb_is_black_children(_Rb_node *node);
+static void         _Rb_fix_double_black(_Rb_node *node, _Rb_node **root);
+static void         _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root);
+static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root);
+static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare);
 
-static void _Rb_fix_double_black(_Rb_node *node, _Rb_node **root);
-static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root);
-static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root);
+void *rb_insert(rb_tree *root, void *key, compare_fun compare)
+{
+    _Rb_node *node = _Rb_node_create(key);
+    return _Rb_insert(&(root->root), node, compare)->key;
+}
 
+void *rb_find(rb_tree *root, void *key, compare_fun compare)
+{
+    _Rb_node *result = _BST_find(root->root, key, compare);
+    if (result == NULL)
+        return NULL;
+    return result->key;
+}
 
-static _Rb_node    *_Rb_node_create(void *key)
+void *rb_remove(rb_tree *root, void *key, compare_fun compare)
+{
+    _Rb_node *result = _Rb_remove(&(root->root), key, compare);
+    if (result == NULL)
+        return NULL;
+    return result->key;
+}
+
+static _Rb_node     *_Rb_node_create(void *key)
 {
     _Rb_node    *ret;
 
@@ -48,7 +70,7 @@ static _Rb_node    *_Rb_node_create(void *key)
 }
 #endif
 
-static _Rb_node   *_Rb_grandparent(_Rb_node *node)
+static _Rb_node     *_Rb_grandparent(_Rb_node *node)
 /*
     function returns grandparent of node
 
@@ -62,12 +84,10 @@ static _Rb_node   *_Rb_grandparent(_Rb_node *node)
 {
     assert(node);
 
-//    if (node->parent != NULL)
-        return node->parent->parent;
-//    return NULL;
+    return node->parent->parent;
 }
 
-static _Rb_node   *_Rb_uncle(_Rb_node *node)
+static _Rb_node     *_Rb_uncle(_Rb_node *node)
 /*
     function returns uncle of node
     there are two cases of uncles:
@@ -92,14 +112,12 @@ static _Rb_node   *_Rb_uncle(_Rb_node *node)
 
     assert(node);
     gp = _Rb_grandparent(node);
-//    if (gp == NULL)
-//        return NULL;
     if (node->parent == gp->left)
         return gp->left;
     return gp->left;
 }
 
-static _Rb_node    *_Rb_rotate_right(_Rb_node *node, _Rb_node **root)
+static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root)
 /*
     function applies right-rotation to node
     right rotation has 2 steps
@@ -128,7 +146,6 @@ static _Rb_node    *_Rb_rotate_right(_Rb_node *node, _Rb_node **root)
 
     assert(node);
     assert(root);
-//    _print_rb_tree(node->parent, "before right rotation");
     pivot = node->left;
     if (node == *root)
         *root = pivot;
@@ -140,20 +157,15 @@ static _Rb_node    *_Rb_rotate_right(_Rb_node *node, _Rb_node **root)
             node->parent->right = pivot;
     }
     pivot->parent = node->parent; // step 1
-//    _print_rb_tree(node->parent, "step 1");
     node->left = pivot->right; // step 2
-//    _print_rb_tree(node->parent, "step 2");
-//    _print_rb_tree(pivot, "step 2 pivot");
     if (node->left)
         node->left->parent = node; // step 3
     pivot->right = node; // step 4
-//    _print_rb_tree(pivot, "step 4 pivot");
     node->parent = pivot; // step 5
-//    _print_rb_tree(node->parent, "step 5");
     return node;
 }
 
-static _Rb_node    *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
+static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
 /*
     functions applies left-rotation to node
     left rotation has 2 steps:
@@ -180,7 +192,6 @@ static _Rb_node    *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
 
     assert(node);
     assert(root);
-//    _print_rb_tree(node, "before left rotation");
     pivot = node->right;
     if (node == *root)
         *root = pivot;
@@ -192,15 +203,11 @@ static _Rb_node    *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
             node->parent->right = pivot;
     }
     pivot->parent = node->parent;
-//    _print_rb_tree(node, "step 1");
     node->right = pivot->left;
-//    _print_rb_tree(node, "step 2");
-//    _print_rb_tree(pivot, "step 1 pivot");
 
     if (node->right)
         node->right->parent = node;
     pivot->left = node;
-//    _print_rb_tree(node, "step 3");
 
     node->parent = pivot;
     return node;
@@ -242,7 +249,7 @@ static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun com
     }
 }
 
-static _Rb_node    *_BST_find(_Rb_node *root, void *value, compare_fun compare)
+static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare)
 {
     assert(compare);
 
@@ -268,7 +275,7 @@ static _Rb_node    *_BST_find(_Rb_node *root, void *value, compare_fun compare)
     }
 }
 
-static _Rb_node    *_Rb_recolor(_Rb_node *node)
+static _Rb_node     *_Rb_recolor(_Rb_node *node)
 /*
     function does recoloring to serval neighbours:
      - uncle is colored Black
@@ -295,7 +302,7 @@ static _Rb_node    *_Rb_recolor(_Rb_node *node)
     return gp;
 }
 
-static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
+static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
 /*
     function eliminates violations after inserting node to tree
     in examples [a] means black node, (a) - is red, {a} means, that color does
@@ -335,12 +342,11 @@ static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **r
         node->parent->color = _Rb_Black;
         if (gp == *root)
             *root = node->parent;
-//        _print_rb_tree(node->parent, "after rotate");
         return node->parent;
     }
 }
 
-static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
+static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root)
 {
     assert(node);
     assert(gp);
@@ -359,7 +365,7 @@ static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **r
     }
 }
 
-static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare)
+static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare)
 {
     assert(root);
     assert(node);
@@ -373,7 +379,6 @@ static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare
     _Rb_node *inserted = _BST_insert(*root, node, compare);
     if (inserted != NULL)
         return inserted;
-//    _print_rb_tree(*root, "after BST insert");
     while (node != *root && node->color == _Rb_Red)
     {
         if (node->parent->color == _Rb_Black)
@@ -381,11 +386,6 @@ static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare
         _Rb_node *gp = _Rb_grandparent(node);
         if (gp == NULL)
             break ;
-//        {
-//            _rb_print_toggle = 1;
-//            printf("now on %p\n", node->key);
-//            _print_rb_tree(*root, "grandparent is null");
-//        }
         if (node->parent == gp->left) // left cases
             node = _Rb_insert_case_1(node, gp, root);
         else // right cases
@@ -395,7 +395,7 @@ static _Rb_node *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare
     return node;
 }
 
-static _Rb_node *_BST_max(_Rb_node *node)
+static _Rb_node     *_BST_max(_Rb_node *node)
 /*
     function finds the maximal element in given tree
 */
@@ -409,7 +409,7 @@ static _Rb_node *_BST_max(_Rb_node *node)
     }
 }
 
-static _Rb_node *_BST_remove(_Rb_node *node)
+static _Rb_node     *_BST_remove(_Rb_node *node)
 /*
     function performs binary search tree removing algorithm. It has three cases:
 
@@ -474,13 +474,13 @@ static _Rb_node *_BST_remove(_Rb_node *node)
     return _BST_remove(accessor);
 }
 
-static int _Rb_is_black_children(_Rb_node *node)
+static int          _Rb_is_black_children(_Rb_node *node)
 {
     return (node->left == NULL || node->left->color == _Rb_Black)
         && (node->right == NULL || node->right->color == _Rb_Black);
 }
 
-static void _Rb_fix_double_black(_Rb_node *node, _Rb_node **root)
+static void         _Rb_fix_double_black(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
@@ -493,7 +493,7 @@ static void _Rb_fix_double_black(_Rb_node *node, _Rb_node **root)
         _Rb_fix_double_black_right(node, root);
 }
 
-static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root)
+static void         _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
@@ -540,7 +540,7 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root)
     _Rb_rotate_left(parent, root);
 }
 
-static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root)
+static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
@@ -587,7 +587,7 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root)
     _Rb_rotate_right(parent, root);
 }
 
-static _Rb_node *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
+static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
 {
     assert(root);
     assert(compare);
@@ -621,26 +621,4 @@ static _Rb_node *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
     else
         leaf->parent->right = NULL;
     return rm;
-}
-
-void *rb_insert(rb_tree *root, void *key, compare_fun compare)
-{
-    _Rb_node *node = _Rb_node_create(key);
-    return _Rb_insert(&(root->root), node, compare)->key;
-}
-
-void *rb_find(rb_tree *root, void *key, compare_fun compare)
-{
-    _Rb_node *result = _BST_find(root->root, key, compare);
-    if (result == NULL)
-        return NULL;
-    return result->key;
-}
-
-void *rb_remove(rb_tree *root, void *key, compare_fun compare)
-{
-    _Rb_node *result = _Rb_remove(&(root->root), key, compare);
-    if (result == NULL)
-        return NULL;
-    return result->key;
 }

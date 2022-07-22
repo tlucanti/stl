@@ -19,7 +19,7 @@ include_directories(test)
 add_executable(vector_test vector/test_vector.cpp)
 add_executable(stack_test stack/test_stack.cpp)
 add_executable(pair_test pair/test_pair.cpp)
-add_executable(set_test set/test_set.cpp set/rb_tree.c)
+add_executable(rb_tree_test rb_tree/test_rb_tree.cpp rb_tree/rb_tree.c)
 
 add_executable(vector_speed vector/speed_test.cpp)
 
