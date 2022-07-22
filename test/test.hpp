@@ -694,9 +694,27 @@ void _rb_dfs_parent_check(_Rb_node *node)
     if (node->color == _Rb_Red and node->parent->color == _Rb_Red)
         throw std::logic_error("two red nodes in row");
     if (node->left)
+    {
+        if (node->left->parent != node)
+        {
+            std::stringstream ss;
+            ss << "child's parent pointer not equal actual parent. node: ("
+                << node->key << "), child: (" << node->left->key << ")";
+            throw std::logic_error(ss.str());
+        }
         _rb_dfs_parent_check(node->left);
+    }
     if (node->right)
+    {
+        if (node->right->parent != node)
+        {
+            std::stringstream ss;
+            ss << "child's parent pointer not equal actual parent. node: ("
+               << node->key << "), child: (" << node->right->key << ")";
+            throw std::logic_error(ss.str());
+        }
         _rb_dfs_parent_check(node->right);
+    }
 }
 
 void check_valid_rb_tree(rb_tree *tree)

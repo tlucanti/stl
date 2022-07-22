@@ -18,22 +18,20 @@ static _Rb_node   *_Rb_node_create(void *key)
 static _Rb_node     *_Rb_node_create(void *key);
 static _Rb_node     *_Rb_grandparent(_Rb_node *node);
 static _Rb_node     *_Rb_uncle(_Rb_node *node);
-static _Rb_node     *_Rb_rotate_right(_Rb_node *node);
-static _Rb_node     *_Rb_rotate_left(_Rb_node *node);
+static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root);
+static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root);
 static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare);
 static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare);
 static _Rb_node     *_Rb_recolor(_Rb_node *node);
 static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
 static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
 static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare);
-static void         _BST_remove_case_1(_Rb_node *node);
 static _Rb_node     *_BST_max(_Rb_node *node);
-static void         _BST_remove_case_2(_Rb_node *node);
 static _Rb_node     *_BST_remove(_Rb_node *node);
 
-static void _Rb_fix_double_black(_Rb_node *node, _Rb_node *root);
-static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root);
-static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root);
+static void _Rb_fix_double_black(_Rb_node *node, _Rb_node **root);
+static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root);
+static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root);
 
 
 static _Rb_node    *_Rb_node_create(void *key)
@@ -101,7 +99,7 @@ static _Rb_node   *_Rb_uncle(_Rb_node *node)
     return gp->left;
 }
 
-static _Rb_node    *_Rb_rotate_right(_Rb_node *node)
+static _Rb_node    *_Rb_rotate_right(_Rb_node *node, _Rb_node **root)
 /*
     function applies right-rotation to node
     right rotation has 2 steps
@@ -129,8 +127,11 @@ static _Rb_node    *_Rb_rotate_right(_Rb_node *node)
     _Rb_node    *pivot;
 
     assert(node);
+    assert(root);
 //    _print_rb_tree(node->parent, "before right rotation");
     pivot = node->left;
+    if (node == *root)
+        *root = pivot;
     if (node->parent)
     {
         if (node == node->parent->left)
@@ -152,7 +153,7 @@ static _Rb_node    *_Rb_rotate_right(_Rb_node *node)
     return node;
 }
 
-static _Rb_node    *_Rb_rotate_left(_Rb_node *node)
+static _Rb_node    *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
 /*
     functions applies left-rotation to node
     left rotation has 2 steps:
@@ -178,8 +179,11 @@ static _Rb_node    *_Rb_rotate_left(_Rb_node *node)
     _Rb_node    *pivot;
 
     assert(node);
+    assert(root);
 //    _print_rb_tree(node, "before left rotation");
     pivot = node->right;
+    if (node == *root)
+        *root = pivot;
     if (node->parent)
     {
         if (node == node->parent->left)
@@ -326,8 +330,8 @@ static _Rb_node    *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **r
     else
     {
         if (node == node->parent->right)
-            node = _Rb_rotate_left(node->parent); // case 2
-        _Rb_rotate_right(gp)->color = _Rb_Red; // case 3
+            node = _Rb_rotate_left(node->parent, root); // case 2
+        _Rb_rotate_right(gp, root)->color = _Rb_Red; // case 3
         node->parent->color = _Rb_Black;
         if (gp == *root)
             *root = node->parent;
@@ -346,8 +350,8 @@ static _Rb_node    *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **r
     else
     {
         if (node == node->parent->left)
-            node = _Rb_rotate_right(node->parent); // case 2
-        _Rb_rotate_left(gp)->color = _Rb_Red; // case 3
+            node = _Rb_rotate_right(node->parent, root); // case 2
+        _Rb_rotate_left(gp, root)->color = _Rb_Red; // case 3
         node->parent->color = _Rb_Black;
         if (gp == *root)
             *root = node->parent;
@@ -460,6 +464,7 @@ static _Rb_node *_BST_remove(_Rb_node *node)
             node->parent->left = child;
         else
             node->parent->right = child;
+        child->parent = node->parent;
         child->color = node->color;
         return NULL;
     }
@@ -475,11 +480,12 @@ static int _Rb_is_black_children(_Rb_node *node)
         && (node->right == NULL || node->right->color == _Rb_Black);
 }
 
-static void _Rb_fix_double_black(_Rb_node *node, _Rb_node *root)
+static void _Rb_fix_double_black(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
-    if (node == root)
+    assert(*root);
+    if (node == *root)
         return ;
     if (node->parent->left == node)
         _Rb_fix_double_black_left(node, root);
@@ -487,11 +493,12 @@ static void _Rb_fix_double_black(_Rb_node *node, _Rb_node *root)
         _Rb_fix_double_black_right(node, root);
 }
 
-static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
+static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
-    if (node == root)
+    assert(*root);
+    if (node == *root)
     // case 2
         return ;
     _Rb_node *parent = node->parent;
@@ -511,7 +518,7 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
     {
         sibling->color = parent->color;
         parent->color = _Rb_Red;
-        _Rb_rotate_left(parent);
+        _Rb_rotate_left(parent, root);
         _Rb_fix_double_black_left(node, root);
         return ;
     }
@@ -521,7 +528,8 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
         _Rb_colors sib_col = sibling->color;
         sibling->color = sibling->left->color;
         sibling->left->color = sib_col;
-        _Rb_rotate_right(sibling);
+        _Rb_rotate_right(sibling, root);
+        sibling = sibling->parent;
     }
     // case 6
     _Rb_colors sib_col = sibling->color;
@@ -529,14 +537,15 @@ static void _Rb_fix_double_black_left(_Rb_node *node, _Rb_node *root)
     parent->color = sib_col;
     if (sibling->right)
         sibling->right->color = _Rb_Black;
-    _Rb_rotate_left(parent);
+    _Rb_rotate_left(parent, root);
 }
 
-static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
+static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root)
 {
     assert(node);
     assert(root);
-    if (node == root)
+    assert(*root);
+    if (node == *root)
         // case 2
         return ;
     _Rb_node *parent = node->parent;
@@ -556,7 +565,7 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
     {
         sibling->color = parent->color;
         parent->color = _Rb_Red;
-        _Rb_rotate_right(parent);
+        _Rb_rotate_right(parent, root);
         _Rb_fix_double_black_right(node, root);
         return ;
     }
@@ -566,7 +575,8 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
         _Rb_colors sib_col = sibling->color;
         sibling->color = sibling->right->color;
         sibling->right->color = sib_col;
-        _Rb_rotate_left(sibling);
+        _Rb_rotate_left(sibling, root);
+        sibling = sibling->parent;
     }
     // case 6
     _Rb_colors sib_col = sibling->color;
@@ -574,7 +584,7 @@ static void _Rb_fix_double_black_right(_Rb_node *node, _Rb_node *root)
     parent->color = sib_col;
     if (sibling->left)
         sibling->left->color = _Rb_Black;
-    _Rb_rotate_right(parent);
+    _Rb_rotate_right(parent, root);
 }
 
 static _Rb_node *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
@@ -605,7 +615,7 @@ static _Rb_node *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
         return rm;
     }
     if (leaf->color != _Rb_Red)
-        _Rb_fix_double_black(leaf, *root);
+        _Rb_fix_double_black(leaf, root);
     if (leaf->parent->left == leaf)
         leaf->parent->left = NULL;
     else
