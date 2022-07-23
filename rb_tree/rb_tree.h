@@ -1,6 +1,6 @@
 
-#ifndef _RB_TREE_H
-# define _RB_TREE_H
+#ifndef RB_TREE_H
+# define RB_TREE_H
 
 # ifdef __cplusplus
 extern "C" {
@@ -56,4 +56,4 @@ rb_node rb_prev(rb_node node);
 }
 #endif /* __cplusplus */
 
-#endif /* _RB_TREE_H */
+#endif /* RB_TREE_H */

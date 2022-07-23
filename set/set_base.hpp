@@ -3,7 +3,7 @@
 # define SET_BASE_HPP
 
 # include "defs.h"
-# include "rb_tree.h"
+# include "rb_tree.hpp"
 # include "rb_tree_iterator.hpp"
 # include <functional>
 
@@ -34,18 +34,21 @@ public:
     typedef rb_tree_reverse_iterator<const value_type>  const_reverse_iterator;
 
 private:
-    rb_tree         _tree;
-    rb_node         _begin;
-    rb_node         _end;
+    typedef rb_tree<value_type, key_compare>            tree_type;
+    typedef typename tree_type::rb_node                 tree_node;
+
+    tree_type       _tree;
+    tree_node       *_begin;
+    tree_node       *_end;
     size_type       _size;
     allocator_type  _alloc;
     key_compare     _cmp;
 
 public:
     set_base() :
-        _tree((rb_tree){nullptr}),
-        _begin((rb_node){nullptr}),
-        _end((rb_node){nullptr}),
+        _tree(tree_type()),
+        _begin(nullptr),
+        _end(nullptr),
         _size(0),
         _alloc(allocator_type()),
         _cmp(key_compare())
@@ -55,12 +58,12 @@ public:
         const key_type &comp,
         const allocator_type &alloc=allocator_type()
     ) :
-        _tree((rb_tree){nullptr}),
-        _begin((rb_node){nullptr}),
-        _end((rb_node){nullptr}),
+        _tree(tree_type()),
+        _begin(nullptr),
+        _end(nullptr),
         _size(0),
-        _alloc(alloc),
-        _cmp(comp)
+        _alloc(allocator_type()),
+        _cmp(key_compare())
     {}
 
     template<class iterator_type>
@@ -70,37 +73,29 @@ public:
         const key_type &comp=key_type(),
         const allocator_type &alloc=allocator_type()
     ) :
-        _tree((rb_tree){nullptr}),
-        _begin((rb_node){nullptr}),
-        _end((rb_node){nullptr}),
+        _tree(tree_type()),
+        _begin(nullptr),
+        _end(nullptr),
         _size(0),
-        _alloc(alloc),
-        _cmp(comp)
+        _alloc(allocator_type()),
+        _cmp(key_compare())
     {
-        while (first != last)
-            rb_insert(&_tree, &(*first++), &set_base::_compare_fun);
+//        while (first != last)
+//            _tree.insert((&_tree, &(*first++), &set_base::_compare_fun);
     }
 
-    void insert(value_type value)
+    void insert(const_reference value)
     {
-        rb_insert(&_tree, static_cast<void *>(&value),
-                  (compare_fun)(&set_base::_compare_fun));
+        _tree.insert(value);
     }
 
-    void *find(value_type value)
+    value_type find(const_reference value)
     {
-        return rb_get_key(rb_find(&_tree, static_cast<void *>(&value), &set_base::_compare_fun));
+        _tree.find(value);
     }
 
 private:
-    int _compare_fun(void *lhs, void *rhs)
-    {
-        if (_cmp(*static_cast<value_type *>(lhs), *static_cast<value_type *>(rhs)))
-            return -1;
-        else if (rhs < lhs)
-            return 0;
-        return 1;
-    }
+
 };
 
 TLU_NAMESPACE_END

@@ -1,7 +1,6 @@
 
 #include "set_base.hpp"
-#include "rb_tree_iterator.hpp"
-#include <set>
+#include "rb_tree.hpp"
 #include <iostream>
 
 class UC
@@ -18,11 +17,8 @@ public:
 
 int main()
 {
-    tlucanti::set_base<int> a;
-
-    a.insert(123);
-    std::cout << "pointer " << a.find(123) << std::endl;
-    std::cout << "value " << *static_cast<int *>(a.find(123)) << std::endl;
-//    std::cout << "reversed " << rev.next() << std::endl;
-//    std::cout << "not reversed " << nrev.next() << std::endl;
+    tlucanti::rb_tree<int, std::less<int> > tree((std::less<int>()));
+    tree.insert(123);
+    tree.find(123);
+    tree.remove(123);
 }
