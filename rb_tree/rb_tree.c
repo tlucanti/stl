@@ -15,6 +15,21 @@ static _Rb_node   *_Rb_node_create(void *key)
 
 #else /* C */
 
+static _Rb_node     *_Rb_node_create(void *key)
+{
+    _Rb_node    *ret;
+
+    ret = (_Rb_node *)malloc(sizeof(_Rb_node));
+    ret->parent = NULL;
+    ret->left = NULL;
+    ret->right = NULL;
+    ret->color = _Rb_Red;
+    ret->key = key;
+    return ret;
+}
+
+#endif
+
 static _Rb_node     *_Rb_node_create(void *key);
 static _Rb_node     *_Rb_grandparent(_Rb_node *node);
 static _Rb_node     *_Rb_uncle(_Rb_node *node);
@@ -69,20 +84,6 @@ rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
 {
     return (rb_node){_Rb_remove(&(root->root), key, compare)};
 }
-
-static _Rb_node     *_Rb_node_create(void *key)
-{
-    _Rb_node    *ret;
-
-    ret = (_Rb_node *)malloc(sizeof(_Rb_node));
-    ret->parent = NULL;
-    ret->left = NULL;
-    ret->right = NULL;
-    ret->color = _Rb_Red;
-    ret->key = key;
-    return ret;
-}
-#endif
 
 static _Rb_node     *_Rb_grandparent(_Rb_node *node)
 /*

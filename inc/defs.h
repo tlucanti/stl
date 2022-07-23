@@ -16,6 +16,7 @@
 # include <unistd.h>
 # include <cstring>
 # include <cstdlib>
+# include <cctype>
 
 # ifdef __DEBUG
 #  define PRIVATE public
