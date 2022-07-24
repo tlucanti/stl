@@ -23,8 +23,18 @@ public:
     {
 //    private:
     public:
-        rb_node (rb_node *_parent, rb_node *_left, rb_node *_right, rb_colors _color, const type_T &_key)
-            : parent(_parent), left(_left), right(_right), color(_color), key(_key)
+        rb_node(
+            rb_node *_parent,
+            rb_node *_left,
+            rb_node *_right,
+            rb_colors _color,
+            const type_T &_key
+        ) :
+            parent(_parent),
+            left(_left),
+            right(_right),
+            color(_color),
+            key(_key)
         {}
 
         rb_node     *parent;
@@ -41,6 +51,8 @@ public:
 
 private:
     rb_node     *_root;
+    rb_node     *_begin;
+    rb_node     *_end;
     const cmp_T &_cmp;
 
 public:
@@ -48,6 +60,23 @@ public:
     explicit rb_tree(const cmp_T &cmp)
         : _root(nullptr), _cmp(cmp)
     {}
+
+#if CPP11
+    rb_tree(rb_tree &&mv)
+        : _root(mv._root), _cmp(std::move(mv._cmp))
+    {}
+#endif
+
+    rb_tree(const rb_tree &cpy)
+        : _root(nullptr), _cmp(cpy._cmp)
+    {
+        _root = _rb_copy(cpy._root);
+    }
+
+    ~rb_node()
+    {
+        _rb_destroy(_root);
+    }
 
     rb_node *insert(const type_T &key)
     {
@@ -469,7 +498,6 @@ private:
 
     rb_node    *_rb_prev(rb_node *node)
     {
-        assert(node);
         if (node->left)
             return _bst_max(node->left);
         while (node->parent->left == node)
@@ -484,6 +512,27 @@ private:
         else if (rhs < lhs)
             return 0;
         return 1;
+    }
+
+    rb_node *_rb_copy(rb_node *root)
+    {
+        rb_node *node = new rb_node;
+        node->key = new type_T(*(root->key));
+        node->color = root->color;
+        if (root->left)
+            node->left = _rb_copy(root->left);
+        if (root->right)
+            node->right = _rb_copy(root->right);
+        return node;
+    }
+
+    void _rb_destroy(rb_node *node)
+    {
+        delete node->key;
+        if (node->left)
+            _rb_destroy(node->left);
+        if (node->right)
+            _rb_destroy(node->right);
     }
 };
 

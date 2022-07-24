@@ -1,6 +1,31 @@
 
 #include "rb_tree.h"
 
+WUR static _Rb_node     *_Rb_node_create(void *key) NOEXCEPT;
+static void             _Rb_node_destroy(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_grandparent(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_uncle(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+WUR static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+WUR static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare) NOEXCEPT;
+WUR static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare) NOEXCEPT;
+WUR static _Rb_node     *_Rb_recolor(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root) NOEXCEPT;
+WUR static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root) NOEXCEPT;
+WUR static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare) NOEXCEPT;
+WUR static _Rb_node     *_BST_max(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_BST_min(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_BST_remove(_Rb_node *node) NOEXCEPT;
+WUR static int          _Rb_is_black_children(_Rb_node *node) NOEXCEPT;
+static void             _Rb_fix_double_black(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+static void             _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+static void             _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+WUR static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare, _Rb_node **begin, _Rb_node **end) NOEXCEPT;
+WUR static _Rb_node     *_Rb_next(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_prev(_Rb_node *node) NOEXCEPT;
+WUR static _Rb_node     *_Rb_tree_copy(_Rb_node *root, copy_fun) NOEXCEPT;
+static void             _Rb_tree_destroy(_Rb_node *root, del_fun) NOEXCEPT;
+
 #ifdef __cplusplus
 static _Rb_node   *_Rb_node_create(void *key)
 {
@@ -11,6 +36,11 @@ static _Rb_node   *_Rb_node_create(void *key)
     ret->color = _Rb_Red;
     ret->key = key;
     return ret;
+}
+
+static void         _Rb_node_destroy(_Rb_node *node)
+{
+    delete node;
 }
 
 #else /* C */
@@ -28,35 +58,49 @@ static _Rb_node     *_Rb_node_create(void *key)
     return ret;
 }
 
+static void         _Rb_node_destroy(_Rb_node *node)
+{
+    free(node);
+}
 #endif
-
-static _Rb_node     *_Rb_node_create(void *key);
-static _Rb_node     *_Rb_grandparent(_Rb_node *node);
-static _Rb_node     *_Rb_uncle(_Rb_node *node);
-static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root);
-static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root);
-static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare);
-static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare);
-static _Rb_node     *_Rb_recolor(_Rb_node *node);
-static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
-static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root);
-static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare);
-static _Rb_node     *_BST_max(_Rb_node *node);
-static _Rb_node     *_BST_min(_Rb_node *node);
-static _Rb_node     *_BST_remove(_Rb_node *node);
-static int          _Rb_is_black_children(_Rb_node *node);
-static void         _Rb_fix_double_black(_Rb_node *node, _Rb_node **root);
-static void         _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root);
-static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root);
-static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare);
-static _Rb_node     *_Rb_next(_Rb_node *node);
-static _Rb_node     *_Rb_prev(_Rb_node *node);
 
 void    *rb_get_key(rb_node node)
 {
-    if (node.node)
+    if (LIKELY(node.node != NULL))
         return node.node->key;
     return NULL;
+}
+
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
+{
+    _Rb_node *node = _Rb_node_create(key);
+    if (UNLIKELY(root->root.node == NULL))
+    {
+        root->begin.node = node;
+        root->end.node = node;
+    }
+    else if (compare(key, root->begin.node->key) == -1)
+        root->begin.node = node;
+    else if (compare(key, root->end.node->key) == 1)
+        root->end.node = node;
+    return (rb_node){_Rb_insert(&root->root.node, node, compare)};
+}
+
+rb_node rb_find(rb_tree *root, void *key, compare_fun compare)
+{
+    return (rb_node){_BST_find(root->root.node, key, compare)};
+}
+
+rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
+{
+    _Rb_node    *ret = _Rb_remove(&root->root.node, key, compare);
+    if (UNLIKELY(root->root.node == NULL))
+    {
+        root->begin.node = NULL;
+        root->end.node = NULL;
+    }
+    else if (compare())
+    return (rb_node){ret};
 }
 
 rb_node rb_next(rb_node node)
@@ -69,20 +113,15 @@ rb_node rb_prev(rb_node node)
     return (rb_node){_Rb_prev(node.node)};
 }
 
-rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
+rb_tree rb_copy(rb_tree *root, copy_fun copy)
 {
-    _Rb_node *node = _Rb_node_create(key);
-    return (rb_node){_Rb_insert(&(root->root), node, compare)};
+    rb_tree tree = {NULL, NULL, NULL};
+    tree.root.node = _Rb_tree_copy(root->root.node, copy);
 }
 
-rb_node rb_find(rb_tree *root, void *key, compare_fun compare)
+void rb_destroy(rb_tree *root, del_fun del)
 {
-    return (rb_node){_BST_find(root->root, key, compare)};
-}
-
-rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
-{
-    return (rb_node){_Rb_remove(&(root->root), key, compare)};
+    _Rb_tree_destroy(root->root, del);
 }
 
 static _Rb_node     *_Rb_grandparent(_Rb_node *node)
@@ -616,6 +655,10 @@ static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compar
     _Rb_node *rm = _BST_find(*root, value, compare);
     if (rm == NULL)
         return NULL;
+    if (compare(rm->key, (*begin)->key) <= 0)
+        *begin = _Rb_next(*begin);
+    else if (compare(rm->key, (*end)->key) >= 0)
+        *end = _Rb_prev(*end);
     _Rb_node *leaf = _BST_remove(rm);
     if (leaf == NULL)
         return rm;
@@ -632,6 +675,8 @@ static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compar
             (*root)->parent = NULL;
             (*root)->color = _Rb_Black;
         }
+        *begin = *root;
+        *end = *root;
         return rm;
     }
     if (leaf->color != _Rb_Red)
@@ -661,4 +706,41 @@ static _Rb_node    *_Rb_prev(_Rb_node *node)
     while (node->parent->left == node)
         node = node->parent;
     return node->parent;
+}
+
+static _Rb_node     *_Rb_tree_copy(_Rb_node *root, copy_fun copy)
+{
+    assert(root);
+    assert(copy);
+
+    _Rb_node *new_root = _Rb_node_create(copy(root->key));
+    new_root->color = root->color;
+    if (root->left)
+        new_root->left = _Rb_tree_copy(root->left, copy);
+    if (root->right)
+        new_root->right = _Rb_tree_copy(root->right, copy);
+    return new_root;
+}
+
+static void         _Rb_tree_destroy(_Rb_node *root, del_fun del)
+{
+    assert(root);
+    assert(del);
+
+    del(root->key);
+    if (root->left)
+        _Rb_tree_destroy(root->left, del);
+    if (root->right)
+        _Rb_tree_destroy(root->right, del);
+    _Rb_node_destroy(root);
+}
+
+static _Rb_node     *_Rb_lower_bound(_Rb_node *root, compare_fun compare)
+{
+
+}
+
+static _Rb_node     *_Rb_upper_bound(_Rb_node *root, compare_fun compare)
+{
+
 }

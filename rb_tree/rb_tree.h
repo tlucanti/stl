@@ -8,6 +8,7 @@ extern "C" {
 
 # include <assert.h>
 # include <stddef.h>
+# include "defs.h"
 
 # ifndef __cplusplus
 #  ifdef __LINUX__
@@ -33,17 +34,22 @@ typedef struct s_Rb_node
 	void                *key;
 }	_Rb_node;
 
-typedef struct s_rb_tree
-{
-    _Rb_node *root;
-}   rb_tree;
-
 typedef struct s_rb_node
 {
-    _Rb_node *node;
+    _Rb_node    *node;
 }   rb_node;
 
+typedef struct s_rb_tree
+{
+    rb_node     root;
+    rb_node     begin;
+    rb_node     end;
+}   rb_tree;
+
+
 typedef int (*compare_fun)(void *, void *);
+typedef void *(*copy_fun)(void *);
+typedef void (*del_fun)(void *);
 
 void    *rb_get_key(rb_node node);
 rb_node rb_insert(rb_tree *root, void *key, compare_fun compare);
@@ -51,6 +57,8 @@ rb_node rb_find(rb_tree *root, void *key, compare_fun compare);
 rb_node rb_remove(rb_tree *root, void *key, compare_fun compare);
 rb_node rb_next(rb_node node);
 rb_node rb_prev(rb_node node);
+rb_tree rb_copy(rb_tree *root, copy_fun copy);
+void rb_destroy(rb_tree *root, del_fun del);
 
 #ifdef __cplusplus
 }

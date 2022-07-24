@@ -6,6 +6,7 @@ void insert_tests();
 void find_tests();
 void remove_tests();
 void iterator_test();
+void copy_destroy_test();
 
 void random_insert_find_small_tests();
 void random_insert_find_medium_tests();
@@ -19,6 +20,19 @@ void random_root_removal_small_test();
 void random_root_removal_medium_test();
 void random_root_removal_large_test();
 
+void destroy_UserClass(void *ptr)
+{
+    UserClass *cl = reinterpret_cast<UserClass *>(ptr);
+    delete cl;
+}
+
+void *copy_UserClass(void *ptr)
+{
+    UserClass *cl = reinterpret_cast<UserClass *>(ptr);
+    UserClass *cpy = new UserClass(*cl);
+    return cpy;
+}
+
 int main()
 {
     signal(SIGSEGV, sigsegv_catcher);
@@ -30,6 +44,7 @@ int main()
     run_test(find_tests);
     run_test(remove_tests);
     run_test(iterator_test);
+    run_test(copy_destroy_test);
 
     run_test(random_insert_find_small_tests);
     run_test(random_insert_find_medium_tests);
@@ -516,6 +531,31 @@ void iterator_test()
         ASSERT(rb_get_key(node) == PTR(2), "iterator test 17");
         node = rb_prev(node);
         ASSERT(rb_get_key(node) == PTR(1), "iterator test 18");
+    }
+
+    result();
+}
+
+void copy_destroy_test()
+{
+    start("rb_copy/rb_destroy tests");
+
+    {
+        rb_tree tree = {nullptr};
+        int num = 10000;
+        std::vector<UserClass *>v(num);
+        for (int i=0; i < 10000; ++i)
+        {
+            v.at(i) = new UserClass;
+            rb_insert(&tree, v.at(i), int_compare);
+        }
+        ASSERT(UserClass::total_instances == num, "class count copy/destroy test 0");
+        rb_tree tree2 = rb_copy(&tree, copy_UserClass);
+        ASSERT(UserClass::total_instances == num * 2, "class count copy/destroy test 1");
+        rb_destroy(&tree2, destroy_UserClass);
+        ASSERT(UserClass::total_instances == num, "class count copy/destroy test 2");
+        rb_destroy(&tree, destroy_UserClass);
+        ASSERT(UserClass::total_instances == 0, "class count copy/destroy test 3");
     }
 
     result();

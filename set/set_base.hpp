@@ -44,6 +44,8 @@ private:
     allocator_type  _alloc;
     key_compare     _cmp;
 
+// ============================================================================
+// ------------------------------- constructors/destructors
 public:
     set_base() :
         _tree(tree_type()),
@@ -80,10 +82,53 @@ public:
         _alloc(allocator_type()),
         _cmp(key_compare())
     {
-//        while (first != last)
-//            _tree.insert((&_tree, &(*first++), &set_base::_compare_fun);
+        while (first != last)
+            insert(*first++);
     }
 
+    set_base(const set_base &cmp) :
+        _tree(cmp._tree),
+        _begin(nullptr),
+        _end(nullptr),
+        _size(0),
+        _alloc(cmp._alloc),
+        _cmp(cmp._cmp)
+    {
+
+    }
+
+#if CPP11
+    set_base(set_base &&mv) :
+        _tree(std::move(mv._tree))
+        _begin(mv._begin)
+        _end(mv._end)
+        _size(mv.size())
+        _alloc(std::move(mv._alloc))
+        _cmp(std::move(mv._cmp))
+    {
+        mv._begin = nullptr;
+        mv._end = nullptr;
+        mv._size = 0;
+    }
+
+    set_base(set_base &&mv, const allocator_type &alloc)
+        _tree(std::move(mv._tree))
+        _begin(mv._begin)
+        _end(mv._end)
+        _size(mv.size())
+        _alloc(alloc)
+        _cmp(std::move(mv._cmp))
+    {
+        mv._begin = nullptr;
+        mv._end = nullptr;
+        mv._size = 0;
+    }
+#endif /* CPP11 */
+
+    ~set_base() DEFAULT
+
+// ============================================================================
+// -------------------------------
     void insert(const_reference value)
     {
         _tree.insert(value);
