@@ -20,18 +20,24 @@ namespace ft
             const first_type &_first, const second_type &_second
         ) : base_class(_first, _second) {}
 
+        template <class type_U1, class type_U2>
+        constexpr explicit pair(const pair<type_U1, type_U2> &cpy) : base_class(cpy) {}
+
         constexpr pair(const pair &cpy) : base_class(cpy) {}
 
-#if CPP11
         template <class type_U1, class type_U2>
-        constexpr pair(
-            type_U1 &&_first, type_U2 &&_second
-        ) : base_class(std::move(_first), std::move(_second)) {}
-
-        template<class U1, class U2>
-        constexpr explicit pair(pair<U1, U2> &&mv) : base_class(std::move(mv.first), std::move(mv.second)) {}
-#endif /* CPP11 */
+        constexpr pair &operator =(const pair<type_U1, type_U2> &other)
+        {
+            base_class::operator=(other);
+            return *this;
+        }
     }; /* pair */
+
+    template <class type_T, class type_Y>
+    constexpr pair<type_T, type_Y> make_pair(type_T first, type_Y second)
+    {
+        return pair<type_T, type_Y>(first, second);
+    }
 } /* ft */
 
 #endif /* PAIR_HPP */

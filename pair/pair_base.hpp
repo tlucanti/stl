@@ -3,7 +3,7 @@
 # define PAIR_BASE_HPP
 
 # include "defs.h"
-//# include <type_traits>
+# include <algorithm>
 
 TLU_NAMESPACE_BEGIN
 
@@ -24,6 +24,9 @@ struct pair_base
 
     constexpr pair_base(const first_type &_first, const second_type &_second) : first(_first), second(_second) {}
 
+    template <class type_U1, class type_U2>
+    constexpr explicit pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
+
     constexpr pair_base(const pair_base &cpy) : first(cpy.first), second(cpy.second) {}
 
 #if CPP11
@@ -32,6 +35,8 @@ struct pair_base
 
     template<class U1, class U2>
     constexpr explicit pair_base(pair_base<U1, U2> &&mv) : first(std::move(mv.first)), second(std::move(mv.second)) {}
+
+    constexpr pair_base(const pair_base &&mv) : first(std::move(mv.first)), second(std::move(mv.second)) {}
 #endif /* CPP11 */
 
 // ------------------------------------- destructors -------------------------
@@ -50,6 +55,7 @@ struct pair_base
     {
         first = other.first;
         second = other.second;
+        return *this;
     }
 
 // ------------------------------------- swap -------------------------

@@ -545,6 +545,7 @@ bool UserClass::monitoring = false;
     } \
 } while (false)
 
+template <typename _Rb_node>
 int _rb_tree_height_dfs(_Rb_node *node, int cur=1)
 {
     int left = 0;
@@ -558,6 +559,7 @@ int _rb_tree_height_dfs(_Rb_node *node, int cur=1)
     return std::max(std::max(left, right), cur);
 }
 
+template <typename _Rb_node>
 void _print_rb_level(_Rb_node *node, int level, std::vector<_Rb_node *> &line, int cur=0)
 {
     if (cur == level)
@@ -567,11 +569,11 @@ void _print_rb_level(_Rb_node *node, int level, std::vector<_Rb_node *> &line, i
     }
     if (node == nullptr)
     {
-        _print_rb_level(nullptr, level, line, cur + 1);
-        _print_rb_level(nullptr, level, line, cur + 1);
+        _print_rb_level<_Rb_node>(nullptr, level, line, cur + 1);
+        _print_rb_level<_Rb_node>(nullptr, level, line, cur + 1);
     } else {
-        _print_rb_level(node->left, level, line, cur + 1);
-        _print_rb_level(node->right, level, line, cur + 1);
+        _print_rb_level<_Rb_node>(node->left, level, line, cur + 1);
+        _print_rb_level<_Rb_node>(node->right, level, line, cur + 1);
     }
 }
 
@@ -595,7 +597,13 @@ unsigned long long ipow(unsigned long long base, unsigned long long power)
     return pow_half * pow_half;
 }
 
+#ifndef RB_TREE_H
+# define _Rb_Red 0
+# define _Rb_Black 1
+#endif
+
 extern bool _rb_print_toggle;
+template <typename _Rb_node>
 void _print_rb_tree(_Rb_node *tree, const char *msg)
 {
     if (!_rb_print_toggle)
@@ -625,6 +633,7 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     std::cout << std::endl;
 }
 
+template <typename rb_tree>
 void print_rb_tree(rb_tree *tree, const std::string &msg)
 {
     _print_rb_tree(tree->root, msg.c_str());
@@ -668,6 +677,7 @@ int random(int start, int stop)
     return ret % (stop - start + 1) + start;
 }
 
+template <typename _Rb_node>
 void _rb_dfs_black_height_check(
         _Rb_node *node,
         int cur,
@@ -688,6 +698,7 @@ void _rb_dfs_black_height_check(
         height_set.insert(cur);
 }
 
+template <typename _Rb_node>
 void _rb_dfs_parent_check(_Rb_node *node)
 {
     assert(node->parent);
@@ -717,6 +728,7 @@ void _rb_dfs_parent_check(_Rb_node *node)
     }
 }
 
+template <typename rb_tree>
 void check_valid_rb_tree(rb_tree *tree)
 {
     assert(tree);
@@ -753,6 +765,7 @@ int int_compare(void *lhs, void *rhs)
     );
 }
 
+template <typename rb_tree>
 void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int max, rb_tree *tree2=nullptr)
 {
     for (int i=0; i < count; ++i)
@@ -765,6 +778,7 @@ void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int ma
     }
 }
 
+template <typename rb_tree>
 void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 {
     for (std::set<int>::iterator i=std_tree.begin(); i != std_tree.end(); ++i)
@@ -777,5 +791,16 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
         }
     }
 }
+
+# define MAKE_USED(__e) write(-1, &(__e), 8)
+
+
+# define PAIR_ASSERT(__name, __first, __second, __msg) \
+    ASSERT((__name).first == (__first), std::string("constructor first argument check ") + (__msg)); \
+    ASSERT((__name).second == (__second), std::string("constructor second argument check ") + (__msg))
+
+# define PAIR_SET_ASSERT(__name, __type1, __type2, __first, __second, __msg) \
+    ft::pair<__type1, __type2> __name(__first, __second); \
+    PAIR_ASSERT(__name, __first, __second, __msg)
 
 #endif /* PAIR_HPP */

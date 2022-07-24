@@ -21,4 +21,5 @@ int main()
     tree.insert(123);
     tree.find(123);
     tree.remove(123);
+
 }
