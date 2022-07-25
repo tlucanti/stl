@@ -2,49 +2,70 @@
 #include "vector.hpp"
 #include <vector>
 #include <sys/time.h>
+#include <unistd.h>
 #include "benchmark.hpp"
 
-#define USED(__x) volatile __x
-#define LOOP_ITERATION asm("")
+struct timeval __tv_start_time = {};
+struct timeval __tv_end_time = {};
 
 template <class T>
 void constructor_test_1(UNUSED(std::size_t _), int times)
 {
-	for (long long i=0; i < times; ++i)
-	{
-		USED(T a);
-		LOOP_ITERATION;
-	}
+    std::vector<T *> v(times);
+    __test_start();
+    for (long long i=0; i < times; ++i)
+        v[i] = new T;
+    __test_end();
+    for (long long i=0; i < times; ++i)
+    {
+        USED_PTR(v[i]);
+        delete v[i];
+    }
+    USED(v);
 }
 
 template <class T>
 void constructor_test_2(typename T::size_type size, long long times)
 {
+    std::vector<T *> v(times);
+    __test_start();
+    for (long long i=0; i < times; ++i)
+        v[i] = new T(size);
+    __test_end();
     for (long long i=0; i < times; ++i)
     {
-        USED(T a(size));
-        LOOP_ITERATION;
+        USED_PTR(v[i]);
+        delete v[i];
     }
+    USED(v);
 }
 
 template <class T>
-void constructor_test_3(typename T::size_type size, long long times) {
+void constructor_test_3(typename T::size_type size, long long times)
+{
     T a(size);
-    for (long long i = 0; i < times; ++i) {
-        USED(T b(a));
-        LOOP_ITERATION;
+    std::vector<T *> v(times);
+    __test_start();
+    for (long long i=0; i < times; ++i)
+        v[i] = new T(a);
+    __test_end();
+    for (long long i=0; i < times; ++i)
+    {
+        USED_PTR(v[i]);
+        delete v[i];
     }
+    USED(v);
 }
 
 template <class T>
 void constructor_test_4(typename T::size_type size, long long times)
 {
-    std::vector<int> vec(static_cast<std::size_t>(size));
-    for (long long i=0; i < times; ++i)
-    {
-        USED(T a(vec.begin(), vec.end()));
-        LOOP_ITERATION;
-    }
+//    std::vector<int> vec(static_cast<std::size_t>(size));
+//    for (long long i=0; i < times; ++i)
+//    {
+//        USED(T a(vec.begin(), vec.end()));
+//        LOOP_ITERATION;
+//    }
 }
 
 #if PRECPP11
@@ -60,25 +81,6 @@ void assign_operator_test_1(typename T::size_type size, long long times)
 }
 #endif /* PRECPP11 */
 
-#define E1 10LL
-#define E2 100LL
-#define E3 1000LL
-#define E4 10000LL
-#define E5 100000LL
-#define E6 1000000LL
-#define E7 10000000LL
-#define E8 100000000LL
-#define E9 1000000000LL
-#define E10 10000000000LL
-#define E11 100000000000LL
-#define E12 1000000000000LL
-#define E13 10000000000000LL
-#define E14 100000000000000LL
-#define E15 1000000000000000LL
-
-#define __test_start() gettimeofday(&_start, NULL)
-#define __test_end()   gettimeofday(&_end, NULL)
-
 double delta(struct timeval start, struct timeval end)
 {
 	double start_usec = static_cast<double>(start.tv_usec) / 1e6;
@@ -89,28 +91,24 @@ double delta(struct timeval start, struct timeval end)
 }
 
 #define run_speed_test(__func, ...) do { \
-	__test_start(); \
 	__func<ft::vector<int> >(__VA_ARGS__); \
-	__test_end(); \
-	ft_time = delta(_start, _end); \
-	__test_start(); \
+	ft_time = delta(__tv_start_time, __tv_end_time); \
 	__func<std::vector<int> >(__VA_ARGS__); \
-	__test_end(); \
-	std_time = delta(_start, _end); \
+	std_time = delta(__tv_start_time, __tv_end_time); \
 } while (false)
 
 #define SMALL(__func) do { \
-    run_speed_test(__func, 5, E8); \
+    run_speed_test(__func, 5, E7); \
     bm.small(ft_time, std_time); \
 } while (false)
 
 #define MEDIUM(__func) do { \
-    run_speed_test(__func, E3, E5); \
+    /*run_speed_test(__func, E3, E5);*/ \
     bm.medium(ft_time, std_time); \
 } while (false)
 
 #define LARGE(__func) do { \
-    run_speed_test(__func, E6, E3); \
+    /*run_speed_test(__func, E6, E3);*/ \
     bm.large(ft_time, std_time); \
 } while (false)
 
@@ -123,8 +121,7 @@ double delta(struct timeval start, struct timeval end)
 
 int main()
 {
-	struct timeval _start = {};
-	struct timeval _end = {};
+
     double std_time;
     double ft_time;
 

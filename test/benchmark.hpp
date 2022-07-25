@@ -1,7 +1,36 @@
 
-#include <iostream>
-#include "color.hpp"
-#include <string>
+#ifndef BENCHMARK_HPP
+# define BENCHMARK_HPP
+
+# include <iostream>
+# include <cmath>
+# include <string>
+# include "color.hpp"
+
+# define USED_PTR(__x) write(-1, __x, 8)
+# define USED(__x) USED_PTR(&__x)
+# define ALLOC_ARRAY(__type, __size) reinterpret_cast<__type *>(malloc(__size * sizeof(__type)))
+# define DELETE_ARRAY(__array) free(__array)
+
+#define E1 10LL
+#define E2 100LL
+#define E3 1000LL
+#define E4 10000LL
+#define E5 100000LL
+#define E6 1000000LL
+#define E7 10000000LL
+#define E8 100000000LL
+#define E9 1000000000LL
+#define E10 10000000000LL
+#define E11 100000000000LL
+#define E12 1000000000000LL
+#define E13 10000000000000LL
+#define E14 100000000000000LL
+#define E15 1000000000000000LL
+
+#define __test_start() gettimeofday(&__tv_start_time, NULL)
+#define __test_end()   gettimeofday(&__tv_end_time, NULL)
+
 
 TLU_NAMESPACE_BEGIN
 
@@ -138,9 +167,9 @@ private:
     {
         std::stringstream ss;
         if (time < 1)
-            time = std::round(time * 1000) / 1000.;
+            time = round(time * 1000) / 1000.;
         else
-            time = std::round(time * 100) / 100;
+            time = round(time * 100) / 100;
         ss << time << "s";
         std::string ret = ss.str();
         return Purple + ret + _string_mul(" ", static_cast<int>(6 - ret.size()));
@@ -156,3 +185,5 @@ private:
 };
 
 TLU_NAMESPACE_END
+
+#endif /* BENCHMARK_HPP */

@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DEFS_H
-# define DEFS_H
+#ifndef DEFS_HPP
+# define DEFS_HPP
 
 # include <unistd.h>
 # include <cstring>
@@ -158,4 +158,4 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  endif /* NORET */
 # endif /* CPP17 */
 
-#endif /* DEFS_H */
+#endif /* DEFS_HPP */

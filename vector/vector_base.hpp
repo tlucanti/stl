@@ -16,7 +16,7 @@
 # include <limits>
 # include <memory>
 # include <cmath>
-# include "defs.h"
+# include "defs.hpp"
 # include "type_traits.hpp"
 # include "wrap_iterator.hpp"
 # include "utils.hpp"
@@ -839,14 +839,14 @@ PRIVATE:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void _construct(pointer start, difference_type cnt)
-    {
-        while (cnt-- > 0)
-            _construct_at(start++);
-    }
+//    constexpr void _construct(pointer start, difference_type cnt)
+//    {
+//        while (cnt-- > 0)
+//            _construct_at(start++);
+//    }
 
 // -----------------------------------------------------------------------------
-    constexpr void _construct(pointer start, difference_type cnt, const_reference val)
+    constexpr void _construct(pointer start, difference_type cnt, const_reference val=value_type())
     {
         while (cnt-- > 0)
             _construct_at(start++, val);

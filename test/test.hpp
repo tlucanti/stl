@@ -15,7 +15,7 @@
 # define __DEBUG
 # define __SAFE_TEST 0
 
-# include "defs.h"
+# include "defs.hpp"
 # include "color.hpp"
 
 int all = 0;
@@ -636,17 +636,17 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
 template <typename rb_tree>
 void print_rb_tree(rb_tree *tree, const std::string &msg)
 {
-    _print_rb_tree(tree->root, msg.c_str());
+    _print_rb_tree(tree->root.node, msg.c_str());
 }
 
 # define CHECK_EDGE(__root, __dir, __root_key, __dir_key, __root_col, __dir_col, __msg) \
-    ASSERT(__root, __msg + std::string(" root check")); \
-    ASSERT(__root->__dir, __msg + std::string(" dir check")); \
-    ASSERT(__root->key == PTR(__root_key), __msg + std::string(" root key check")); \
-    ASSERT(__root->__dir->key == PTR(__dir_key), __msg + std::string(" dir key check")); \
-    ASSERT(__root->color == __root_col, __msg + std::string(" root color check")); \
-    ASSERT(__root->__dir->color == __dir_col, __msg + std::string(" dir color check")); \
-    ASSERT(__root->__dir->parent == __root, __msg + std::string(" dir parent check"))
+    ASSERT((__root), (__msg) + std::string(" root check")); \
+    ASSERT((__root)->__dir, (__msg) + std::string(" dir check")); \
+    ASSERT((__root)->key == PTR(__root_key), (__msg) + std::string(" root key check")); \
+    ASSERT((__root)->__dir->key == PTR(__dir_key), (__msg) + std::string(" dir key check")); \
+    ASSERT((__root)->color == (__root_col), (__msg) + std::string(" root color check")); \
+    ASSERT((__root)->__dir->color == (__dir_col), (__msg) + std::string(" dir color check")); \
+    ASSERT((__root)->__dir->parent == (__root), (__msg) + std::string(" dir parent check"))
 
 # define _R _Rb_Red
 # define _B _Rb_Black
@@ -732,25 +732,27 @@ template <typename rb_tree>
 void check_valid_rb_tree(rb_tree *tree)
 {
     assert(tree);
-    if (tree->root == nullptr)
+    if (tree->root.node == nullptr)
         return ;
-    if (tree->root->color == _Rb_Red)
+    if (tree->root.node->color == _Rb_Red)
         throw std::logic_error("root is Red");
     std::set<int> depth_map;
-    _rb_dfs_black_height_check(tree->root, 0, depth_map);
+    _rb_dfs_black_height_check(tree->root.node, 0, depth_map);
     if (depth_map.size() > 1)
         throw std::logic_error("tree has various black height");
-    if (tree->root->left)
-        _rb_dfs_parent_check(tree->root->left);
-    if (tree->root->right)
-        _rb_dfs_parent_check(tree->root->right);
+    if (tree->root.node->left)
+        _rb_dfs_parent_check(tree->root.node->left);
+    if (tree->root.node->right)
+        _rb_dfs_parent_check(tree->root.node->right);
 }
 
-# define RB_PRINT_LOCK(__msg) do { \
+# define RB_TREE_PRINT_LOCK(__tree, __msg) do { \
     _rb_print_toggle = true; \
-    print_rb_tree(&tree, __msg); \
+    print_rb_tree(&(__tree), __msg); \
     _rb_print_toggle = false; \
 } while (false)
+
+# define RB_PRINT_LOCK(__msg) RB_TREE_PRINT_LOCK(tree, __msg)
 
 # define RB_INSERT_PRINT_LOCK(__val) do { \
     rb_insert(&tree, PTR(__val), int_compare); \
@@ -781,12 +783,17 @@ void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int ma
 template <typename rb_tree>
 void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 {
+    if (std_tree.empty())
+    {
+        if (tree->root.node != nullptr)
+            throw std::logic_error("rb_tree is not empty");
+    }
     for (std::set<int>::iterator i=std_tree.begin(); i != std_tree.end(); ++i)
     {
         if (rb_get_key(rb_find(tree, PTR(*i), int_compare)) == nullptr)
         {
             std::stringstream ss;
-            ss << "rb_tree has not element " << (*i);
+            ss << "rb_tree don't have element " << (*i);
             throw std::logic_error(ss.str());
         }
     }

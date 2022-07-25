@@ -18,8 +18,4 @@
 #  define UNLIKELY(__expr) __builtin_expect((__expr), 0)
 # endif /* UNLIKELY */
 
-# ifndef __restrict
-#  define __restrict restrict
-# endif
-
 #endif /* DEFS_H */
