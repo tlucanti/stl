@@ -20,6 +20,7 @@ WUR static int          _Rb_is_black_children(_Rb_node *node) NOEXCEPT;
 static void             _Rb_fix_double_black(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static void             _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static void             _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
+static _Rb_node         *_Rb_remove_node(_Rb_node **root, _Rb_node *node) NOEXCEPT;
 WUR static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare) NOEXCEPT;
 WUR static _Rb_node     *_Rb_next(_Rb_node *node) NOEXCEPT;
 WUR static _Rb_node     *_Rb_prev(_Rb_node *node) NOEXCEPT;
@@ -104,6 +105,20 @@ rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
     else if (ret == root->end.node)
         root->end.node = _Rb_prev(root->end.node);
     return (rb_node){ret};
+}
+
+void rb_remove_node(rb_tree *root, rb_node *node)
+{
+    _Rb_remove_node(&root->root.node, node->node);
+    if (UNLIKELY(root->root.node == NULL))
+    {
+        root->begin.node = NULL;
+        root->end.node = NULL;
+    }
+    else if (node->node == root->begin.node)
+        root->begin.node = _Rb_next(root->begin.node);
+    else if (node->node == root->end.node)
+        root->end.node = _Rb_prev(root->end.node);
 }
 
 rb_node rb_next(rb_node node)
@@ -654,14 +669,11 @@ static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root)
     _Rb_rotate_right(parent, root);
 }
 
-static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
+_Rb_node *_Rb_remove_node(_Rb_node **root, _Rb_node *rm)
 {
     assert(root);
-    assert(compare);
+    assert(rm);
     if (*root == NULL)
-        return NULL;
-    _Rb_node *rm = _BST_find(*root, value, compare);
-    if (rm == NULL)
         return NULL;
     _Rb_node *leaf = _BST_remove(rm);
     if (leaf == NULL)
@@ -688,6 +700,18 @@ static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compar
     else
         leaf->parent->right = NULL;
     return rm;
+}
+
+static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare)
+{
+    assert(root);
+    assert(compare);
+    if (*root == NULL)
+        return NULL;
+    _Rb_node *rm = _BST_find(*root, value, compare);
+    if (rm == NULL)
+        return NULL;
+    return _Rb_remove_node(root, rm);
 }
 
 static _Rb_node    *_Rb_next(_Rb_node *node)

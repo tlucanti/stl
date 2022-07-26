@@ -2,10 +2,13 @@
 #ifndef SET_BASE_HPP
 # define SET_BASE_HPP
 
-# include "defs.h"
+# include "defs.hpp"
 # include "rb_tree.hpp"
 # include "rb_tree_iterator.hpp"
+# include "pair_base.hpp"
 # include <functional>
+# include <memory>
+# include <limits>
 
 TLU_NAMESPACE_BEGIN
 
@@ -34,38 +37,28 @@ public:
     typedef rb_tree_reverse_iterator<const value_type>  const_reverse_iterator;
 
 private:
-    typedef rb_tree<value_type, key_compare>            tree_type;
+    typedef rb_tree<
+        value_type,
+        key_compare,
+        allocator_type
+    >   tree_type;
     typedef typename tree_type::rb_node                 tree_node;
+    typedef pair_base<iterator, bool>                   pair_type;
 
     tree_type       _tree;
-    tree_node       *_begin;
-    tree_node       *_end;
-    size_type       _size;
-    allocator_type  _alloc;
-    key_compare     _cmp;
 
-// ============================================================================
-// ------------------------------- constructors/destructors
 public:
+    // ============================================================================
+// ------------------------------- constructors/destructors
     set_base() :
-        _tree(tree_type()),
-        _begin(nullptr),
-        _end(nullptr),
-        _size(0),
-        _alloc(allocator_type()),
-        _cmp(key_compare())
+        _tree(tree_type())
     {}
 
     explicit set_base(
         const key_type &comp,
         const allocator_type &alloc=allocator_type()
     ) :
-        _tree(tree_type()),
-        _begin(nullptr),
-        _end(nullptr),
-        _size(0),
-        _alloc(allocator_type()),
-        _cmp(key_compare())
+        _tree(comp, alloc)
     {}
 
     template<class iterator_type>
@@ -75,68 +68,199 @@ public:
         const key_type &comp=key_type(),
         const allocator_type &alloc=allocator_type()
     ) :
-        _tree(tree_type()),
-        _begin(nullptr),
-        _end(nullptr),
-        _size(0),
-        _alloc(allocator_type()),
-        _cmp(key_compare())
+        _tree(comp, alloc)
     {
+        bool _;
         while (first != last)
-            insert(*first++);
+            _tree.insert(*first++, _);
     }
 
     set_base(const set_base &cmp) :
-        _tree(cmp._tree),
-        _begin(nullptr),
-        _end(nullptr),
-        _size(0),
-        _alloc(cmp._alloc),
-        _cmp(cmp._cmp)
-    {
-
-    }
+        _tree(cmp._tree)
+    {}
 
 #if CPP11
     set_base(set_base &&mv) :
         _tree(std::move(mv._tree))
-        _begin(mv._begin)
-        _end(mv._end)
-        _size(mv.size())
-        _alloc(std::move(mv._alloc))
-        _cmp(std::move(mv._cmp))
-    {
-        mv._begin = nullptr;
-        mv._end = nullptr;
-        mv._size = 0;
-    }
+    {}
 
     set_base(set_base &&mv, const allocator_type &alloc)
         _tree(std::move(mv._tree))
-        _begin(mv._begin)
-        _end(mv._end)
-        _size(mv.size())
-        _alloc(alloc)
-        _cmp(std::move(mv._cmp))
-    {
-        mv._begin = nullptr;
-        mv._end = nullptr;
-        mv._size = 0;
-    }
+    {}
 #endif /* CPP11 */
 
     ~set_base() DEFAULT
 
-// ============================================================================
-// -------------------------------
-    void insert(const_reference value)
+    set_base &operator =(const set_base &cmp)
     {
-        _tree.insert(value);
+        _tree.destroy();
+        _tree.assign(cmp._tree);
     }
 
-    value_type find(const_reference value)
+    allocator_type get_allocator() const noexcept
     {
-        _tree.find(value);
+        return _tree.get_allocator();
+    }
+    // ============================================================================
+// -------------------------------
+    iterator begin()
+    {
+        return iterator(_tree.begin(), false);
+    }
+
+    const_iterator begin() const
+    {
+        return const_iterator(_tree.begin(), false);
+    }
+
+    iterator end()
+    {
+        return iterator(_tree.end(), true);
+    }
+
+    const_iterator end() const
+    {
+        return const_iterator(_tree.end(), true);
+    }
+
+    reverse_iterator rbegin()
+    {
+        return reverse_iterator(_tree.rbegin(), true);
+    }
+
+    const_reverse_iterator rbegin() const
+    {
+        return const_reverse_iterator(_tree.rbegin(), true);
+    }
+
+    reverse_iterator rend()
+    {
+        return reverse_iterator(_tree.rend(), false);
+    }
+
+    const_reverse_iterator rend() const
+    {
+        return const_reverse_iterator (_tree.rend(), true);
+    }
+
+    // ============================================================================
+// -------------------------------
+    WUR bool empty() const noexcept
+    {
+        return _tree.size() == 0;
+    }
+
+    size_type size() const noexcept
+    {
+        return _tree.size();
+    }
+
+    size_type max_size() const noexcept
+    {
+        return std::numeric_limits<size_type>::max();
+    }
+
+    // ============================================================================
+// -------------------------------
+    void clear() noexcept
+    {
+        _tree.destroy();
+    }
+
+    pair_type insert(const_reference value)
+    {
+        bool was_inserted;
+        iterator node = iterator(_tree.insert(value, was_inserted));
+        return pair_type(node, was_inserted);
+    }
+
+    template <class InputIt>
+    void insert(InputIt first, InputIt last)
+    {
+        bool _;
+        while (first != last)
+            _tree.insert(*first, _);
+    }
+
+    void erase(iterator pos)
+    {
+        _tree.remove_node(pos._node);
+    }
+
+    size_type erase(const value_type &value)
+    {
+        _tree.remove(value);
+    }
+
+    void swap(set_base &other)
+    {
+        _tree.swap(other._tree);
+    }
+
+    // ============================================================================
+// -------------------------------
+    size_type count(const_reference value) const
+    {
+        return find(value) != end();
+    }
+
+    iterator find(const_reference value)
+    {
+        return iterator(_tree.find(value));
+    }
+
+    const_iterator find(const_reference value) const
+    {
+        return const_iterator(_tree.find(value));
+    }
+
+#if CPP20
+    bool contains(const_reference value) const
+    {
+        return count(value);
+    }
+#endif /* CPP20 */
+
+    pair_base<iterator, iterator> equal_range(const_reference value)
+    {
+        return pair_base<iterator, iterator>(lower_bound(value), upper_bound(value));
+    }
+
+    pair_base<const_iterator, const_iterator> equal_range(const_reference value) const
+    {
+        return pair_base<const_iterator, const_iterator>(lower_bound(value), upper_bound(value));
+    }
+
+    iterator lower_bound(const_reference value)
+    {
+        return iterator(_tree.lower_bound(value));
+    }
+
+    const_iterator lower_bound(const_reference value) const
+    {
+        return const_iterator(_tree.lower_bound(value));
+    }
+
+    iterator upper_bound(const_reference value)
+    {
+        return iterator(_tree.upper_bound(value));
+    }
+
+    const_iterator upper_bound(const_reference value) const
+    {
+        return const_iterator(_tree.upper_bound(value));
+    }
+
+    // ============================================================================
+// -------------------------------
+    key_compare key_comp() const
+    {
+        return _tree.cmp();
+    }
+
+    value_compare value_comp() const
+    {
+        return _tree.cmp();
     }
 
 private:

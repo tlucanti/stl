@@ -5,10 +5,16 @@
 # include "defs.h"
 # include <cassert>
 # include <cstddef>
+# include <memory>
+# include <functional>
 
 TLU_NAMESPACE_BEGIN
 
-template <class type_T, class cmp_T>
+template <
+        class key_T,
+        class cmp_T=std::less<key_T>,
+        class allocator_T=std::allocator<key_T>
+>
 class rb_tree
 {
 private:
@@ -28,7 +34,7 @@ public:
             rb_node *_left,
             rb_node *_right,
             rb_colors _color,
-            const type_T &_key
+            const key_T &_key
         ) :
             parent(_parent),
             left(_left),
@@ -44,7 +50,7 @@ public:
         rb_colors   color;
 
     public:
-        type_T      key;
+        key_T      key;
     };
 
     friend class rb_node;
@@ -53,22 +59,54 @@ private:
     rb_node     *_root;
     rb_node     *_begin;
     rb_node     *_end;
-    const cmp_T &_cmp;
+    cmp_T       _cmp;
+    allocator_T _alloc;
+    size_t      _size;
 
 public:
 
-    explicit rb_tree(const cmp_T &cmp)
-        : _root(nullptr), _cmp(cmp)
+    rb_tree() :
+        _root(nullptr),
+        _begin(nullptr),
+        _end(nullptr),
+        _cmp(cmp_T()),
+        _alloc(allocator_T()),
+        _size(0)
     {}
+
+    rb_tree(const cmp_T &cmp, const allocator_T &alloc) :
+        _root(nullptr),
+        _begin(nullptr),
+        _end(nullptr),
+        _cmp(cmp),
+        _alloc(alloc),
+        _size(0)
+    {}
+
 
 #if CPP11
-    rb_tree(rb_tree &&mv)
-        : _root(mv._root), _cmp(std::move(mv._cmp))
-    {}
+    rb_tree(rb_tree &&mv) :
+        _root(mv._root),
+        _begin(mv._begin),
+        _end(mv._end),
+        _cmp(std::move(mv._cmp)),
+        _alloc(std::move(mv._alloc)),
+        _size(mv._size)
+    {
+        mv._root = nullptr;
+        mv._begin = nullptr;
+        mv._end = nullptr;
+        mv._size = 0;
+    }
 #endif
 
-    rb_tree(const rb_tree &cpy)
-        : _root(nullptr), _cmp(cpy._cmp)
+    rb_tree(const rb_tree &cpy) :
+        _root(nullptr),
+        _begin(nullptr),
+        _end(nullptr),
+        _cmp(cpy._cmp),
+        _alloc(cpy._alloc),
+        _size(0)
     {
         _root = _rb_copy(cpy._root);
     }
@@ -78,38 +116,38 @@ public:
         _rb_destroy(_root);
     }
 
-    rb_node *insert(const type_T &key)
+    rb_node *insert(const key_T &key)
     {
         rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_black, key);
         return _rb_insert(node);
     }
     
-    rb_node *find(const type_T &key)
+    rb_node *find(const key_T &key)
     {
         return _bst_find(key);
     }
     
-    rb_node *remove(const type_T &key)
+    rb_node *remove(const key_T &key)
     {
         return _rb_remove(key);
     }
     
-    rb_node *next(const type_T &key)
+    rb_node *next(const key_T &key)
     {
         return _rb_next(key);
     }
     
-    rb_node *prev(const type_T &key)
+    rb_node *prev(const key_T &key)
     {
         return _rb_prev(key);
     }
     
-    rb_node *lower_bound(const type_T &key)
+    rb_node *lower_bound(const key_T &key)
     {
         return _lower_bound(key);
     }
     
-    rb_node *upper_bound(const type_T &key)
+    rb_node *upper_bound(const key_T &key)
     {
         return _upper_bound(key);
     }
@@ -210,7 +248,7 @@ private:
         }
     }
 
-    rb_node     *_bst_find(const type_T &value)
+    rb_node     *_bst_find(const key_T &value)
     {
         if (_root == nullptr)
             return nullptr;
@@ -279,15 +317,17 @@ private:
         }
     }
 
-    rb_node     *_rb_insert(rb_node *node)
+    rb_node     *_rb_insert(rb_node *node, bool &was_inserted)
     {
         if (_root == nullptr)
         {
+            was_inserted = true;
             _root = node;
             node->color = rb_black;
             return node;
         }
         rb_node *inserted = _bst_insert(node);
+        was_inserted = false;
         if (inserted != nullptr)
             return inserted;
         while (node != _root && node->color == rb_red)
@@ -303,6 +343,7 @@ private:
                 node = _rb_insert_case_2(node, gp);
         }
         _root->color = rb_black;
+        was_inserted = true;
         return node;
     }
 
@@ -453,7 +494,7 @@ private:
         _rb_rotate_right(parent);
     }
 
-    rb_node     *_rb_remove(const type_T &value)
+    rb_node     *_rb_remove(const key_T &value)
     {
         if (_root == nullptr)
             return nullptr;
@@ -505,7 +546,7 @@ private:
         return node->parent;
     }
 
-    int _compare_fun(const type_T &lhs, const type_T &rhs)
+    int _compare_fun(const key_T &lhs, const key_T &rhs)
     {
         if (_cmp(lhs, rhs))
             return -1;
@@ -517,7 +558,7 @@ private:
     rb_node *_rb_copy(rb_node *root)
     {
         rb_node *node = new rb_node;
-        node->key = new type_T(*(root->key));
+        node->key = new key_T(*(root->key));
         node->color = root->color;
         if (root->left)
             node->left = _rb_copy(root->left);

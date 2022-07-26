@@ -19,6 +19,7 @@ include_directories(test)
 include_directories(rb_tree)
 include_directories(pair)
 include_directories(iterator)
+include_directories(set)
 
 add_executable(vector_test vector/test_vector.cpp)
 add_executable(stack_test stack/test_stack.cpp)
