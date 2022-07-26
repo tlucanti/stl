@@ -19,8 +19,8 @@ public:
         _init();
     }
 
-    TermColor(uint8_t _red, uint8_t _green, uint8_t _blue, bool _bold=true, bool _bg=false)
-        : _red(_red), _green(_green), _blue(_blue), _bold(_bold), _bg(_bg)
+    TermColor(uint8_t red, uint8_t green, uint8_t blue, bool bold=true, bool bg=false)
+        : _red(red), _green(green), _blue(blue), _bold(bold), _bg(bg)
     {
         _init();
     }
@@ -68,17 +68,31 @@ public:
 
     TermColor operator +(const TermColor &other) const
     {
-        return TermColor(_red + other._red, _green + other._green, _blue + other._blue, _bold | other._bold);
+        return TermColor(
+            static_cast<uint8_t>(_red + other._red),
+            static_cast<uint8_t>(_green + other._green),
+            static_cast<uint8_t>(_blue + other._blue),
+            _bold | other._bold
+        );
     }
 
     TermColor operator -(const TermColor &other) const
     {
-        return TermColor(_red - other._red, _green - other._green, _blue - other._blue, _bold | other._bold);
+        return TermColor(
+            static_cast<uint8_t>(_red - other._red),
+            static_cast<uint8_t>(_green - other._green),
+            static_cast<uint8_t>(_blue - other._blue),
+            _bold | other._bold
+        );
     }
 
     TermColor operator *(const TermColor &other) const
     {
-        return TermColor(_red * other._red, _green * other._green, _blue * other._blue);
+        return TermColor(
+            static_cast<uint8_t>(_red * other._red),
+            static_cast<uint8_t>(_green * other._green),
+            static_cast<uint8_t>(_blue * other._blue)
+        );
     }
 
     TermColor operator *(double value) const
@@ -98,6 +112,7 @@ public:
         return this->str() + str + "\033[0m";
     }
 
+#if PRECPP11
     TermColor &operator =(const TermColor &cpy)
     {
         if (this == &cpy)
@@ -110,6 +125,7 @@ public:
         std::memcpy(_buff, cpy._buff, 22);
         return *this;
     }
+#endif /* PRECPP11 */
 
 private:
     void _init()
@@ -126,11 +142,11 @@ private:
 
     void itoa3(char *str, uint8_t num)
     {
-        str[2] = num % 10 + '0';
+        str[2] = static_cast<char>(num % 10 + '0');
         num /= 10;
-        str[1] = num % 10 + '0';
+        str[1] = static_cast<char>(num % 10 + '0');
         num /= 10;
-        str[0] = num % 10 + '0';
+        str[0] = static_cast<char>(num % 10 + '0');
     }
 
     uint8_t _red;

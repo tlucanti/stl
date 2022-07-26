@@ -405,7 +405,7 @@ struct UserClass
         if (verbose)
             std::cout << str() << tlucanti::C << " constructor" << tlucanti::S << "\n";
     }
-    ~UserClass() EXCEPT {
+    ~UserClass() EXCEPT(std::runtime_error) {
         if (!valid)
             throw std::runtime_error("nullptr in `valid` value");
         if (not *valid)
@@ -531,7 +531,7 @@ bool UserClass::monitoring = false;
     std_vec_cmp(__v1, __v2, __msg); \
     UserClass::monitoring = true
 
-# define PTR(__x) reinterpret_cast<void *>(__x)
+# define PTR(__x) reinterpret_cast<int *>(__x)
 # define SINGLE_OP_INIT \
     int __single_op_list [200]; \
     std::memset(__single_op_list, 0, sizeof(int) * 200); \
@@ -809,5 +809,7 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 # define PAIR_SET_ASSERT(__name, __type1, __type2, __first, __second, __msg) \
     ft::pair<__type1, __type2> __name(__first, __second); \
     PAIR_ASSERT(__name, __first, __second, __msg)
+
+# define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}}
 
 #endif /* PAIR_HPP */

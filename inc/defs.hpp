@@ -99,7 +99,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define AUTO(__x) auto
 #  endif /* AUTO */
 #  ifndef EXCEPT
-#   define EXCEPT noexcept(false)
+#   define EXCEPT(__e) noexcept(false)
 #  endif /* EXCEPT */
 
 # else /* PRECPP11 */
@@ -116,7 +116,7 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #   define noexcept throw()
 #  endif /* noexcept */
 #  ifndef EXCEPT
-#   define EXCEPT
+#   define EXCEPT(__e) throw(__e)
 #  endif /* EXCEPT */
 #  ifndef override
 #   define override

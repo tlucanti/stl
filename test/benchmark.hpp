@@ -5,10 +5,12 @@
 # include <iostream>
 # include <cmath>
 # include <string>
+# include <unistd.h>
+# include <sys/time.h>
 # include "color.hpp"
 
-# define USED_PTR(__x) write(-1, __x, 8)
-# define USED(__x) USED_PTR(&__x)
+# define USED_PTR(__x) do { /* if (write(-1, __x, 8)) {} */ } while (false)
+# define USED(__x) do { if (write(-1, &__x, 8)) {} } while (false)
 # define ALLOC_ARRAY(__type, __size) reinterpret_cast<__type *>(malloc(__size * sizeof(__type)))
 # define DELETE_ARRAY(__array) free(__array)
 
@@ -31,6 +33,14 @@
 #define __test_start() gettimeofday(&__tv_start_time, NULL)
 #define __test_end()   gettimeofday(&__tv_end_time, NULL)
 
+double delta(struct timeval start, struct timeval end)
+{
+    double start_usec = static_cast<double>(start.tv_usec) / 1e6;
+    double end_usec = static_cast<double>(end.tv_usec) / 1e6;
+    time_t sec_delta = end.tv_sec - start.tv_sec;
+    double usec_delta = end_usec - start_usec;
+    return static_cast<double>(sec_delta) + usec_delta;
+}
 
 TLU_NAMESPACE_BEGIN
 
@@ -141,7 +151,8 @@ private:
             s += gradient[anim_div].str();
             s += progress[anim_div];
             s += right;
-            write(1, s.c_str(), s.size());
+            if (write(1, s.c_str(), s.size()))
+                {}
             usleep(8000);
         }
         std::cout << std::endl;

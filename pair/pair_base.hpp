@@ -2,7 +2,7 @@
 #ifndef PAIR_BASE_HPP
 # define PAIR_BASE_HPP
 
-# include "defs.h"
+# include "defs.hpp"
 # include <algorithm>
 
 TLU_NAMESPACE_BEGIN

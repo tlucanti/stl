@@ -75,7 +75,7 @@ void insert_tests()
     start("rb_insert tests");
 
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         _START:
@@ -117,7 +117,7 @@ void insert_tests()
         CHECK_EDGE(tree.root.node->right, right, 70, 80, _B, _R, "left rotate insert test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         _START_1:
@@ -138,7 +138,7 @@ void insert_tests()
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert left rotate test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         _START_2:
@@ -159,7 +159,7 @@ void insert_tests()
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert right rotate test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         rb_insert(&tree, PTR(2), int_compare);
@@ -173,7 +173,7 @@ void insert_tests()
         CHECK_EDGE(tree.root.node->right, right, 4, 5, _B, _R, "triangle insert right test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         rb_insert(&tree, PTR(7), int_compare);
@@ -190,7 +190,7 @@ void insert_tests()
         CHECK_EDGE(tree.root.node->left, right, 4, 5, _B, _R, "triangle insert left test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         // 338 264 813 620 823 116 285 413 738 532 937 973 606 529 676 659 206
         RB_INSERT(338);
         RB_INSERT(264);
@@ -220,15 +220,15 @@ void find_tests()
     start("rb_find tests");
 
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
 
-        ASSERT(rb_get_key(rb_find(&tree, PTR(0), int_compare)) == nullptr, "empty find test 0");
+        ASSERT(rb_get_key(rb_find(&tree, nullptr, int_compare)) == nullptr, "empty find test 0");
         FIND_ASSERT(tree, 1, "find basic test 0");
-        FIND_ASSERT(tree, 0, "find basic test 1");
+        FIND_ASSERT(tree, nullptr, "find basic test 1");
         FIND_ASSERT(tree, 3, "find basic test 2");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 50, "find recoloring test 0");
         FIND_ASSERT(tree, 40, "find recoloring test 1");
         FIND_ASSERT(tree, 60, "find recoloring test 2");
@@ -238,19 +238,19 @@ void find_tests()
         FIND_ASSERT(tree, 80, "find recoloring test 6");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 1, "find left-rotate test 0");
         FIND_ASSERT(tree, 2, "find left-rotate test 1");
         FIND_ASSERT(tree, 3, "find left-rotate test 2");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 3, "find right-rotate test 0");
         FIND_ASSERT(tree, 2, "find right-rotate test 1");
         FIND_ASSERT(tree, 1, "find right-rotate test 2");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 2, "find right-triangle-rotate test 0");
         FIND_ASSERT(tree, 1, "find right-triangle-rotate test 1");
         FIND_ASSERT(tree, 3, "find right-triangle-rotate test 2");
@@ -258,7 +258,7 @@ void find_tests()
         FIND_ASSERT(tree, 4, "find right-triangle-rotate test 4");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 7, "find left-triangle-rotate test 0");
         FIND_ASSERT(tree, 6, "find left-triangle-rotate test 1");
         FIND_ASSERT(tree, 5, "find left-triangle-rotate test 2");
@@ -278,7 +278,7 @@ void _random_insert_find_sized_tests(int div, const std::string &name)
 //        std::cout << test << std::endl;
         std::vector<int> _moves;
         std::set<int> std_tree;
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         try {
             for (int cnt = 0; cnt < 1000; ++cnt)
             {
@@ -328,18 +328,18 @@ void remove_tests()
     start("rb_remove tests");
 
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_REMOVE(1);
         ASSERT(tree.root.node == nullptr, "empty remove test 0");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(1);
         RB_REMOVE(1);
         ASSERT(tree.root.node == nullptr, "root remove test 0");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(2);
         RB_INSERT(1);
         RB_INSERT(3);
@@ -351,7 +351,7 @@ void remove_tests()
         RB_NOT_FOUND(1, "red leaf remove test 1");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(5);
         RB_INSERT(2);
         RB_INSERT(7);
@@ -362,7 +362,7 @@ void remove_tests()
         RB_NOT_FOUND(2, "replacement removal test 0");
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(5);
         RB_INSERT(3);
         RB_INSERT(7);
@@ -377,7 +377,7 @@ void remove_tests()
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(5);
         RB_INSERT(3);
         RB_INSERT(6);
@@ -391,7 +391,7 @@ void remove_tests()
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(5);
         RB_INSERT(2);
         RB_INSERT(9);
@@ -399,16 +399,16 @@ void remove_tests()
         RB_INSERT(4);
         RB_INSERT(8);
         RB_INSERT(10);
-        RB_INSERT(0);
+        RB_INSERT(nullptr);
 
-        RB_REMOVE(0);
+        RB_REMOVE(nullptr);
 //        RB_PRINT_LOCK("before removal");
         RB_REMOVE(5);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(3);
         RB_INSERT(1);
 
@@ -418,7 +418,7 @@ void remove_tests()
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(3);
         RB_INSERT(1);
         RB_INSERT(7);
@@ -432,7 +432,7 @@ void remove_tests()
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(4);
         RB_INSERT(2);
         RB_INSERT(8);
@@ -441,16 +441,16 @@ void remove_tests()
         RB_INSERT(7);
         RB_INSERT(10);
         RB_INSERT(6);
-        RB_INSERT(0);
+        RB_INSERT(nullptr);
 
-        RB_REMOVE(0);
+        RB_REMOVE(nullptr);
 //        RB_PRINT_LOCK("before removal");
         RB_REMOVE(4);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(5);
         RB_INSERT(2);
         RB_INSERT(8);
@@ -468,7 +468,7 @@ void remove_tests()
         check_valid_rb_tree(&tree);
     }
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(9);
         RB_INSERT(4);
         RB_INSERT(10);
@@ -488,7 +488,7 @@ void iterator_test()
     start("iterator tests");
 
     {
-        rb_tree tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
 
         RB_INSERT(1);
         RB_INSERT(2);
@@ -553,7 +553,7 @@ void copy_destroy_test()
     {
         for (int i=0; i < 1000; ++i)
         {
-            rb_tree tree = {nullptr};
+            rb_tree tree = MAKE_EMPTY_TREE;
             std::set<int> std_tree;
             for (int j=0; j < 10; ++j)
             {
@@ -579,19 +579,20 @@ void copy_destroy_user_test()
     start("rb_copy/rb_destroy UserClass tests");
 
     {
-        rb_tree tree = {nullptr};
-        int num = 10000;
+        rb_tree tree = MAKE_EMPTY_TREE;
+        std::size_t num = 10000;
         std::vector<UserClass *>v(num);
-        for (int i=0; i < 10000; ++i)
+        for (std::size_t i=0; i < 10000; ++i)
         {
             v.at(i) = new UserClass;
             rb_insert(&tree, v.at(i), int_compare);
         }
-        ASSERT(UserClass::total_instances == num, "class count copy/destroy test 0");
+        int intnum = static_cast<int>(num);
+        ASSERT(UserClass::total_instances == intnum, "class count copy/destroy test 0");
         rb_tree tree2 = rb_copy(&tree, copy_UserClass);
-        ASSERT(UserClass::total_instances == num * 2, "class count copy/destroy test 1");
+        ASSERT(UserClass::total_instances == intnum * 2, "class count copy/destroy test 1");
         rb_destroy(&tree2, destroy_UserClass);
-        ASSERT(UserClass::total_instances == num, "class count copy/destroy test 2");
+        ASSERT(UserClass::total_instances == intnum, "class count copy/destroy test 2");
         rb_destroy(&tree, destroy_UserClass);
         ASSERT(UserClass::total_instances == 0, "class count copy/destroy test 3");
     }
@@ -606,8 +607,8 @@ void _random_remove_sized_tests(int div, const std::string &name, bool root_remo
     for (int test = 0; test < 1000; ++test)
     {
         std::vector<int> insert_moves;
-        rb_tree tree = {nullptr};
-        rb_tree starting_tree = {nullptr};
+        rb_tree tree = MAKE_EMPTY_TREE;
+        rb_tree starting_tree = MAKE_EMPTY_TREE;
         generate_rb_tree(&tree, insert_moves, 1000, div, &starting_tree);
         std::set<int> std_tree(insert_moves.begin(), insert_moves.end());
         std::size_t cnt = 0;
