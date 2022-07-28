@@ -21,6 +21,10 @@ void random_root_removal_small_test();
 void random_root_removal_medium_test();
 void random_root_removal_large_test();
 
+void random_bound_small_test();
+void random_bound_medium_test();
+void random_bound_large_test();
+
 void destroy_UserClass(void *ptr)
 {
     UserClass *cl = reinterpret_cast<UserClass *>(ptr);
@@ -53,9 +57,9 @@ int main()
     run_test(copy_destroy_test);
     run_test(copy_destroy_user_test);
 
-//    run_test(random_insert_find_small_tests);
-//    run_test(random_insert_find_medium_tests);
-//    run_test(random_insert_find_large_tests);
+    run_test(random_insert_find_small_tests);
+    run_test(random_insert_find_medium_tests);
+    run_test(random_insert_find_large_tests);
 
     run_test(random_remove_small_tests);
     run_test(random_remove_medium_tests);
@@ -64,6 +68,10 @@ int main()
     run_test(random_root_removal_small_test);
     run_test(random_root_removal_medium_test);
     run_test(random_root_removal_large_test);
+
+    run_test(random_bound_small_test);
+    run_test(random_bound_medium_test);
+    run_test(random_bound_large_test);
 
     final();
 }
@@ -542,6 +550,55 @@ void iterator_test()
         node = rb_prev(node);
         ASSERT(rb_get_key(node) == PTR(1), "iterator test 18");
     }
+    {
+        rb_tree tree = MAKE_EMPTY_TREE;
+        RB_INSERT(6);
+        RB_INSERT(1);
+        RB_INSERT(10);
+//        RB_PRINT_LOCK("start");
+        ASSERT(tree.begin.node->key == PTR(1), "begin test 0");
+        ASSERT(tree.end.node->key == PTR(10), "end test 0");
+        RB_REMOVE(1);
+//        RB_PRINT_LOCK("without 1");
+        ASSERT(tree.begin.node->key == PTR(6), "begin test 1");
+        ASSERT(tree.end.node->key == PTR(10), "end test 1");
+        RB_REMOVE(10);
+//        RB_PRINT_LOCK("without 10");
+        ASSERT(tree.begin.node->key == PTR(6), "begin test 2");
+        ASSERT(tree.end.node->key == PTR(6), "end test 2");
+        RB_REMOVE(6);
+//        RB_PRINT_LOCK("empty");
+        ASSERT(tree.begin.node == nullptr, "begin test 3");
+        ASSERT(tree.end.node == nullptr, "end test 3");
+    }
+    {
+        rb_tree tree = MAKE_EMPTY_TREE;
+        RB_INSERT(6);
+        RB_INSERT(4);
+        RB_INSERT(9);
+        RB_INSERT(2);
+        RB_INSERT(5);
+        RB_INSERT(8);
+        RB_INSERT(10);
+        RB_INSERT(1);
+        RB_INSERT(3);
+        RB_INSERT(7);
+//        RB_PRINT_LOCK("start");
+        RB_REMOVE(8);
+        RB_REMOVE(4);
+        RB_REMOVE(8);
+        RB_REMOVE(3);
+        RB_REMOVE(10);
+        RB_REMOVE(10);
+        RB_REMOVE(9);
+        RB_REMOVE(2);
+        RB_REMOVE(5);
+//        RB_PRINT_LOCK("before 1");
+        RB_REMOVE(1);
+//        RB_PRINT_LOCK("end");
+        ASSERT(tree.begin.node->key == PTR(6), "begin test 4");
+        ASSERT(tree.end.node->key == PTR(7), "end test 4");
+    }
 
     result();
 }
@@ -644,8 +701,8 @@ void _random_remove_sized_tests(int div, const std::string &name, bool root_remo
                 }
                 else
                 {
-                    ASSERT(tree.begin.node->key == PTR(*std_tree.begin()), "tree begin check");
-                    ASSERT(tree.end.node->key == PTR(*--std_tree.end()), "tree end check");
+                    ASSERT_THROW(tree.begin.node->key == PTR(*std_tree.begin()), "tree begin check");
+                    ASSERT_THROW(tree.end.node->key == PTR(*--std_tree.end()), "tree end check");
                 }
             }
         } catch (std::exception &e) {
@@ -693,4 +750,55 @@ void random_root_removal_medium_test()
 void random_root_removal_large_test()
 {
     _random_remove_sized_tests(2147483647, "large", true);
+}
+
+void _random_bound_test(const std::string &name, int div)
+{
+    start(("random " + name + " bound tests").c_str());
+
+    const int count = 1000;
+    rb_tree tree = MAKE_EMPTY_TREE;
+    std::set<int> std_tree;
+    for (int i=0; i < count; ++i)
+    {
+        for (int j=0; j < 100; ++j)
+        {
+            int b = rand() % div + 1;
+            rb_node lower = rb_lower_bound(&tree, PTR(b), int_compare);
+            rb_node upper = rb_upper_bound(&tree, PTR(b), int_compare);
+
+            std::set<int>::iterator std_lower = std_tree.lower_bound(b);
+            std::set<int>::iterator std_upper = std_tree.upper_bound(b);
+            if (std_lower == std_tree.end())
+                ASSERT(lower.node == nullptr, "lower bound end() test");
+            else
+                ASSERT(rb_get_key(lower) == PTR(*std_lower), "lower bound test");
+            if (std_upper == std_tree.end())
+                ASSERT(upper.node == nullptr, "upper bound end() test");
+            else
+                ASSERT(rb_get_key(upper) == PTR(*std_upper), "upper bound test");
+            rb_lower_bound(&tree, PTR(b), int_compare);
+            rb_upper_bound(&tree, PTR(b), int_compare);
+        }
+        int r = rand() % div + 1;
+        RB_INSERT(r);
+        std_tree.insert(r);
+    }
+
+    result();
+}
+
+void random_bound_small_test()
+{
+    _random_bound_test("small", 10);
+}
+
+void random_bound_medium_test()
+{
+    _random_bound_test("medium", 1000);
+}
+
+void random_bound_large_test()
+{
+    _random_bound_test("large", 2147483647);
 }

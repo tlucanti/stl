@@ -59,6 +59,8 @@ rb_node rb_next(rb_node node);
 rb_node rb_prev(rb_node node);
 rb_tree rb_copy(rb_tree *root, copy_fun copy);
 void rb_destroy(rb_tree *root, del_fun del);
+rb_node rb_lower_bound(rb_tree *root, void *value, compare_fun cmp);
+rb_node rb_upper_bound(rb_tree *root, void *value, compare_fun cmp);
 
 #ifdef __cplusplus
 }

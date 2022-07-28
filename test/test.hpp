@@ -40,19 +40,26 @@ void run_test(func_T func)
 }
 
 # undef ASSERT
-# define ASSERT(e, msg) do { \
+# define ASSERT(__e, __msg) _DO_ASSERT(__e, __msg, false)
+# define ASSERT_THROW(__e, __msg) _DO_ASSERT(__e, __msg, true)
+
+# define _DO_ASSERT(e, msg, do_throw) do { \
     current_test = msg; \
     ++all; \
     ++grand_total; \
     try { \
         if (not (e)) \
-            std::cout << tlucanti::R << "assertion fail: " << tlucanti::Y << (msg) << tlucanti::S << std::endl; \
+        { \
+            std::cout << tlucanti::R << "assertion failed: " << tlucanti::Y << (msg) << tlucanti::S << std::endl; \
+            if (do_throw) throw std::logic_error("assertation failed"); \
+        } \
         else { \
             ++ok; \
             ++grand_total_ok; \
         } \
     } catch (std::exception &ex) { \
         std::cout << tlucanti::R << "task fall with exception: " << tlucanti::Y << ex.what() << tlucanti::S << std::endl; \
+        if (do_throw) throw ; \
     } \
 } while (0)
 
@@ -633,9 +640,30 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     std::cout << std::endl;
 }
 
+template <typename _Rb_node>
+std::string _print_node(_Rb_node *node)
+{
+    if (node == nullptr)
+        return "(null)";
+    std::stringstream ss;
+    if (node->color == _Rb_Red)
+        ss << tlucanti::Red;
+    else
+        ss << tlucanti::White;
+    ss << '[' << reinterpret_cast<std::size_t>(node->key) << ']'
+        << tlucanti::Orange << '(' << node << ')' << tlucanti::Reset;
+    return ss.str();
+}
+
 template <typename rb_tree>
 void print_rb_tree(rb_tree *tree, const std::string &msg)
 {
+    if (_rb_print_toggle)
+    {
+        std::cout << "root: " << _print_node(tree->root.node)
+            << "; begin: " << _print_node(tree->begin.node)
+            << "; end: " << _print_node(tree->end.node) << std::endl;
+    }
     _print_rb_tree(tree->root.node, msg.c_str());
 }
 
@@ -780,6 +808,21 @@ void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int ma
     }
 }
 
+template <typename _Rb_node>
+void _dfs_compare(_Rb_node *root, const std::set<int> &std_tree)
+{
+    if (std_tree.count(static_cast<int>(reinterpret_cast<std::size_t>(root->key))) == 0)
+    {
+        std::stringstream ss;
+        ss << "tree has excess element " << root->key;
+        throw std::logic_error(ss.str());
+    }
+    if (root->left)
+        _dfs_compare(root->left, std_tree);
+    if (root->right)
+        _dfs_compare(root->right, std_tree);
+}
+
 template <typename rb_tree>
 void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 {
@@ -797,6 +840,8 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
             throw std::logic_error(ss.str());
         }
     }
+    if (tree->root.node)
+        _dfs_compare(tree->root.node, std_tree);
 }
 
 # define MAKE_USED(__e) write(-1, &(__e), 8)
