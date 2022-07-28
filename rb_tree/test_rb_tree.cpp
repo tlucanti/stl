@@ -574,13 +574,21 @@ void iterator_test()
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(6);
+//        RB_PRINT_LOCK("");
         RB_INSERT(4);
+//        RB_PRINT_LOCK("");
         RB_INSERT(9);
+//        RB_PRINT_LOCK("");
         RB_INSERT(2);
+//        RB_PRINT_LOCK("");
         RB_INSERT(5);
+//        RB_PRINT_LOCK("");
         RB_INSERT(8);
+//        RB_PRINT_LOCK("");
         RB_INSERT(10);
+//        RB_PRINT_LOCK("");
         RB_INSERT(1);
+//        RB_PRINT_LOCK("added 1");
         RB_INSERT(3);
         RB_INSERT(7);
 //        RB_PRINT_LOCK("start");

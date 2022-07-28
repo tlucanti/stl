@@ -2,7 +2,7 @@
 #ifndef RB_TREE_HPP
 # define RB_TREE_HPP
 
-# include "defs.h"
+# include "defs.hpp"
 # include <cassert>
 # include <cstddef>
 # include <memory>
@@ -27,33 +27,40 @@ private:
 public:
     class rb_node
     {
-//    private:
-    public:
+        friend class rb_tree;
+    private:
+
         rb_node(
-            rb_node *_parent,
-            rb_node *_left,
-            rb_node *_right,
-            rb_colors _color,
-            const key_T &_key
+                rb_node     *_parent,
+                rb_node     *_left,
+                rb_node     *_right,
+                rb_colors   _color,
+                key_T       *_key
         ) :
-            parent(_parent),
-            left(_left),
-            right(_right),
-            color(_color),
-            key(_key)
+                parent(_parent),
+                left(_left),
+                right(_right),
+                color(_color),
+                key(_key)
         {}
 
         rb_node     *parent;
         rb_node     *left;
         rb_node     *right;
-
         rb_colors   color;
+        key_T       *key;
 
     public:
-        key_T      key;
-    };
+        const key_T &get_key()
+        {
+            return *key;
+        }
 
-    friend class rb_node;
+        key_T get_key_copy()
+        {
+            return *key;
+        }
+    };
 
 private:
     rb_node     *_root;
@@ -85,7 +92,7 @@ public:
 
 
 #if CPP11
-    rb_tree(rb_tree &&mv) :
+    rb_tree(rb_tree andmv) :
         _root(mv._root),
         _begin(mv._begin),
         _end(mv._end),
@@ -109,47 +116,97 @@ public:
         _size(0)
     {
         _root = _rb_copy(cpy._root);
+        _begin = _bst_min(_root);
+        _end = _bst_max(_root);
     }
 
-    ~rb_node()
+    ~rb_tree()
     {
-        _rb_destroy(_root);
+        if (_root != nullptr)
+            _rb_destroy(_root);
+        _begin = nullptr;
+        _end = nullptr;
     }
+
+private:
+    int compare(const key_T *lhs, const key_T *rhs)
+    {
+        if (_cmp(*lhs, *rhs))
+            return -1;
+        else if (_cmp(*rhs, *lhs))
+            return 1;
+        return 0;
+    }
+
+public:
 
     rb_node *insert(const key_T &key)
     {
-        rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_black, key);
-        return _rb_insert(node);
+        bool _;
+        return insert(key, _);
+    }
+
+    rb_node *insert(const key_T &key, bool &was_inserted)
+    {
+        key_T   *key_ptr = new key_T(key);
+        rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
+        if (_root == nullptr)
+        {
+            _begin = node;
+            _end = node;
+        }
+        else if (compare(key_ptr, _root->key) <= -1)
+            _begin = node;
+        else if (compare(key_ptr, _root->key) >= 1)
+            _end = node;
+        return _rb_insert(node, was_inserted);
     }
     
     rb_node *find(const key_T &key)
     {
-        return _bst_find(key);
+        return _bst_find(&key);
     }
     
     rb_node *remove(const key_T &key)
     {
-        return _rb_remove(key);
+        if (UNLIKELY(_root == nullptr))
+            return nullptr;
+        rb_node *ret = _rb_remove(&key);
+        if (_root == nullptr)
+        {
+            _begin = nullptr;
+            _end = nullptr;
+        }
+        else
+        {
+            _begin = _bst_min(_root);
+            _end = _bst_max(_root);
+        }
+        return ret;
     }
     
-    rb_node *next(const key_T &key)
+    static rb_node *next(rb_node *node)
     {
-        return _rb_next(key);
+        return _bst_next(node);
     }
     
-    rb_node *prev(const key_T &key)
+    static rb_node *prev(rb_node *node)
     {
-        return _rb_prev(key);
+        return _bst_prev(node);
     }
     
     rb_node *lower_bound(const key_T &key)
     {
-        return _lower_bound(key);
+        if (_root == nullptr)
+            return nullptr;
+        return _bst_lower_bound(&key);
     }
     
     rb_node *upper_bound(const key_T &key)
     {
-        return _upper_bound(key);
+        if (_root == nullptr)
+            return nullptr;
+        return _bst_upper_bound(&key);
     }
 
 private:
@@ -163,7 +220,7 @@ private:
     {
         rb_node   *gp;
 
-        gp = _Rb_grandparent(node);
+        gp = _rb_grandparent(node);
         if (node->parent == gp->left)
             return gp->left;
         return gp->left;
@@ -171,9 +228,7 @@ private:
 
     rb_node     *_rb_rotate_right(rb_node *node)
     {
-        rb_node    *pivot;
-
-        pivot = node->left;
+        rb_node *pivot = node->left;
         if (node == _root)
             _root = pivot;
         if (node->parent)
@@ -194,9 +249,7 @@ private:
 
     rb_node     *_rb_rotate_left(rb_node *node)
     {
-        rb_node    *pivot;
-
-        pivot = node->right;
+        rb_node *pivot = node->right;
         if (node == _root)
             _root = pivot;
         if (node->parent)
@@ -222,7 +275,7 @@ private:
         rb_node *root = _root;
         while (true)
         {
-            int cmp = _compare_fun(node->key, root->key);
+            int cmp = compare(node->key, root->key);
             if (cmp == 0)
                 return root;
             if (cmp < 0)
@@ -248,14 +301,14 @@ private:
         }
     }
 
-    rb_node     *_bst_find(const key_T &value)
+    rb_node     *_bst_find(const key_T *value)
     {
         if (_root == nullptr)
             return nullptr;
         rb_node *root = _root;
         while (true)
         {
-            int cmp = _compare_fun(value, root->key);
+            int cmp = compare(value, root->key);
             if (cmp == 0)
                 return root;
             else if (cmp < 0)
@@ -275,19 +328,16 @@ private:
 
     rb_node     *_rb_recolor(rb_node *node)
     {
-        rb_node    *gp;
-
-        assert(node);
-        gp = _rb_grandparent(node);
+        rb_node *gp = _rb_grandparent(node);
         gp->color = rb_red;
         gp->left->color = rb_black;
         gp->right->color = rb_black;
         return gp;
-    }
+        }
 
     rb_node     *_rb_insert_case_1(rb_node *node, rb_node *gp)
     {
-        if (gp->right && gp->right->color == rb_red)
+        if (gp->right and gp->right->color == rb_red)
             return _rb_recolor(node); // case 1
         else
         {
@@ -303,7 +353,7 @@ private:
 
     rb_node     *_rb_insert_case_2(rb_node *node, rb_node *gp)
     {
-        if (gp->left && gp->left->color == rb_red)
+        if (gp->left and gp->left->color == rb_red)
             return _rb_recolor(node); // case 1
         else
         {
@@ -326,14 +376,16 @@ private:
             node->color = rb_black;
             return node;
         }
-        rb_node *inserted = _bst_insert(node);
         was_inserted = false;
+        rb_node *inserted = _bst_insert(node);
         if (inserted != nullptr)
             return inserted;
-        while (node != _root && node->color == rb_red)
+        was_inserted = true;
+        inserted = node;
+        while (node != _root and node->color == rb_red)
         {
             if (node->parent->color == rb_black)
-                return node;
+                break ;
             rb_node *gp = _rb_grandparent(node);
             if (gp == nullptr)
                 break ;
@@ -343,18 +395,17 @@ private:
                 node = _rb_insert_case_2(node, gp);
         }
         _root->color = rb_black;
-        was_inserted = true;
-        return node;
+        return inserted;
     }
 
-    rb_node     *_bst_max(rb_node *node)
+    static rb_node     *_bst_max(rb_node *node)
     {
         while (node->right != nullptr)
             node = node->right;
         return node;
     }
 
-    rb_node     *_bst_min(rb_node *node)
+    static rb_node     *_bst_min(rb_node *node)
     {
         while (node->left != nullptr)
             node = node->left;
@@ -363,11 +414,11 @@ private:
 
     rb_node     *_bst_remove(rb_node *node)
     {
-        if (node->left == nullptr && node->right == nullptr)
-            // case 1
+        if (node->left == nullptr and node->right == nullptr)
+        // case 1
             return node;
-        if (node->left == nullptr || node->right == nullptr)
-            // case 2
+        if (node->left == nullptr or node->right == nullptr)
+        // case 2
         {
             rb_node *child;
             if (node->right == nullptr)
@@ -392,8 +443,8 @@ private:
 
     bool          _rb_is_black_children(rb_node *node)
     {
-        return (node->left == nullptr || node->left->color == rb_black)
-               && (node->right == nullptr || node->right->color == rb_black);
+        return (node->left == nullptr or node->left->color == rb_black)
+            and (node->right == nullptr or node->right->color == rb_black);
     }
 
     void         _rb_fix_double_black(rb_node *node)
@@ -409,12 +460,12 @@ private:
     void         _rb_fix_double_black_left(rb_node *node)
     {
         if (node == _root)
-            // case 2
+        // case 2
             return ;
         rb_node *parent = node->parent;
         rb_node *sibling = parent->right;
-        if (sibling->color == rb_black && _rb_is_black_children(sibling))
-            // case 3
+        if (sibling->color == rb_black and _rb_is_black_children(sibling))
+        // case 3
         {
             sibling->color = rb_red;
             if (parent->color == rb_red)
@@ -424,7 +475,7 @@ private:
             return ;
         }
         else if (sibling->color == rb_red)
-            // case 4
+        // case 4
         {
             sibling->color = parent->color;
             parent->color = rb_red;
@@ -432,8 +483,8 @@ private:
             _rb_fix_double_black_left(node);
             return ;
         }
-        else if (sibling->right == nullptr || sibling->right->color == rb_black)
-            // case 5
+        else if (sibling->right == nullptr or sibling->right->color == rb_black)
+        // case 5
         {
             rb_colors sib_col = sibling->color;
             sibling->color = sibling->left->color;
@@ -457,7 +508,7 @@ private:
             return ;
         rb_node *parent = node->parent;
         rb_node *sibling = parent->left;
-        if (sibling->color == rb_black && _rb_is_black_children(sibling))
+        if (sibling->color == rb_black and _rb_is_black_children(sibling))
             // case 3
         {
             sibling->color = rb_red;
@@ -476,7 +527,7 @@ private:
             _rb_fix_double_black_right(node);
             return ;
         }
-        else if (sibling->left == nullptr || sibling->left->color == rb_black)
+        else if (sibling->left == nullptr or sibling->left->color == rb_black)
             // case 5
         {
             rb_colors sib_col = sibling->color;
@@ -494,16 +545,13 @@ private:
         _rb_rotate_right(parent);
     }
 
-    rb_node     *_rb_remove(const key_T &value)
+    void    _rb_remove_node(rb_node *rm)
     {
         if (_root == nullptr)
-            return nullptr;
-        rb_node *rm = _bst_find(value);
-        if (rm == nullptr)
-            return nullptr;
+            return ;
         rb_node *leaf = _bst_remove(rm);
         if (leaf == nullptr)
-            return rm;
+            return ;
         if (leaf == _root)
         {
             if (leaf->left)
@@ -514,10 +562,10 @@ private:
                 _root = nullptr;
             if (_root)
             {
-                _root->parent = nullptr;
-                _root->color = rb_black;
+                (_root)->parent = nullptr;
+                (_root)->color = rb_black;
             }
-            return rm;
+            return ;
         }
         if (leaf->color != rb_red)
             _rb_fix_double_black(leaf);
@@ -525,56 +573,106 @@ private:
             leaf->parent->left = nullptr;
         else
             leaf->parent->right = nullptr;
-        return rm;
     }
 
-    rb_node    *_rb_next(rb_node *node)
+    rb_node     *_rb_remove(const key_T *value)
+    {
+        if (_root == nullptr)
+            return nullptr;
+        rb_node *rm = _bst_find(value);
+        if (rm == nullptr)
+            return nullptr;
+        rb_node *ret;
+        if (rm == _end)
+            ret = nullptr;
+        else
+            ret = _bst_next(rm);
+        _rb_remove_node(rm);
+        return ret;
+    }
+
+    static rb_node    *_bst_next(rb_node *node)
     {
         if (node->right)
             return _bst_min(node->right);
-        while (node->parent->right == node)
+        while (node->parent and node->parent->right == node)
             node = node->parent;
-        return node->parent;
+        if (LIKELY(node->parent != nullptr))
+            return node->parent;
+        return nullptr;
     }
 
-    rb_node    *_rb_prev(rb_node *node)
+    static rb_node    *_bst_prev(rb_node *node)
     {
         if (node->left)
             return _bst_max(node->left);
-        while (node->parent->left == node)
+        while (node->parent and node->parent->left == node)
             node = node->parent;
-        return node->parent;
-    }
-
-    int _compare_fun(const key_T &lhs, const key_T &rhs)
-    {
-        if (_cmp(lhs, rhs))
-            return -1;
-        else if (rhs < lhs)
-            return 0;
-        return 1;
+        if (LIKELY(node->parent != nullptr))
+            return node->parent;
+        return nullptr;
     }
 
     rb_node *_rb_copy(rb_node *root)
     {
-        rb_node *node = new rb_node;
-        node->key = new key_T(*(root->key));
-        node->color = root->color;
+        key_T node_ptr = new key_T(root->key);
+        rb_node *new_root = rb_node_create(node_ptr);
+        new_root->color = root->color;
         if (root->left)
-            node->left = _rb_copy(root->left);
+            new_root->left = _Rb_tree_copy(root->left);
         if (root->right)
-            node->right = _rb_copy(root->right);
-        return node;
+            new_root->right = _Rb_tree_copy(root->right);
+        return new_root;
     }
 
-    void _rb_destroy(rb_node *node)
+    void _rb_destroy(rb_node *root)
     {
-        delete node->key;
-        if (node->left)
-            _rb_destroy(node->left);
-        if (node->right)
-            _rb_destroy(node->right);
+        delete root->key;
+        if (root->left)
+            _rb_destroy(root->left);
+        if (root->right)
+            _rb_destroy(root->right);
+        delete root;
     }
+
+    rb_node *_bst_lower_bound(const key_T *value)
+    {
+        rb_node *root = _root;
+        rb_node *ret = root;
+        while (root != nullptr)
+        {
+            if (compare(root->key, value) >= 0)
+            {
+                ret = root;
+                root = root->left;
+            }
+            else
+                root = root->right;
+        }
+        if (compare(ret->key, value) < 0)
+            return nullptr;
+        return ret;
+    }
+
+    rb_node *_bst_upper_bound(const key_T *value)
+    {
+        rb_node *root = _root;
+        rb_node *ret = root;
+        while (root != nullptr)
+        {
+            if (compare(root->key, value) > 0)
+            {
+                ret = root;
+                root = root->left;
+            }
+            else
+                root = root->right;
+        }
+        if (compare(ret->key, value) <= 0)
+            return nullptr;
+        return ret;
+    }
+
 };
 
 TLU_NAMESPACE_END

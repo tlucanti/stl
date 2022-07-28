@@ -61,7 +61,7 @@ void run_test(func_T func)
         std::cout << tlucanti::R << "task fall with exception: " << tlucanti::Y << ex.what() << tlucanti::S << std::endl; \
         if (do_throw) throw ; \
     } \
-} while (0)
+} while (false)
 
 # define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
     ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
@@ -679,12 +679,24 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
 # define _R _Rb_Red
 # define _B _Rb_Black
 
-# define RB_INSERT(__val) do { \
-    rb_insert(&tree, PTR(__val), int_compare); \
+# define RB_TREE_INSERT(__tree, __val) do { \
+    rb_node __node = rb_insert(&__tree, PTR(__val), int_compare); \
+    ASSERT(rb_get_key(__node) == PTR(__val), "insert return test"); \
 } while (false)
 
+# define RB_INSERT(__val) RB_TREE_INSERT(tree, __val)
+
 # define RB_REMOVE(__val) do { \
-    rb_remove(&tree, PTR(__val), int_compare); \
+    rb_node __find = rb_find(&tree, PTR(__val), int_compare); \
+    if (__find.node != nullptr) \
+        __find = rb_next(__find); \
+    rb_node __rm = rb_remove(&tree, PTR(__val), int_compare); \
+    if (__find.node != nullptr) \
+    { \
+        ASSERT(__find.node->key == __rm.node->key, "success remove return test"); \
+    } \
+    else \
+        ASSERT(__rm.node == nullptr, "failed remove return test"); \
 } while (false)
 
 # define RB_NOT_FOUND(__val, __msg) do { \
@@ -692,7 +704,7 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
 } while (false)
 
 # define FIND_ASSERT(__tree, __val, __msg) do { \
-    rb_insert(&__tree, PTR(__val), int_compare); \
+    RB_TREE_INSERT(__tree, __val); \
     ASSERT(rb_get_key(rb_find(&__tree, PTR(__val), int_compare)) == PTR(__val), __msg); \
 } while (false)
 
@@ -856,5 +868,26 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
     PAIR_ASSERT(__name, __first, __second, __msg)
 
 # define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}}
+
+# define __RBCPP_METHODVAL_CMPASSERT(__method, __val, __cmp, __msg) do { \
+    tlucanti::rb_tree<int>::rb_node *node = tree.__method(__val); \
+    if (PTR(__cmp) == nullptr) \
+        ASSERT(node == nullptr, __msg); \
+    else \
+        ASSERT(PTR(node->get_key()) == PTR(__cmp), __msg); \
+} while (false)
+
+# define __RBCPP_METHODVAL_ASSERT(__method, __val, __msg) __RBCPP_METHODVAL_CMPASSERT(__method, __val, __val, __msg)
+# define __RBCPP_METHODNODE_ASSERT(__method, __nd, __val, __msg) __RBCPP_METHODVAL_CMPASSERT(__method, __nd, __val, __msg)
+
+# define RBCPP_INSERT_ASSERT(__val, __msg) __RBCPP_METHODVAL_ASSERT(insert, __val, __msg)
+# define RBCPP_FIND_ASSERT(__val, __msg) __RBCPP_METHODVAL_ASSERT(find, __val, __msg)
+# define RBCPP_REMOVE_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(remove, __val, __cmp, __msg)
+# define RBCPP_NEXT_ASSERT(__nd, __val, __msg) __RBCPP_METHODNODE_ASSERT(next, __nd, __val, __msg)
+# define RBCPP_PREV_ASSERT(__nd, __val, __msg) __RBCPP_METHODNODE_ASSERT(prev, __nd, __val, __msg)
+# define RBCPP_LOWERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(lower_bound, __val, __cmp, __msg)
+# define RBCPP_UPPERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(upper_bound, __val, __cmp, __msg)
+
+
 
 #endif /* PAIR_HPP */
