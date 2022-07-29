@@ -24,7 +24,7 @@ public:
 private:
     typedef typename rb_tree<value_type>::rb_node rb_node;
 
-    explicit rb_tree_iterator(rb_node *ptr, bool end) :
+    rb_tree_iterator(rb_node *ptr, bool end) :
         _ptr(ptr), _end(end)
     {}
 

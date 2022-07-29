@@ -55,7 +55,7 @@ public:
     {}
 
     explicit set_base(
-        const key_type &comp,
+        const key_compare &comp,
         const allocator_type &alloc=allocator_type()
     ) :
         _tree(comp, alloc)
@@ -65,7 +65,7 @@ public:
     set_base(
         iterator_type first,
         iterator_type last,
-        const key_type &comp=key_type(),
+        const key_compare &comp=key_compare(),
         const allocator_type &alloc=allocator_type()
     ) :
         _tree(comp, alloc)
@@ -176,7 +176,7 @@ public:
 
     iterator insert(iterator hint, const_reference value)
     {
-        tree_node *child = _tree.find(value, hint);
+        return iterator(_tree.insert(hint, value), false);
     }
 
     template <class InputIt>
@@ -211,12 +211,18 @@ public:
 
     iterator find(const_reference value)
     {
-        return iterator(_tree.find(value));
+        tree_node *ret = _tree.find(value);
+        if (ret == nullptr)
+            return iterator(_tree.end(), true);
+        return iterator(ret, true);
     }
 
     const_iterator find(const_reference value) const
     {
-        return const_iterator(_tree.find(value));
+        tree_node *ret = _tree.find(value);
+        if (ret == nullptr)
+            return const_iterator(_tree._end, true);
+        return const_iterator(ret, true);
     }
 
 #if CPP20
@@ -238,23 +244,33 @@ public:
 
     iterator lower_bound(const_reference value)
     {
-        return iterator(_tree.lower_bound(value));
+        tree_node *ret = _tree.lower_bound(value);
+        if (ret == nullptr)
+            return iterator(_tree._end, true);
+        return iterator(ret, false);
     }
 
     const_iterator lower_bound(const_reference value) const
     {
-        return const_iterator(_tree.lower_bound(value));
-    }
+        tree_node *ret = _tree.lower_bound(value);
+        if (ret == nullptr)
+            return const_iterator(_tree._end, true);
+        return const_iterator(ret, false);    }
 
     iterator upper_bound(const_reference value)
     {
-        return iterator(_tree.upper_bound(value));
+        tree_node *ret = _tree.upper_bound(value);
+        if (ret == nullptr)
+            return iterator(_tree._end, true);
+        return iterator(ret, false);
     }
 
     const_iterator upper_bound(const_reference value) const
     {
-        return const_iterator(_tree.upper_bound(value));
-    }
+        tree_node *ret = _tree.upper_bound(value);
+        if (ret == nullptr)
+            return const_iterator(_tree._end, true);
+        return const_iterator(ret, false);    }
 
     // ============================================================================
 // -------------------------------

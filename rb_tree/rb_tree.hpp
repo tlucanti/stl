@@ -140,6 +140,16 @@ private:
 
 public:
 
+    rb_node *end()
+    {
+        return _end;
+    }
+
+    rb_node *begin()
+    {
+        return _begin;
+    }
+
     rb_node *insert(const key_T &key)
     {
         bool _;
@@ -164,7 +174,7 @@ public:
             _begin = node;
         else if (compare(key_ptr, _root->key) >= 1)
             _end = node;
-        rb_node *parent = _BST_find_parent(hint, key);
+        rb_node *parent = _bst_find_parent(hint, &key);
         if (parent != nullptr && compare(&key, parent->key) == 0)
         {
             was_inserted = false;
@@ -176,14 +186,14 @@ public:
             _root = node;
             node->color = rb_black;
             was_inserted = true;
-            return (rb_node){node};
+            return node;
         }
         else if (parent == nullptr)
-            _BST_insert(_root, node);
+            _bst_insert(_root, node);
         else
-            _BST_insert(parent, node);
-        _Rb_balance_after_insert(node);
-        return (rb_node){node};
+            _bst_insert(parent, node);
+        _rb_balance_after_insert(node);
+        return node;
     }
     
     rb_node *find(const key_T &key, rb_node *start_from=nullptr)
@@ -236,6 +246,11 @@ public:
     }
 
 private:
+
+    rb_node     *_rb_node_create(key_T *key)
+    {
+        return new rb_node(nullptr, nullptr, nullptr, rb_red, key);
+    }
     
     rb_node     *_rb_grandparent(rb_node *node)
     {
@@ -296,9 +311,8 @@ private:
         return node;
     }
 
-    void        _bst_insert(rb_node *node)
+    void        _bst_insert(rb_node *root, rb_node *node)
     {
-        rb_node *root = _root;
         while (true)
         {
             if (compare(node->key, root->key) < 0)
@@ -348,7 +362,7 @@ private:
         }
     }
 
-    rb_node     *_bst_find_parent(rb_node *root, key_T *value)
+    rb_node     *_bst_find_parent(rb_node *root, const key_T *value)
     {
         if (root == NULL)
             return NULL;
@@ -419,13 +433,13 @@ private:
         {
             if (node->parent->color == rb_black)
                 break ;
-            rb_node *gp = _Rb_grandparent(node);
-            if (gp == NULL)
+            rb_node *gp = _rb_grandparent(node);
+            if (gp == nullptr)
                 break ;
             if (node->parent == gp->left) // left cases
-                node = _Rb_insert_case_1(node, gp);
+                node = _rb_insert_case_1(node, gp);
             else // right cases
-                node = _Rb_insert_case_2(node, gp);
+                node = _rb_insert_case_2(node, gp);
         }
         _root->color = rb_black;
     }
@@ -647,13 +661,13 @@ private:
 
     rb_node *_rb_copy(rb_node *root)
     {
-        key_T node_ptr = new key_T(root->key);
-        rb_node *new_root = rb_node_create(node_ptr);
+        AUTO(key_T *) node_ptr = new key_T(*root->key);
+        rb_node *new_root = _rb_node_create(node_ptr);
         new_root->color = root->color;
         if (root->left)
-            new_root->left = _Rb_tree_copy(root->left);
+            new_root->left = _rb_copy(root->left);
         if (root->right)
-            new_root->right = _Rb_tree_copy(root->right);
+            new_root->right = _rb_copy(root->right);
         return new_root;
     }
 
