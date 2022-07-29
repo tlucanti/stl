@@ -7,12 +7,13 @@ static _Rb_node     *_Rb_grandparent(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_Rb_uncle(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
-static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare) WUR NOEXCEPT;
+static void         _BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
+static _Rb_node     *_BST_find_parent(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_Rb_recolor(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_Rb_insert_case_1(_Rb_node *node, _Rb_node *gp, _Rb_node **root) WUR NOEXCEPT;
 static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **root) WUR NOEXCEPT;
-static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare) WUR NOEXCEPT;
+static void         _Rb_balance_after_insert(_Rb_node **root, _Rb_node *node) NOEXCEPT;
 static _Rb_node     *_BST_max(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_BST_min(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_BST_remove(_Rb_node *node) WUR NOEXCEPT;
@@ -74,7 +75,7 @@ void    *rb_get_key(rb_node node)
     return NULL;
 }
 
-rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
+rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare)
 {
     _Rb_node *node = _Rb_node_create(key);
     if (UNLIKELY(root->root.node == NULL))
@@ -86,7 +87,24 @@ rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
         root->begin.node = node;
     else if (compare(key, root->end.node->key) >= 1)
         root->end.node = node;
-    return (rb_node){_Rb_insert(&root->root.node, node, compare)};
+    _Rb_node *parent = _BST_find_parent(hint.node, key, compare);
+    if (parent == NULL && root->root.node == NULL)
+    {
+        root->root.node = node;
+        node->color = _Rb_Black;
+        return (rb_node){node};
+    }
+    else if (parent == NULL)
+        _BST_insert(root->root.node, node, compare);
+    else
+        _BST_insert(parent, node, compare);
+    _Rb_balance_after_insert(&root->root.node, node);
+    return (rb_node){node};
+}
+
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare)
+{
+    return rb_insert_hint(root, root->root, key, compare);
 }
 
 rb_node rb_find(rb_tree *root, void *key, compare_fun compare)
@@ -310,7 +328,7 @@ static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root)
     return node;
 }
 
-static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare)
+static void     _BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare)
 /*
     function inserts element `node` to Binary Search Tree with root `root`
 */
@@ -320,16 +338,13 @@ static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun com
     assert(compare);
     while (1)
     {
-        int cmp = compare(node->key, root->key);
-        if (cmp == 0)
-            return root;
-        if (cmp < 0)
+        if (compare(node->key, root->key) < 0)
         {
             if (root->left == NULL)
             {
                 root->left = node;
                 node->parent = root;
-                return NULL;
+                return ;
             }
             root = root->left;
         }
@@ -339,7 +354,7 @@ static _Rb_node     *_BST_insert(_Rb_node *root, _Rb_node *node, compare_fun com
             {
                 root->right = node;
                 node->parent = root;
-                return NULL;
+                return ;
             }
             root = root->right;
         }
@@ -367,6 +382,32 @@ static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare)
         {
             if (root->right == NULL)
                 return NULL;
+            root = root->right;
+        }
+    }
+}
+
+static _Rb_node     *_BST_find_parent(_Rb_node *root, void *value, compare_fun compare)
+{
+    assert(compare);
+
+    if (root == NULL)
+        return NULL;
+    while (1)
+    {
+        int cmp = compare(value, root->key);
+        if (cmp == 0)
+            return root;
+        else if (cmp < 0)
+        {
+            if (root->left == NULL)
+                return root;
+            root = root->left;
+        }
+        else
+        {
+            if (root->right == NULL)
+                return root;
             root = root->right;
         }
     }
@@ -462,21 +503,8 @@ static _Rb_node     *_Rb_insert_case_2(_Rb_node *node, _Rb_node *gp, _Rb_node **
     }
 }
 
-static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun compare)
+static void         _Rb_balance_after_insert(_Rb_node **root, _Rb_node *node)
 {
-    assert(root);
-    assert(node);
-    assert(compare);
-    if (*root == NULL)
-    {
-        *root = node;
-        node->color = _Rb_Black;
-        return node;
-    }
-    _Rb_node *inserted = _BST_insert(*root, node, compare);
-    if (inserted != NULL)
-        return inserted;
-    inserted = node;
     while (node != *root && node->color == _Rb_Red)
     {
         if (node->parent->color == _Rb_Black)
@@ -490,7 +518,6 @@ static _Rb_node     *_Rb_insert(_Rb_node **root, _Rb_node *node, compare_fun com
             node = _Rb_insert_case_2(node, gp, root);
     }
     (*root)->color = _Rb_Black;
-    return inserted;
 }
 
 static _Rb_node     *_BST_max(_Rb_node *node)

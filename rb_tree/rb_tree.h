@@ -53,6 +53,7 @@ typedef void (*del_fun)(void *);
 
 void    *rb_get_key(rb_node node);
 rb_node rb_insert(rb_tree *root, void *key, compare_fun compare);
+rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare);
 rb_node rb_find(rb_tree *root, void *key, compare_fun compare);
 rb_node rb_remove(rb_tree *root, void *key, compare_fun compare);
 rb_node rb_next(rb_node node);
