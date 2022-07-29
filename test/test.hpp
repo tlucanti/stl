@@ -538,7 +538,7 @@ bool UserClass::monitoring = false;
     std_vec_cmp(__v1, __v2, __msg); \
     UserClass::monitoring = true
 
-# define PTR(__x) reinterpret_cast<int *>(__x)
+# define PTR(__x) reinterpret_cast<void *>(__x)
 # define SINGLE_OP_INIT \
     int __single_op_list [200]; \
     std::memset(__single_op_list, 0, sizeof(int) * 200); \
@@ -888,6 +888,6 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 # define RBCPP_LOWERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(lower_bound, __val, __cmp, __msg)
 # define RBCPP_UPPERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(upper_bound, __val, __cmp, __msg)
 
-
+# define set_123(__name) tlucanti::set_base<int> __name; __name.insert(1), __name.insert(2), __name.insert(3)
 
 #endif /* PAIR_HPP */

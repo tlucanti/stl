@@ -121,9 +121,9 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef override
 #   define override
 #  endif /* override */
-#  ifndef nullptr
+#  undef nullptr
 #   define nullptr NULL
-#  endif /* nullptr */
+//#  endif /* nullptr */
 #  ifndef AUTO
 #   define AUTO(__x) __x
 #  endif /* AUTO */

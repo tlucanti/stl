@@ -2,11 +2,11 @@
 #ifndef RB_TREE_HPP
 # define RB_TREE_HPP
 
-# include "defs.hpp"
 # include <cassert>
 # include <cstddef>
 # include <memory>
 # include <functional>
+# include "defs.hpp"
 
 TLU_NAMESPACE_BEGIN
 
@@ -143,10 +143,15 @@ public:
     rb_node *insert(const key_T &key)
     {
         bool _;
-        return insert(key, _);
+        return insert(_root, key, _);
     }
 
     rb_node *insert(const key_T &key, bool &was_inserted)
+    {
+        return insert(_root, key, was_inserted);
+    }
+
+    rb_node *insert(rb_node *hint, const key_T &key, bool &was_inserted)
     {
         key_T   *key_ptr = new key_T(key);
         rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
@@ -159,12 +164,33 @@ public:
             _begin = node;
         else if (compare(key_ptr, _root->key) >= 1)
             _end = node;
-        return _rb_insert(node, was_inserted);
+        rb_node *parent = _BST_find_parent(hint, key);
+        if (parent != nullptr && compare(&key, parent->key) == 0)
+        {
+            was_inserted = false;
+            return parent;
+        }
+        was_inserted = true;
+        if (parent == nullptr && _root == nullptr)
+        {
+            _root = node;
+            node->color = rb_black;
+            was_inserted = true;
+            return (rb_node){node};
+        }
+        else if (parent == nullptr)
+            _BST_insert(_root, node);
+        else
+            _BST_insert(parent, node);
+        _Rb_balance_after_insert(node);
+        return (rb_node){node};
     }
     
-    rb_node *find(const key_T &key)
+    rb_node *find(const key_T &key, rb_node *start_from=nullptr)
     {
-        return _bst_find(&key);
+        if (start_from == nullptr)
+            start_from = _root;
+        return _bst_find(&key, start_from);
     }
     
     rb_node *remove(const key_T &key)
@@ -270,21 +296,18 @@ private:
         return node;
     }
 
-    rb_node     *_bst_insert(rb_node *node)
+    void        _bst_insert(rb_node *node)
     {
         rb_node *root = _root;
         while (true)
         {
-            int cmp = compare(node->key, root->key);
-            if (cmp == 0)
-                return root;
-            if (cmp < 0)
+            if (compare(node->key, root->key) < 0)
             {
                 if (root->left == nullptr)
                 {
                     root->left = node;
                     node->parent = root;
-                    return nullptr;
+                    return ;
                 }
                 root = root->left;
             }
@@ -294,18 +317,17 @@ private:
                 {
                     root->right = node;
                     node->parent = root;
-                    return nullptr;
+                    return ;
                 }
                 root = root->right;
             }
         }
     }
 
-    rb_node     *_bst_find(const key_T *value)
+    rb_node     *_bst_find(const key_T *value, rb_node *root)
     {
-        if (_root == nullptr)
+        if (root == nullptr)
             return nullptr;
-        rb_node *root = _root;
         while (true)
         {
             int cmp = compare(value, root->key);
@@ -321,6 +343,30 @@ private:
             {
                 if (root->right == nullptr)
                     return nullptr;
+                root = root->right;
+            }
+        }
+    }
+
+    rb_node     *_bst_find_parent(rb_node *root, key_T *value)
+    {
+        if (root == NULL)
+            return NULL;
+        while (true)
+        {
+            int cmp = compare(value, root->key);
+            if (cmp == 0)
+                return root;
+            else if (cmp < 0)
+            {
+                if (root->left == NULL)
+                    return root;
+                root = root->left;
+            }
+            else
+            {
+                if (root->right == NULL)
+                    return root;
                 root = root->right;
             }
         }
@@ -367,35 +413,21 @@ private:
         }
     }
 
-    rb_node     *_rb_insert(rb_node *node, bool &was_inserted)
+    void         _rb_balance_after_insert(rb_node *node)
     {
-        if (_root == nullptr)
-        {
-            was_inserted = true;
-            _root = node;
-            node->color = rb_black;
-            return node;
-        }
-        was_inserted = false;
-        rb_node *inserted = _bst_insert(node);
-        if (inserted != nullptr)
-            return inserted;
-        was_inserted = true;
-        inserted = node;
-        while (node != _root and node->color == rb_red)
+        while (node != _root && node->color == rb_red)
         {
             if (node->parent->color == rb_black)
                 break ;
-            rb_node *gp = _rb_grandparent(node);
-            if (gp == nullptr)
+            rb_node *gp = _Rb_grandparent(node);
+            if (gp == NULL)
                 break ;
             if (node->parent == gp->left) // left cases
-                node = _rb_insert_case_1(node, gp);
+                node = _Rb_insert_case_1(node, gp);
             else // right cases
-                node = _rb_insert_case_2(node, gp);
+                node = _Rb_insert_case_2(node, gp);
         }
         _root->color = rb_black;
-        return inserted;
     }
 
     static rb_node     *_bst_max(rb_node *node)
@@ -579,7 +611,7 @@ private:
     {
         if (_root == nullptr)
             return nullptr;
-        rb_node *rm = _bst_find(value);
+        rb_node *rm = _bst_find(value, _root);
         if (rm == nullptr)
             return nullptr;
         rb_node *ret;

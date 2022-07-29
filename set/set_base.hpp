@@ -174,6 +174,11 @@ public:
         return pair_type(node, was_inserted);
     }
 
+    iterator insert(iterator hint, const_reference value)
+    {
+        tree_node *child = _tree.find(value, hint);
+    }
+
     template <class InputIt>
     void insert(InputIt first, InputIt last)
     {

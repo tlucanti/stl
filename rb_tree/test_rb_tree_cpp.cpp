@@ -1,6 +1,6 @@
 
-# include "rb_tree.hpp"
 # include "test.hpp"
+# include "rb_tree.hpp"
 
 void basic_method_test();
 
