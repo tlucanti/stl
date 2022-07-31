@@ -25,17 +25,18 @@ private:
     };
 
 public:
-    class rb_node
+    template <class key_type>
+    class _rb_node
     {
         friend class rb_tree;
     private:
 
-        rb_node(
-                rb_node     *_parent,
-                rb_node     *_left,
-                rb_node     *_right,
+        _rb_node(
+                _rb_node     *_parent,
+                _rb_node     *_left,
+                _rb_node     *_right,
                 rb_colors   _color,
-                key_T       *_key
+                key_type    *_key
         ) :
                 parent(_parent),
                 left(_left),
@@ -44,31 +45,35 @@ public:
                 key(_key)
         {}
 
-        rb_node     *parent;
-        rb_node     *left;
-        rb_node     *right;
+        _rb_node     *parent;
+        _rb_node     *left;
+        _rb_node     *right;
         rb_colors   color;
-        key_T       *key;
+        key_type    *key;
 
     public:
-        const key_T &get_key()
+        const key_type &get_key()
         {
             return *key;
         }
 
-        key_T get_key_copy()
+        key_type get_key_copy()
         {
             return *key;
         }
     };
 
+public:
+    typedef _rb_node<key_T> rb_node;
+    typedef _rb_node<const key_T> const_rb_node;
+
 private:
-    rb_node     *_root;
-    rb_node     *_begin;
-    rb_node     *_end;
-    cmp_T       _cmp;
-    allocator_T _alloc;
-    size_t      _size;
+    rb_node         *_root;
+    rb_node         *_begin;
+    rb_node         *_end;
+    cmp_T           _cmp;
+    allocator_T     _alloc;
+    size_t          _size;
 
 public:
 
@@ -129,7 +134,7 @@ public:
     }
 
 private:
-    int compare(const key_T *lhs, const key_T *rhs)
+    int compare(const key_T *lhs, const key_T *rhs) const
     {
         if (_cmp(*lhs, *rhs))
             return -1;
@@ -145,7 +150,17 @@ public:
         return _end;
     }
 
+    const_rb_node         *end() const
+    {
+        return _end;
+    }
+
     rb_node *begin()
+    {
+        return _begin;
+    }
+
+    const_rb_node         *begin() const
     {
         return _begin;
     }
@@ -196,7 +211,7 @@ public:
         return node;
     }
     
-    rb_node *find(const key_T &key, rb_node *start_from=nullptr)
+    rb_node *find(const key_T &key, rb_node *start_from=nullptr) const
     {
         if (start_from == nullptr)
             start_from = _root;
@@ -231,18 +246,23 @@ public:
         return _bst_prev(node);
     }
     
-    rb_node *lower_bound(const key_T &key)
+    rb_node *lower_bound(const key_T &key) const
     {
         if (_root == nullptr)
             return nullptr;
         return _bst_lower_bound(&key);
     }
     
-    rb_node *upper_bound(const key_T &key)
+    rb_node *upper_bound(const key_T &key) const
     {
         if (_root == nullptr)
             return nullptr;
         return _bst_upper_bound(&key);
+    }
+
+    std::size_t size() const
+    {
+        return _size;
     }
 
 private:
@@ -338,7 +358,7 @@ private:
         }
     }
 
-    rb_node     *_bst_find(const key_T *value, rb_node *root)
+    rb_node     *_bst_find(const key_T *value, rb_node *root) const
     {
         if (root == nullptr)
             return nullptr;

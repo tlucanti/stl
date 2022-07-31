@@ -7,8 +7,8 @@
 
 TLU_NAMESPACE_BEGIN
 
-template <class value_T, class cmp_T=std::less<value_T> >
-class rb_tree_iterator : public std::iterator<std::bidirectional_iterator_tag, value_T>
+template<class value_T, class size_T, class cmp_T=std::less<value_T> >
+class rb_tree_iterator_base : public std::iterator<std::bidirectional_iterator_tag, value_T>
 {
 private:
     typedef typename std::iterator<std::bidirectional_iterator_tag, value_T> base_class;
@@ -21,29 +21,36 @@ public:
     typedef const reference                         const_reference;
     typedef const pointer                           const_pointer;
 
-private:
+
+protected:
     typedef typename rb_tree<value_type>::rb_node rb_node;
 
-    rb_tree_iterator(rb_node *ptr, bool end) :
-        _ptr(ptr), _end(end)
-    {}
-
+private:
     rb_node *_ptr;
     bool    _end;
 
 public:
-    explicit rb_tree_iterator(const rb_tree_iterator &cpy) :
-        _ptr(cpy._ptr), _end(cpy._end)
-    {}
-
-    ~rb_tree_iterator() DEFAULT
-
-    const_reference operator *() const noexcept
+    virtual const_reference operator *()
     {
         return _ptr->get_key();
     }
 
-    rb_tree_iterator &operator ++() // ++i
+    virtual bool operator ==(const rb_tree_iterator_base &cmp)
+    {
+        return _ptr == cmp._ptr;
+    }
+
+    virtual bool operator !=(const rb_tree_iterator_base &cmp)
+    {
+        return _ptr != cmp._ptr;
+    }
+
+protected:
+    rb_tree_iterator_base(rb_node *ptr, bool end) :
+        _ptr(ptr), _end(end)
+    {}
+
+    void increment() // ++i
     {
         if (_end)
         {
@@ -51,27 +58,87 @@ public:
             return *this;
         }
         _ptr = rb_tree<value_type>::prev(_ptr);
+        return *this;
+    }
+
+    void decrement()
+    {
+        if (_end)
+        {
+            _end = false;
+            return *this;
+        }
+        _ptr = rb_tree<value_type>::prev(_ptr);
+        return *this;
+    }
+
+    virtual ~rb_tree_iterator_base() DEFAULT
+};
+
+template <class value_T, class size_T, class cmp_T=std::less<value_T> >
+class rb_tree_iterator : public rb_tree_iterator_base<value_T, size_T, cmp_T>
+{
+private:
+    typedef rb_tree_iterator_base<value_T, size_T, cmp_T> base_class;
+
+public:
+    typedef typename base_class::iterator_category  iterator_category;
+    typedef typename base_class::value_type         value_type;
+    typedef typename base_class::difference_type    difference_type;
+    typedef typename base_class::pointer            pointer;
+    typedef typename base_class::reference          reference;
+    typedef const reference                         const_reference;
+    typedef const pointer                           const_pointer;
+
+public:
+    typedef typename rb_tree<value_type>::rb_node rb_node;
+    typedef typename rb_tree<const value_type>::rb_node const_rb_node;
+
+
+public: // TODO: remove this
+    rb_tree_iterator(rb_node *ptr, bool end) : base_class(ptr, end)
+    {}
+
+public:
+    rb_tree_iterator(const rb_tree_iterator &cpy) : base_class(cpy)
+    {}
+
+    ~rb_tree_iterator() DEFAULT
+
+    rb_tree_iterator &operator ++() // ++i
+    {
+        this->increment();
         return *this;
     }
 
     rb_tree_iterator operator ++(int) // i++
     {
-        return ++rb_tree_iterator(*this);
+        rb_tree_iterator ret(*this);
+        this->increment();
+        return ret;
     }
 
-    rb_tree_iterator &operator --() {} // --i
+    rb_tree_iterator &operator --() // --i
+    {
+        this->decrement();
+        return *this;
+    }
 
     rb_tree_iterator operator --(int) // i--
     {
-        return --rb_tree_iterator(*this);
+       rb_tree_iterator ret(*this);
+       this->decrement();
+       return ret;
     }
+
 };
 
-template <class value_T, class cmp_T=std::less<value_T> >
-class rb_tree_reverse_iterator : public std::iterator<std::bidirectional_iterator_tag, value_T>
+template <class value_T, class size_T, class cmp_T=std::less<value_T> >
+class rb_tree_reverse_iterator : public rb_tree_iterator_base<value_T, size_T, cmp_T>
 {
 private:
-    typedef typename std::iterator<std::bidirectional_iterator_tag, value_T> base_class;
+    typedef rb_tree_iterator_base<value_T, size_T, cmp_T> base_class;
+
 public:
     typedef typename base_class::iterator_category  iterator_category;
     typedef typename base_class::value_type         value_type;
@@ -81,59 +148,46 @@ public:
     typedef const reference                         const_reference;
     typedef const pointer                           const_pointer;
 
-private:
+protected:
     typedef typename rb_tree<value_type>::rb_node rb_node;
 
-    explicit rb_tree_reverse_iterator(rb_node *ptr, bool end) :
-            _ptr(ptr), _end(end)
+
+public: // TODO: remove this
+    rb_tree_reverse_iterator(rb_node *ptr, bool end) : base_class(ptr, end)
     {}
 
-    rb_node *_ptr;
-    bool    _end;
-
 public:
-    explicit rb_tree_reverse_iterator(const rb_tree_reverse_iterator &cpy) :
-            _ptr(cpy._ptr), _end(cpy._end)
+    explicit rb_tree_reverse_iterator(const rb_tree_reverse_iterator &cpy) : base_class(cpy)
     {}
 
     ~rb_tree_reverse_iterator() DEFAULT
 
-    const_reference operator *() const noexcept
-    {
-        return _ptr->get_key();
-    }
-
     rb_tree_reverse_iterator &operator ++() // ++i
     {
-        if (_end)
-        {
-            _end = false;
-            return *this;
-        }
-        _ptr = rb_tree<value_type>::prev(_ptr);
+        this->decrement();
         return *this;
     }
 
     rb_tree_reverse_iterator operator ++(int) // i++
     {
-        return ++rb_tree_reverse_iterator(*this);
+        rb_tree_reverse_iterator ret(*this);
+        this->decrement();
+        return ret;
     }
 
     rb_tree_reverse_iterator &operator --() // --i
     {
-        if (_end)
-        {
-            _end = false;
-            return *this;
-        }
-        _ptr = rb_tree<value_type>::prev(_ptr);
+        this->increment();
         return *this;
     }
 
     rb_tree_reverse_iterator operator --(int) // i--
     {
-        return --rb_tree_reverse_iterator(*this);
+        rb_tree_reverse_iterator ret(*this);
+        this->increment();
+        return ret;
     }
+
 };
 
 TLU_NAMESPACE_END

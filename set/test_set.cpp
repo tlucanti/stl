@@ -5,28 +5,13 @@
 #include "rb_tree.hpp"
 #include "set_base.hpp"
 
-class UC
-{
-public:
-    UC() {}
-
-    bool operator <(const UC &b) const
-    {
-        (void)b;
-        return true;
-    }
-};
-
-void constructor_test();
+void set_test();
 
 int main()
 {
-    tlucanti::set_base<int> a;
-    a.find(123);
-    tlucanti::rb_tree<int, std::less<int> > tree((std::less<int>()), std::allocator<int>());
-    tree.insert(123);
-    tree.find(123);
-    tree.remove(123);
+    run_test(set_test);
+
+    final();
 }
 
 void set_test()

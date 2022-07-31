@@ -31,10 +31,11 @@ public:
     typedef const value_type                            &const_reference;
     typedef typename allocator_type::pointer            pointer;
     typedef typename allocator_type::const_pointer      const_pointer;
-    typedef rb_tree_iterator<value_type>                iterator;
-    typedef rb_tree_iterator<const value_type>          const_iterator;
-    typedef rb_tree_reverse_iterator<value_type>        reverse_iterator;
-    typedef rb_tree_reverse_iterator<const value_type>  const_reverse_iterator;
+
+    typedef rb_tree_iterator<value_type, size_type, key_compare>                iterator;
+    typedef rb_tree_iterator<const value_type, size_type, key_compare>          const_iterator;
+    typedef rb_tree_reverse_iterator<value_type, size_type, key_compare>        reverse_iterator;
+    typedef rb_tree_reverse_iterator<const value_type, size_type, key_compare>  const_reverse_iterator;
 
 private:
     typedef rb_tree<
@@ -42,7 +43,13 @@ private:
         key_compare,
         allocator_type
     >   tree_type;
-    typedef typename tree_type::rb_node                 tree_node;
+    typedef rb_tree<
+        const value_type,
+        key_compare,
+        allocator_type
+    >   const_tree_type;
+    typedef typename iterator::rb_node                 tree_node;
+    typedef typename iterator::const_rb_node           const_tree_node;
     typedef pair_base<iterator, bool>                   pair_type;
 
     tree_type       _tree;
@@ -220,8 +227,9 @@ public:
     const_iterator find(const_reference value) const
     {
         tree_node *ret = _tree.find(value);
+        tree_node *nd = _tree.end();
         if (ret == nullptr)
-            return const_iterator(_tree._end, true);
+            return const_iterator(nd, true);
         return const_iterator(ret, true);
     }
 
