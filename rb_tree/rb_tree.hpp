@@ -52,12 +52,12 @@ public:
         key_type    *key;
 
     public:
-        const key_type &get_key()
+        key_type &get_key()
         {
             return *key;
         }
 
-        key_type get_key_copy()
+        key_type get_key_copy() const
         {
             return *key;
         }
@@ -129,8 +129,6 @@ public:
     {
         if (_root != nullptr)
             _rb_destroy(_root);
-        _begin = nullptr;
-        _end = nullptr;
     }
 
 private:
@@ -263,6 +261,41 @@ public:
     std::size_t size() const
     {
         return _size;
+    }
+
+    void assign(const rb_tree &cpy)
+    {
+        if (_root != nullptr)
+            _rb_destroy(_root);
+        _root = _rb_copy(cpy._root);
+        _begin = _bst_min(_root);
+        _end = _bst_max(_root);
+        _size = cpy._size;
+    }
+
+    void destroy()
+    {
+        if (_root == nullptr)
+            return ;
+        _rb_destroy(_root);
+        _begin = nullptr;
+        _end = nullptr;
+        _size = 0;
+    }
+
+    allocator_T get_allocator() const
+    {
+        return _alloc;
+    }
+
+    void swap(rb_tree &swp)
+    {
+        std::swap(_root, swp._root);
+        std::swap(_begin, swp._begin);
+        std::swap(_end, swp._end);
+        std::swap(_size, swp._size);
+        std::swap(_alloc, swp._alloc);
+        std::swap(_cmp, swp._cmp);
     }
 
 private:

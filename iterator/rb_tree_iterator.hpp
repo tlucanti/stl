@@ -30,7 +30,7 @@ private:
     bool    _end;
 
 public:
-    virtual const_reference operator *()
+    virtual reference operator *()
     {
         return _ptr->get_key();
     }
@@ -53,23 +53,17 @@ protected:
     void increment() // ++i
     {
         if (_end)
-        {
             _end = false;
-            return *this;
-        }
-        _ptr = rb_tree<value_type>::prev(_ptr);
-        return *this;
+        else
+            _ptr = rb_tree<value_type>::prev(_ptr);
     }
 
     void decrement()
     {
         if (_end)
-        {
             _end = false;
-            return *this;
-        }
-        _ptr = rb_tree<value_type>::prev(_ptr);
-        return *this;
+        else
+            _ptr = rb_tree<value_type>::prev(_ptr);
     }
 
     virtual ~rb_tree_iterator_base() DEFAULT
@@ -96,7 +90,7 @@ public:
 
 
 public: // TODO: remove this
-    rb_tree_iterator(rb_node *ptr, bool end) : base_class(ptr, end)
+    rb_tree_iterator(const rb_node *ptr, bool end=false) : base_class(ptr, end)
     {}
 
 public:

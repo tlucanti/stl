@@ -96,12 +96,16 @@ public:
     {}
 #endif /* CPP11 */
 
-    ~set_base() DEFAULT
+    ~set_base()
+    {
+        _tree.destroy();
+    }
 
     set_base &operator =(const set_base &cmp)
     {
         _tree.destroy();
         _tree.assign(cmp._tree);
+        return *this;
     }
 
     allocator_type get_allocator() const noexcept
@@ -132,22 +136,23 @@ public:
 
     reverse_iterator rbegin()
     {
-        return reverse_iterator(_tree.rbegin(), true);
+        tree_node *end = _tree.end();
+        return reverse_iterator(end, true);
     }
 
     const_reverse_iterator rbegin() const
     {
-        return const_reverse_iterator(_tree.rbegin(), true);
+        return const_reverse_iterator(_tree.end(), true);
     }
 
     reverse_iterator rend()
     {
-        return reverse_iterator(_tree.rend(), false);
+        return reverse_iterator(_tree.begin(), false);
     }
 
     const_reverse_iterator rend() const
     {
-        return const_reverse_iterator (_tree.rend(), true);
+        return const_reverse_iterator(_tree.begin(), true);
     }
 
     // ============================================================================
@@ -201,7 +206,7 @@ public:
 
     size_type erase(const value_type &value)
     {
-        _tree.remove(value);
+        return _tree.remove(value);
     }
 
     void swap(set_base &other)
@@ -227,7 +232,7 @@ public:
     const_iterator find(const_reference value) const
     {
         tree_node *ret = _tree.find(value);
-        tree_node *nd = _tree.end();
+        const_tree_node *nd = _tree.end();
         if (ret == nullptr)
             return const_iterator(nd, true);
         return const_iterator(ret, true);
