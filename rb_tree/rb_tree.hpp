@@ -52,6 +52,15 @@ public:
         key_type    *key;
 
     public:
+        template <class T>
+        _rb_node(const T &cpy) :
+            parent(cpy._parent),
+            left(cpy._left),
+            right(cpy._right),
+            color(cpy._color),
+            key(cpy._key)
+        {}
+
         key_type &get_key()
         {
             return *key;
@@ -148,7 +157,7 @@ public:
         return _end;
     }
 
-    const_rb_node         *end() const
+    rb_node         *end() const
     {
         return _end;
     }
@@ -158,7 +167,7 @@ public:
         return _begin;
     }
 
-    const_rb_node         *begin() const
+    rb_node         *begin() const
     {
         return _begin;
     }

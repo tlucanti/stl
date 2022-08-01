@@ -90,7 +90,8 @@ public:
 
 
 public: // TODO: remove this
-    rb_tree_iterator(const rb_node *ptr, bool end=false) : base_class(ptr, end)
+    template <class T>
+    rb_tree_iterator(IS_RB_ITERATOR(T) *ptr, bool end=false) : base_class(ptr, end)
     {}
 
 public:

@@ -232,9 +232,8 @@ public:
     const_iterator find(const_reference value) const
     {
         tree_node *ret = _tree.find(value);
-        const_tree_node *nd = _tree.end();
         if (ret == nullptr)
-            return const_iterator(nd, true);
+            return const_iterator(_tree.end(), true);
         return const_iterator(ret, true);
     }
 
