@@ -8,6 +8,7 @@ void remove_tests();
 void iterator_test();
 void copy_destroy_test();
 void copy_destroy_user_test();
+void compare_test();
 
 void random_insert_find_small_tests();
 void random_insert_find_medium_tests();
@@ -56,6 +57,7 @@ int main()
     run_test(iterator_test);
     run_test(copy_destroy_test);
     run_test(copy_destroy_user_test);
+    run_test(compare_test);
 
     run_test(random_insert_find_small_tests);
     run_test(random_insert_find_medium_tests);
@@ -665,6 +667,47 @@ void copy_destroy_user_test()
     result();
 }
 
+void compare_test()
+{
+    start("tree compare tests");
+
+    {
+        rb_tree tree1 = MAKE_EMPTY_TREE;
+        rb_tree tree2 = MAKE_EMPTY_TREE;
+
+        ASSERT(rb_equal(&tree1, &tree2, int_compare) == 1, "compare test 0");
+        ASSERT(rb_compare(&tree1, &tree2, int_compare) == 0, "compare test 1");
+        ASSERT(rb_equal(&tree2, &tree1, int_compare) == 1, "invert compare test 0");
+        ASSERT(rb_compare(&tree2, &tree1, int_compare) == 0, "invert compare test 1");
+
+        RB_TREE_INSERT(tree1, 1);
+        ASSERT(rb_equal(&tree1, &tree2, int_compare) == 0, "miss-size compare test 0");
+        ASSERT(rb_compare(&tree1, &tree2, int_compare) == 1, "miss-size compare test 1");
+        ASSERT(rb_equal(&tree2, &tree1, int_compare) == 0, "miss-size invert compare test 0");
+        ASSERT(rb_compare(&tree2, &tree1, int_compare) == -1, "miss-size invert compare test 1");
+        RB_TREE_INSERT(tree2, 1);
+
+        ASSERT(rb_equal(&tree1, &tree2, int_compare) == 1, "compare test 2");
+        ASSERT(rb_compare(&tree1, &tree2, int_compare) == 0, "compare test 3");
+        ASSERT(rb_equal(&tree2, &tree1, int_compare) == 1, "invert compare test 2");
+        ASSERT(rb_compare(&tree2, &tree1, int_compare) == 0, "invert compare test 3");
+
+        RB_TREE_INSERT(tree1, 2);
+        ASSERT(rb_equal(&tree1, &tree2, int_compare) == 0, "miss-size compare test 0");
+        ASSERT(rb_compare(&tree1, &tree2, int_compare) == 1, "miss-size compare test 1");
+        ASSERT(rb_equal(&tree2, &tree1, int_compare) == 0, "miss-size invert compare test 0");
+        ASSERT(rb_compare(&tree2, &tree1, int_compare) == -1, "miss-size invert compare test 1");
+        RB_TREE_INSERT(tree2, 3);
+
+        ASSERT(rb_equal(&tree1, &tree2, int_compare) == 0, "compare test 0");
+        ASSERT(rb_compare(&tree1, &tree2, int_compare) == -1, "compare test 1");
+        ASSERT(rb_equal(&tree2, &tree1, int_compare) == 0, "invert compare test 0");
+        ASSERT(rb_compare(&tree2, &tree1, int_compare) == 1, "invert compare test 1");
+    }
+
+    result();
+}
+
 void _random_remove_sized_tests(int div, const std::string &name, bool root_removing)
 {
     start(("random " + name + " remove tests").c_str());
@@ -785,8 +828,8 @@ void _random_bound_test(const std::string &name, int div)
                 ASSERT(upper.node == nullptr, "upper bound end() test");
             else
                 ASSERT(rb_get_key(upper) == PTR(*std_upper), "upper bound test");
-            rb_lower_bound(&tree, PTR(b), int_compare);
-            rb_upper_bound(&tree, PTR(b), int_compare);
+//            rb_lower_bound(&tree, PTR(b), int_compare);
+//            rb_upper_bound(&tree, PTR(b), int_compare);
         }
         int r = rand() % div + 1;
         RB_INSERT(r);

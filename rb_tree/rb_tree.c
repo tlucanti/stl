@@ -7,7 +7,7 @@ static _Rb_node     *_Rb_grandparent(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_Rb_uncle(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_Rb_rotate_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static _Rb_node     *_Rb_rotate_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
-static void         _BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare) WUR NOEXCEPT;
+static void         _BST_insert(_Rb_node *root, _Rb_node *node, compare_fun compare) NOEXCEPT;
 static _Rb_node     *_BST_find(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_BST_find_parent(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_Rb_recolor(_Rb_node *node) WUR NOEXCEPT;
@@ -29,6 +29,8 @@ static _Rb_node     *_Rb_tree_copy(_Rb_node *root, copy_fun) WUR NOEXCEPT;
 static void         _Rb_tree_destroy(_Rb_node *root, del_fun) NOEXCEPT;
 static _Rb_node     *_BST_lower_bound(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_BST_upper_bound(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
+static unsigned int _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp) WUR NOEXCEPT;
+static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp, _Rb_node *end1, _Rb_node *end2) WUR NOEXCEPT;
 
 #ifdef __cplusplus
 static _Rb_node   *_Rb_node_create(void *key)
@@ -183,6 +185,32 @@ rb_node rb_upper_bound(rb_tree *root, void *value, compare_fun cmp)
     if (root->root.node == NULL)
         return (rb_node){NULL};
     return (rb_node){_BST_upper_bound(root->root.node, value, cmp)};
+}
+
+int     rb_equal(rb_tree *tree1, rb_tree *tree2, compare_fun cmp)
+{
+    if (tree1->root.node == NULL || tree2->root.node == NULL)
+    {
+        if (tree1->root.node == NULL && tree2->root.node == NULL)
+            return 0;
+        if (tree1->root.node != NULL)
+            return 1;
+        return -1;
+    }
+    return _DFS_compare(tree1->root.node, tree2->root.node, cmp);
+}
+
+int     rb_compare(rb_tree *tree1, rb_tree *tree2, compare_fun cmp)
+{
+    if (tree1->root.node == NULL || tree2->root.node == NULL)
+    {
+        if (tree1->root.node == NULL && tree2->root.node == NULL)
+            return 0;
+        if (tree1->root.node != NULL)
+            return 1;
+        return -1;
+    }
+    return _BST_compare(tree1->root.node, tree2->root.node, cmp, tree1->end.node, tree2->end.node);
 }
 
 static _Rb_node     *_Rb_grandparent(_Rb_node *node)
@@ -850,4 +878,40 @@ static _Rb_node     *_BST_upper_bound(_Rb_node *root, void *value, compare_fun c
     if (compare(ret->key, value) <= 0)
         return NULL;
     return ret;
+}
+
+static unsigned int _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp)
+{
+    assert(rt1);
+    assert(rt2);
+    assert(cmp);
+
+    unsigned int left = 1;
+    unsigned int right = 1;
+    if (rt1->left && rt2->left)
+        left = _DFS_compare(rt1->left, rt2->left, cmp);
+    else if (rt1->left || rt2->left)
+        return 0;
+    if (rt1->right && rt2->right)
+        right = _DFS_compare(rt1->right, rt2->right, cmp);
+    else if (rt1->right || rt2->right)
+        return 0;
+    return left & right;
+}
+
+static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp, _Rb_node *end1, _Rb_node *end2)
+{
+    while (1)
+    {
+        if (rt1 == end1 || rt2 == end2)
+        {
+            if (rt1 == end1 && rt2 == end2)
+                return 0;
+            if (rt1 == end1)
+                return 1;
+            return -1;
+        }
+        rt1 = _BST_next(rt1);
+        rt2 = _BST_next(rt2);
+    }
 }
