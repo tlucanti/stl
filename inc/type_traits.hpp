@@ -22,7 +22,7 @@
 
 TLU_NAMESPACE_BEGIN
 
-// -------------------------------  -------------------------------
+// ------------------------------- integral constant -------------------------------
 
     template<typename type_T, type_T type_value>
     struct integral_constant
@@ -99,13 +99,23 @@ TLU_NAMESPACE_HIDDEN_BEGIN
     template<typename type_T, typename = void> struct _is_iterator_base : public false_type {};
 
     template<typename type_T>
-    struct _is_iterator_base<type_T,
-            typename enable_if<!is_same<
-                typename type_T::value_type,
-                void>::value>::type> : public true_type {};
+    struct _is_iterator_base<
+            type_T,
+            typename enable_if<
+                !is_same<
+                    typename type_T::value_type,
+                    void
+                >::value
+            >::type
+        > : public true_type {};
 TLU_NAMESPACE_HIDDEN_END
 
     template <typename type_T> struct is_iterator : public TLU_NAMESPACE_HIDDEN::_is_iterator_base<type_T> {};
+
+    // --------------------------- remove_const -------------------------------
+
+    template <class type_T> struct remove_const                { typedef type_T type; };
+    template <class type_T> struct remove_const<const type_T>  { typedef type_T type; };
 
 TLU_NAMESPACE_END
 

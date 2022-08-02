@@ -49,8 +49,7 @@ private:
         allocator_type
     >   const_tree_type;
     typedef typename iterator::rb_node                 tree_node;
-    typedef typename iterator::const_rb_node           const_tree_node;
-    typedef pair_base<iterator, bool>                   pair_type;
+    typedef pair_base<iterator, bool>                  pair_type;
 
     tree_type       _tree;
 

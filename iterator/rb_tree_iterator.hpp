@@ -23,7 +23,9 @@ public:
 
 
 protected:
-    typedef typename rb_tree<value_type>::rb_node rb_node;
+    typedef typename rb_tree<
+            typename remove_const<value_type>::type
+        >::rb_node rb_node;
 
 private:
     rb_node *_ptr;
@@ -85,13 +87,11 @@ public:
     typedef const pointer                           const_pointer;
 
 public:
-    typedef typename rb_tree<value_type>::rb_node rb_node;
-    typedef typename rb_tree<const value_type>::rb_node const_rb_node;
+    typedef typename base_class::rb_node rb_node;
 
 
 public: // TODO: remove this
-    template <class T>
-    rb_tree_iterator(IS_RB_ITERATOR(T) *ptr, bool end=false) : base_class(ptr, end)
+    rb_tree_iterator(rb_node *ptr, bool end=false) : base_class(ptr, end)
     {}
 
 public:
@@ -144,7 +144,7 @@ public:
     typedef const pointer                           const_pointer;
 
 protected:
-    typedef typename rb_tree<value_type>::rb_node rb_node;
+    typedef typename base_class::rb_node rb_node;
 
 
 public: // TODO: remove this

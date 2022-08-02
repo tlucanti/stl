@@ -17,26 +17,24 @@ template <
 >
 class rb_tree
 {
-private:
-    enum rb_colors
-    {
-        rb_red,
-        rb_black
-    };
-
 public:
-    template <class key_type>
-    class _rb_node
+
+    class rb_node
     {
         friend class rb_tree;
-    private:
+    public:
+        enum rb_colors
+        {
+            rb_red,
+            rb_black
+        };
 
-        _rb_node(
-                _rb_node     *_parent,
-                _rb_node     *_left,
-                _rb_node     *_right,
+        rb_node(
+                rb_node     *_parent,
+                rb_node     *_left,
+                rb_node     *_right,
                 rb_colors   _color,
-                key_type    *_key
+                key_T    *_key
         ) :
                 parent(_parent),
                 left(_left),
@@ -45,36 +43,19 @@ public:
                 key(_key)
         {}
 
-        _rb_node     *parent;
-        _rb_node     *left;
-        _rb_node     *right;
+private:
+        rb_node     *parent;
+        rb_node     *left;
+        rb_node     *right;
         rb_colors   color;
-        key_type    *key;
+        key_T    *key;
 
     public:
-        template <class T>
-        _rb_node(const T &cpy) :
-            parent(cpy._parent),
-            left(cpy._left),
-            right(cpy._right),
-            color(cpy._color),
-            key(cpy._key)
-        {}
-
-        key_type &get_key()
-        {
-            return *key;
-        }
-
-        key_type get_key_copy() const
+        key_T &get_key()
         {
             return *key;
         }
     };
-
-public:
-    typedef _rb_node<key_T> rb_node;
-    typedef _rb_node<const key_T> const_rb_node;
 
 private:
     rb_node         *_root;
@@ -83,6 +64,11 @@ private:
     cmp_T           _cmp;
     allocator_T     _alloc;
     size_t          _size;
+
+    static const typename rb_node::rb_colors
+        rb_red = rb_node::rb_red,
+        rb_black = rb_node::rb_black;
+    typedef typename rb_node::rb_colors rb_colors;
 
 public:
 
@@ -152,19 +138,9 @@ private:
 
 public:
 
-    rb_node *end()
+    rb_node *end() const
     {
         return _end;
-    }
-
-    rb_node         *end() const
-    {
-        return _end;
-    }
-
-    rb_node *begin()
-    {
-        return _begin;
     }
 
     rb_node         *begin() const
