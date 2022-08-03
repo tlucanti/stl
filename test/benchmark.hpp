@@ -11,8 +11,6 @@
 
 # define USED_PTR(__x) do { /* if (write(-1, __x, 8)) {} */ } while (false)
 # define USED(__x) do { if (write(-1, &__x, 8)) {} } while (false)
-# define ALLOC_ARRAY(__type, __size) reinterpret_cast<__type *>(malloc(__size * sizeof(__type)))
-# define DELETE_ARRAY(__array) free(__array)
 
 #define E1 10LL
 #define E2 100LL
