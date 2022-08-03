@@ -680,7 +680,7 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
 # define _B _Rb_Black
 
 # define RB_TREE_INSERT(__tree, __val) do { \
-    rb_node __node = rb_insert(&__tree, PTR(__val), int_compare); \
+    rb_node __node = rb_insert(&(__tree), PTR(__val), int_compare, nullptr); \
     ASSERT(rb_get_key(__node) == PTR(__val), "insert return test"); \
 } while (false)
 
@@ -814,9 +814,9 @@ void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int ma
     {
         int r = rand() % max + 1;
         _moves.push_back(r);
-        rb_insert(tree, PTR(r), int_compare);
+        rb_insert(tree, PTR(r), int_compare, nullptr);
         if (tree2 != nullptr)
-            rb_insert(tree2, PTR(r), int_compare);
+            rb_insert(tree2, PTR(r), int_compare, nullptr);
     }
 }
 
@@ -867,7 +867,7 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
     ft::pair<__type1, __type2> __name(__first, __second); \
     PAIR_ASSERT(__name, __first, __second, __msg)
 
-# define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}}
+# define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}, 0}
 
 # define __RBCPP_METHODVAL_CMPASSERT(__method, __val, __cmp, __msg) do { \
     tlucanti::rb_tree<int>::rb_node *node = tree.__method(__val); \
@@ -880,7 +880,7 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 # define __RBCPP_METHODVAL_ASSERT(__method, __val, __msg) __RBCPP_METHODVAL_CMPASSERT(__method, __val, __val, __msg)
 # define __RBCPP_METHODNODE_ASSERT(__method, __nd, __val, __msg) __RBCPP_METHODVAL_CMPASSERT(__method, __nd, __val, __msg)
 
-# define RBCPP_INSERT_ASSERT(__val, __msg) __RBCPP_METHODVAL_ASSERT(insert, __val, __msg)
+# define RBCPP_INSERT_ASSERT(__val, __msg) __RBCPP_METHODVAL_ASSERT(insert, __val, __msg);
 # define RBCPP_FIND_ASSERT(__val, __msg) __RBCPP_METHODVAL_ASSERT(find, __val, __msg)
 # define RBCPP_REMOVE_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(remove, __val, __cmp, __msg)
 # define RBCPP_NEXT_ASSERT(__nd, __val, __msg) __RBCPP_METHODNODE_ASSERT(next, __nd, __val, __msg)

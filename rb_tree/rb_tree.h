@@ -44,6 +44,7 @@ typedef struct s_rb_tree
     rb_node     root;
     rb_node     begin;
     rb_node     end;
+    size_t      size;
 }   rb_tree;
 
 
@@ -52,14 +53,14 @@ typedef void *(*copy_fun)(void *) WUR;
 typedef void (*del_fun)(void *);
 
 void    *rb_get_key(rb_node node) WUR NOEXCEPT;
-rb_node rb_insert(rb_tree *root, void *key, compare_fun compare) NOEXCEPT;
-rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare) NOEXCEPT;
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
+rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
 rb_node rb_find(rb_tree *root, void *key, compare_fun compare) WUR NOEXCEPT;
 rb_node rb_remove(rb_tree *root, void *key, compare_fun compare) NOEXCEPT;
 rb_node rb_next(rb_node node) WUR NOEXCEPT;
 rb_node rb_prev(rb_node node) WUR NOEXCEPT;
 rb_tree rb_copy(rb_tree *root, copy_fun copy) WUR NOEXCEPT;
-void rb_destroy(rb_tree *root, del_fun del) NOEXCEPT;
+void    rb_destroy(rb_tree *root, del_fun del) NOEXCEPT;
 rb_node rb_lower_bound(rb_tree *root, void *value, compare_fun cmp) WUR NOEXCEPT;
 rb_node rb_upper_bound(rb_tree *root, void *value, compare_fun cmp) WUR NOEXCEPT;
 int     rb_equal(rb_tree *tree1, rb_tree *tree2, compare_fun cmp) WUR NOEXCEPT;

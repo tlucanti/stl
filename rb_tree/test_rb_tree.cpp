@@ -84,65 +84,73 @@ void insert_tests()
 {
     start("rb_insert tests");
 
+    int inserted = 0;
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         _START:
-        SINGLE_OPERATION(rb_insert(&tree, PTR(50), int_compare), _START, 0);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(50), int_compare, &inserted), _START, 0);
         print_rb_tree(&tree, "5 tree");
         ASSERT(tree.root.node, "root insert test 0");
         ASSERT(tree.root.node->key == PTR(50), "root insert test 1");
         ASSERT(tree.root.node->color == _Rb_Black, "root insert test 2");
+        ASSERT(inserted, "was_inserted test 0");
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(40), int_compare), _START, 1);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(40), int_compare, &inserted), _START, 1);
         _rb_print_toggle = false;
         print_rb_tree(&tree, "4-5 tree");
         CHECK_EDGE(tree.root.node, left, PTR(50), PTR(40), _Rb_Black, _Rb_Red, "basic insert test 0");
+        ASSERT(inserted, "was_inserted test 1");
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(60), int_compare), _START, 2);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(60), int_compare, &inserted), _START, 2);
         print_rb_tree(&tree, "4-5-6 tree");
         CHECK_EDGE(tree.root.node, right, 50, 60, _Rb_Black, _Rb_Red, "basic insert test 1");
+        ASSERT(inserted, "was_inserted test 2");
         _RECOLOR_1:
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(20), int_compare), _RECOLOR_1, 3);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(20), int_compare, &inserted), _RECOLOR_1, 3);
         print_rb_tree(&tree, "2-4-5-6 tree");
         CHECK_EDGE(tree.root.node->left, left, 40, 20, _Rb_Black, _Rb_Red, "recolor insert test 0");
+        ASSERT(inserted, "was_inserted test 3");
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(70), int_compare), _RECOLOR_1, 4);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(70), int_compare, &inserted), _RECOLOR_1, 4);
         print_rb_tree(&tree, "2-...-7 tree");
         CHECK_EDGE(tree.root.node->right, right, 60, 70, _Rb_Black, _Rb_Red, "recolor insert test 1");
+        ASSERT(inserted, "was_inserted test 4");
 
         _ROTATE_0:
-        SINGLE_OPERATION(rb_insert(&tree, PTR(10), int_compare), _ROTATE_0, 5);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(10), int_compare, &inserted), _ROTATE_0, 5);
         print_rb_tree(&tree, "1-...-7 tree");
         CHECK_EDGE(tree.root.node->left, left, 20, 10, _B, _R, "right rotate insert test 0");
         CHECK_EDGE(tree.root.node->left, right, 20, 40, _B, _R, "right rotate insert test 1");
+        ASSERT(inserted, "was_inserted test 5");
 
         _ROTATE_1:
         _rb_print_toggle = false;
-        SINGLE_OPERATION(rb_insert(&tree, PTR(80), int_compare), _ROTATE_1, 6);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(80), int_compare, &inserted), _ROTATE_1, 6);
         print_rb_tree(&tree, "2-...-8 tree");
         CHECK_EDGE(tree.root.node->right, left, 70, 60, _B, _R, "left rotate insert test 0");
         CHECK_EDGE(tree.root.node->right, right, 70, 80, _B, _R, "left rotate insert test 1");
+        ASSERT(inserted, "was_inserted test 6");
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
         _START_1:
-        SINGLE_OPERATION(rb_insert(&tree, PTR(1), int_compare), _START_1, 0);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(1), int_compare, nullptr), _START_1, 0);
         print_rb_tree(&tree, "1 tree");
         ASSERT(tree.root.node->key == PTR(1), "root insert test 3");
         ASSERT(tree.root.node->color == _Rb_Black, "root insert test 4");
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(2), int_compare), _START_1, 1);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(2), int_compare, nullptr), _START_1, 1);
         print_rb_tree(&tree, "1-2 tree");
         CHECK_EDGE(tree.root.node, right, 1, 2, _B, _R, "root insert test 5");
 
         _ROOT_ROTATE_LEFT:
         _rb_print_toggle = false;
-        SINGLE_OPERATION(rb_insert(&tree, PTR(3), int_compare), _ROOT_ROTATE_LEFT, 2);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(3), int_compare, nullptr), _ROOT_ROTATE_LEFT, 2);
         print_rb_tree(&tree, "1-2-3 tree");
         CHECK_EDGE(tree.root.node, left, 2, 1, _B, _R, "root insert left rotate test 0");
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert left rotate test 1");
@@ -152,18 +160,18 @@ void insert_tests()
         SINGLE_OP_INIT
 
         _START_2:
-        SINGLE_OPERATION(rb_insert(&tree, PTR(3), int_compare), _START_2, 0);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(3), int_compare, nullptr), _START_2, 0);
         print_rb_tree(&tree, "1 tree");
         ASSERT(tree.root.node->key == PTR(3), "root insert test 6");
         ASSERT(tree.root.node->color == _Rb_Black, "root insert test 7");
 
-        SINGLE_OPERATION(rb_insert(&tree, PTR(2), int_compare), _START_2, 1);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(2), int_compare, nullptr), _START_2, 1);
         print_rb_tree(&tree, "1-2 tree");
         CHECK_EDGE(tree.root.node, left, 3, 2, _B, _R, "root insert test 8");
 
         _ROOT_ROTATE_RIGHT:
         _rb_print_toggle = false;
-        SINGLE_OPERATION(rb_insert(&tree, PTR(1), int_compare), _ROOT_ROTATE_RIGHT, 2);
+        SINGLE_OPERATION(rb_insert(&tree, PTR(1), int_compare, nullptr), _ROOT_ROTATE_RIGHT, 2);
         print_rb_tree(&tree, "1-2-3 tree");
         CHECK_EDGE(tree.root.node, left, 2, 1, _B, _R, "root insert right rotate test 0");
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert right rotate test 1");
@@ -172,12 +180,12 @@ void insert_tests()
         rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
-        rb_insert(&tree, PTR(2), int_compare);
-        rb_insert(&tree, PTR(1), int_compare);
-        rb_insert(&tree, PTR(3), int_compare);
-        rb_insert(&tree, PTR(5), int_compare);
+        rb_insert(&tree, PTR(2), int_compare, nullptr);
+        rb_insert(&tree, PTR(1), int_compare, nullptr);
+        rb_insert(&tree, PTR(3), int_compare, nullptr);
+        rb_insert(&tree, PTR(5), int_compare, nullptr);
         print_rb_tree(&tree, "pre-triangle right tree");
-        rb_insert(&tree, PTR(4), int_compare);
+        rb_insert(&tree, PTR(4), int_compare, nullptr);
         print_rb_tree(&tree, "post-triangle right tree");
         CHECK_EDGE(tree.root.node->right, left, 4, 3, _B, _R, "triangle insert right test 0");
         CHECK_EDGE(tree.root.node->right, right, 4, 5, _B, _R, "triangle insert right test 1");
@@ -186,14 +194,14 @@ void insert_tests()
         rb_tree tree = MAKE_EMPTY_TREE;
         SINGLE_OP_INIT
 
-        rb_insert(&tree, PTR(7), int_compare);
-        rb_insert(&tree, PTR(6), int_compare);
-        rb_insert(&tree, PTR(5), int_compare);
-        rb_insert(&tree, PTR(3), int_compare);
+        rb_insert(&tree, PTR(7), int_compare, nullptr);
+        rb_insert(&tree, PTR(6), int_compare, nullptr);
+        rb_insert(&tree, PTR(5), int_compare, nullptr);
+        rb_insert(&tree, PTR(3), int_compare, nullptr);
         _rb_print_toggle = false;
         print_rb_tree(&tree, "pre-triangle left tree");
         _rb_print_toggle = false;
-        rb_insert(&tree, PTR(4), int_compare);
+        rb_insert(&tree, PTR(4), int_compare, nullptr);
         _rb_print_toggle = false;
         print_rb_tree(&tree, "post-triangle left tree");
         CHECK_EDGE(tree.root.node->left, left, 4, 3, _B, _R, "triangle insert left test 0");
@@ -220,6 +228,14 @@ void insert_tests()
         RB_INSERT(659);
         RB_INSERT(206);
         check_valid_rb_tree(&tree);
+    }
+    {
+        rb_tree tree = MAKE_EMPTY_TREE;
+
+        RB_INSERT(1);
+//        RB_PRINT_LOCK("inserted 1");
+        RB_INSERT(1);
+//        RB_PRINT_LOCK("inserted 1 again");
     }
 
     result();
@@ -624,9 +640,11 @@ void copy_destroy_test()
             std::set<int> std_tree;
             for (int j=0; j < 10; ++j)
             {
+                int inserted = 0;
                 int r = rand() % 10 + 1;
-                rb_insert(&tree, PTR(r), int_compare);
-                std_tree.insert(r);
+                int inserted_expected = std_tree.insert(r).second;
+                rb_insert(&tree, PTR(r), int_compare, &inserted);
+                ASSERT(inserted == inserted_expected, "was_inserted test");
             }
 //            RB_TREE_PRINT_LOCK(tree, "original tree");
             rb_tree tree2 = rb_copy(&tree, int_copy);
@@ -652,7 +670,7 @@ void copy_destroy_user_test()
         for (std::size_t i=0; i < 10000; ++i)
         {
             v.at(i) = new UserClass;
-            rb_insert(&tree, v.at(i), int_compare);
+            rb_insert(&tree, v.at(i), int_compare, nullptr);
         }
         int intnum = static_cast<int>(num);
         ASSERT(UserClass::total_instances == intnum, "class count copy/destroy test 0");
