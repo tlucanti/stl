@@ -192,10 +192,8 @@ int     rb_equal(rb_tree *tree1, rb_tree *tree2, compare_fun cmp)
     if (tree1->root.node == NULL || tree2->root.node == NULL)
     {
         if (tree1->root.node == NULL && tree2->root.node == NULL)
-            return 0;
-        if (tree1->root.node != NULL)
             return 1;
-        return -1;
+        return 0;
     }
     return _DFS_compare(tree1->root.node, tree2->root.node, cmp);
 }
@@ -880,34 +878,40 @@ static _Rb_node     *_BST_upper_bound(_Rb_node *root, void *value, compare_fun c
     return ret;
 }
 
-static unsigned int _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp)
+static unsigned int _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun compare)
 {
     assert(rt1);
     assert(rt2);
-    assert(cmp);
+    assert(compare);
 
     unsigned int left = 1;
     unsigned int right = 1;
+
+    if (compare(rt1->key, rt2->key) != 0)
+        return 0;
     if (rt1->left && rt2->left)
-        left = _DFS_compare(rt1->left, rt2->left, cmp);
+        left = _DFS_compare(rt1->left, rt2->left, compare);
     else if (rt1->left || rt2->left)
         return 0;
     if (rt1->right && rt2->right)
-        right = _DFS_compare(rt1->right, rt2->right, cmp);
+        right = _DFS_compare(rt1->right, rt2->right, compare);
     else if (rt1->right || rt2->right)
         return 0;
     return left & right;
 }
 
-static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp, _Rb_node *end1, _Rb_node *end2)
+static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun compare, _Rb_node *end1, _Rb_node *end2)
 {
     while (1)
     {
+        int cmp = compare(rt1->key, rt2->key);
+        if (cmp)
+            return cmp;
         if (rt1 == end1 || rt2 == end2)
         {
             if (rt1 == end1 && rt2 == end2)
                 return 0;
-            if (rt1 == end1)
+            if (rt2 == end2)
                 return 1;
             return -1;
         }

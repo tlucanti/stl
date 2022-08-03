@@ -58,7 +58,7 @@ int main()
     run_test(copy_destroy_test);
     run_test(copy_destroy_user_test);
     run_test(compare_test);
-
+//    return 0;
     run_test(random_insert_find_small_tests);
     run_test(random_insert_find_medium_tests);
     run_test(random_insert_find_large_tests);
@@ -693,6 +693,8 @@ void compare_test()
         ASSERT(rb_compare(&tree2, &tree1, int_compare) == 0, "invert compare test 3");
 
         RB_TREE_INSERT(tree1, 2);
+//        RB_TREE_PRINT_LOCK(tree1, "tree 1");
+//        RB_TREE_PRINT_LOCK(tree2, "tree 2");
         ASSERT(rb_equal(&tree1, &tree2, int_compare) == 0, "miss-size compare test 0");
         ASSERT(rb_compare(&tree1, &tree2, int_compare) == 1, "miss-size compare test 1");
         ASSERT(rb_equal(&tree2, &tree1, int_compare) == 0, "miss-size invert compare test 0");
