@@ -7,6 +7,7 @@
 # include <memory>
 # include <functional>
 # include "defs.hpp"
+# include "utils.hpp"
 
 TLU_NAMESPACE_BEGIN
 
@@ -163,35 +164,25 @@ public:
     {
         key_T   *key_ptr = new key_T(key);
         rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
-        if (_root == nullptr)
+        was_inserted = true;
+        if (UNLIKELY(_root == nullptr))
         {
             _begin = node;
             _end = node;
+            _root = node;
+            _root->color = rb_black;
+            ++_size;
+            return _root;
         }
         else if (compare(key_ptr, _root->key) <= -1)
             _begin = node;
         else if (compare(key_ptr, _root->key) >= 1)
             _end = node;
-        rb_node *parent = _bst_find_parent(hint, &key);
-        if (parent != nullptr && compare(&key, parent->key) == 0)
-        {
-            was_inserted = false;
-            return parent;
-        }
-        was_inserted = true;
-        if (parent == nullptr && _root == nullptr)
-        {
-            _root = node;
-            node->color = rb_black;
-            was_inserted = true;
-            return node;
-        }
-        else if (parent == nullptr)
-            _bst_insert(_root, node);
-        else
-            _bst_insert(parent, node);
-        _rb_balance_after_insert(node);
-        return node;
+
+        rb_node *ret = _rb_insert(hint, node, was_inserted);
+        if (was_inserted)
+            ++_size;
+        return ret;
     }
     
     rb_node *find(const key_T &key, rb_node *start_from=nullptr) const
@@ -349,6 +340,24 @@ private:
         return node;
     }
 
+    rb_node *_rb_insert(rb_node *hint, rb_node *node, bool &was_inserted)
+    {
+        rb_node *parent = _bst_find_parent(hint, node->key);
+        if (parent != nullptr and compare(node->key, parent->key) == 0)
+        {
+            delete node->key;
+            delete node;
+            was_inserted = false;
+            return parent;
+        }
+        else if (parent == nullptr)
+            _bst_insert(_root, node);
+        else
+            _bst_insert(parent, node);
+        _rb_balance_after_insert(node);
+        return node;
+    }
+
     void        _bst_insert(rb_node *root, rb_node *node)
     {
         while (true)
@@ -467,7 +476,7 @@ private:
 
     void         _rb_balance_after_insert(rb_node *node)
     {
-        while (node != _root && node->color == rb_red)
+        while (node != _root and node->color == rb_red)
         {
             if (node->parent->color == rb_black)
                 break ;
@@ -672,6 +681,7 @@ private:
         else
             ret = _bst_next(rm);
         _rb_remove_node(rm);
+        --_size;
         return ret;
     }
 
@@ -719,7 +729,7 @@ private:
         delete root;
     }
 
-    rb_node *_bst_lower_bound(const key_T *value)
+    rb_node *_bst_lower_bound(const key_T *value) const
     {
         rb_node *root = _root;
         rb_node *ret = root;
@@ -738,7 +748,7 @@ private:
         return ret;
     }
 
-    rb_node *_bst_upper_bound(const key_T *value)
+    rb_node *_bst_upper_bound(const key_T *value) const
     {
         rb_node *root = _root;
         rb_node *ret = root;
@@ -757,6 +767,92 @@ private:
         return ret;
     }
 
+    bool _dfs_compare(rb_node *rt1, rb_node *rt2) const
+    {
+        unsigned int left = 1;
+        unsigned int right = 1;
+
+        if (compare(rt1->key, rt2->key) != 0)
+            return false;
+        if (rt1->left and rt2->left)
+            left = _dfs_compare(rt1->left, rt2->left);
+        else if (rt1->left or rt2->left)
+            return false;
+        if (rt1->right and rt2->right)
+            right = _dfs_compare(rt1->right, rt2->right);
+        else if (rt1->right or rt2->right)
+            return false;
+        return left and right;
+    }
+
+    int          _bst_compare(rb_node *rt1, rb_node *rt2, rb_node *end1, rb_node *end2) const
+    {
+        while (true)
+        {
+            int cmp = compare(rt1->key, rt2->key);
+            if (cmp)
+                return cmp;
+            if (rt1 == end1 or rt2 == end2)
+            {
+                if (rt1 == end1 and rt2 == end2)
+                    return 0;
+                if (rt2 == end2)
+                    return 1;
+                return -1;
+            }
+            rt1 = _bst_next(rt1);
+            rt2 = _bst_next(rt2);
+        }
+    }
+
+    bool _equal(const rb_tree &tree2) const
+    {
+        if (_size != tree2._size)
+            return false;
+        else if (UNLIKELY(_size == 0 and tree2._size == 0))
+            return true;
+        return _dfs_compare(_root, tree2._root);
+    }
+
+    int _compare(const rb_tree &tree2) const
+    {
+        if (_size != tree2._size)
+            return tlucanti::sign(_size - tree2._size);
+        else if (UNLIKELY(_size == 0 and tree2._size == 0))
+            return 0;
+        return _bst_compare(_root, tree2._root, _end, tree2._end);
+    }
+
+public:
+    friend bool operator ==(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return tree1._equal(tree2);
+    }
+
+    friend bool operator !=(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return not tree1._equal(tree2);
+    }
+
+    friend bool operator >(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return tree1._compare(tree2) > 0;
+    }
+
+    friend bool operator >=(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return tree1._compare(tree2) >= 0;
+    }
+
+    friend bool operator <(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return tree1._compare(tree2) < 0;
+    }
+
+    friend bool operator <=(const rb_tree &tree1, const rb_tree &tree2)
+    {
+        return tree1._compare(tree2) <= 0;
+    }
 };
 
 TLU_NAMESPACE_END
