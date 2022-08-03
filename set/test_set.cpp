@@ -2,8 +2,7 @@
 #include <iostream>
 #include <set>
 #include "test.hpp"
-#include "rb_tree.hpp"
-#include "set_base.hpp"
+#include "set.hpp"
 
 void set_test();
 
@@ -19,28 +18,28 @@ void set_test()
     start("set test");
 
     {
-        tlucanti::set_base<int> a;
+        ft::set<int> a;
         ASSERT(a.empty(), "basic constructor test 0");
     }
     {
         std::allocator<int> alloc;
         std::less<int> cmp;
-        tlucanti::set_base<int> a(cmp, alloc);
+        ft::set<int> a(cmp, alloc);
     }
     {
         std::vector<int> stda;
         stda.push_back(1);
         stda.push_back(2);
         stda.push_back(3);
-        tlucanti::set_base<int> a(stda.begin(), stda.end());
+        ft::set<int> a(stda.begin(), stda.end());
         ASSERT(a.count(1), "basic iterator constructor test 0");
         ASSERT(a.count(2), "basic iterator constructor test 1");
         ASSERT(a.count(3), "basic iterator constructor test 2");
-        tlucanti::set_base<int> b(a);
+        ft::set<int> b(a);
         ASSERT(b.count(1), "basic copy constructor test 0");
         ASSERT(b.count(2), "basic copy constructor test 1");
         ASSERT(b.count(3), "basic copy constructor test 2");
-        tlucanti::set_base<int> c;
+        ft::set<int> c;
         ASSERT(c.empty(), "basic assign operator test 0");
         c = a;
         ASSERT(c.count(1), "basic copy constructor test 0");
@@ -50,7 +49,7 @@ void set_test()
     {
         std::allocator<int> alloc;
         std::less<int> cmp;
-        tlucanti::set_base<int> a(cmp, alloc);
+        ft::set<int> a(cmp, alloc);
         ASSERT(a.get_allocator() == alloc, "basic get_allocator tes 0");
     }
     {
@@ -58,7 +57,7 @@ void set_test()
         stda.push_back(1);
         stda.push_back(2);
         stda.push_back(3);
-        tlucanti::set_base<int> a(stda.begin(), stda.end());
+        ft::set<int> a(stda.begin(), stda.end());
         ASSERT(*a.begin() == 1, "basic iterator test 0");
         ASSERT(*++a.begin() == 2, "basic iterator test 1");
         ASSERT(*++(++a.begin()) == 3, "basic iterator test 2");
@@ -88,7 +87,7 @@ void set_test()
         ASSERT(*(((--a.rend())++)++) == 1, "advanced reverse iterator test 3");
     }
     {
-        tlucanti::set_base<int> a;
+        ft::set<int> a;
         set_123(b);
         ASSERT(a.empty(), "empty test 0");
         ASSERT(b.empty() == false, "empty test 1");
@@ -96,8 +95,8 @@ void set_test()
         ASSERT(b.size() == 3, "size test 0");
     }
     {
-        tlucanti::set_base<int> a;
-        ASSERT(a.max_size() == std::numeric_limits<tlucanti::set_base<int>::size_type>::max(), "max_size basic test 0");
+        ft::set<int> a;
+        ASSERT(a.max_size() == std::numeric_limits<ft::set<int>::size_type>::max(), "max_size basic test 0");
     }
     {
         set_123(a);
@@ -105,8 +104,8 @@ void set_test()
         ASSERT(a.empty(), "clear basic test 0");
     }
     {
-        typedef tlucanti::pair_base<tlucanti::set_base<int>::iterator, bool> P;
-        tlucanti::set_base<int> a;
+        typedef tlucanti::pair_base<ft::set<int>::iterator, bool> P;
+        ft::set<int> a;
         P p = a.insert(1);
         ASSERT(*p.first == 1 && p.second == true, "basic insert test 0");
         ASSERT(a.size() == 1, "basic insert test 0.1");
@@ -120,8 +119,8 @@ void set_test()
         ASSERT(*p.first == 1 && p.second == false, "basic insert test 3");
     }
     {
-        typedef tlucanti::set_base<int>::iterator IT;
-        tlucanti::set_base<int> a;
+        typedef ft::set<int>::iterator IT;
+        ft::set<int> a;
         IT p = a.insert(a.begin(), 1);
         ASSERT(*p == 1, "basic hint-insert test 0");
         ASSERT(a.size() == 1, "basic hint-insert test 0.1");
@@ -136,11 +135,11 @@ void set_test()
     }
     {
         std_vec_123(v);
-        tlucanti::set_base<int> a;
+        ft::set<int> a;
         a.insert(v.begin(), v.end());
     }
     {
-        tlucanti::set_base<int> a;
+        ft::set<int> a;
         ASSERT(a.erase(123) == 0, "erase test 0");
         a.insert(1);
         a.erase(a.begin());
@@ -151,13 +150,13 @@ void set_test()
     }
     {
         set_123(a);
-        tlucanti::set_base<int> b;
+        ft::set<int> b;
         a.swap(b);
         ASSERT(a.empty(), "swap basic test 0");
     }
     {
         set_123(a);
-        tlucanti::set_base<int> b;
+        ft::set<int> b;
         b.swap(a);
         ASSERT(a.empty(), "swap basic test 1");
     }
@@ -176,7 +175,7 @@ void set_test()
         ASSERT(a.find(4) == a.end(), "find basic test 4");
     }
     {
-        typedef tlucanti::set_base<int>::iterator IT;
+        typedef ft::set<int>::iterator IT;
         typedef tlucanti::pair_base<IT, IT> P;
 
         set_123(a);
@@ -200,16 +199,16 @@ void set_test()
     {
         std::less<int> cmp;
         std::allocator<int> alloc;
-        tlucanti::set_base<int> a(cmp, alloc);
+        ft::set<int> a(cmp, alloc);
         std::less<int> kcmpt(a.key_comp());
         std::less<int> vcmpt(a.value_comp());
     }
     {
-        tlucanti::set_base<int> a;
+        ft::set<int> a;
         a.insert(1);
         a.insert(2);
         a.insert(3);
-        tlucanti::set_base<int> b;
+        ft::set<int> b;
         b.insert(1);
         b.insert(2);
         b.insert(3);

@@ -31,9 +31,10 @@ namespace ft
             const allocator_type &allocator=allocator_type()
         ) : base_class(count, allocator) {}
 
-        template <class InputIt>
+        template <class InputIterator>
         constexpr vector(
-            InputIt first, InputIt last,
+            InputIterator first,
+            InputIterator last,
             const allocator_type &allocator=allocator_type()
         ) : base_class(first, last, allocator) {}
 
