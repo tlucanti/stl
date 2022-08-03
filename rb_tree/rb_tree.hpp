@@ -144,7 +144,7 @@ public:
         return _end;
     }
 
-    rb_node         *begin() const
+    rb_node *begin() const
     {
         return _begin;
     }
@@ -209,6 +209,12 @@ public:
         }
         return ret;
     }
+
+    void remove_node(rb_node *node)
+    {
+        _rb_remove_node(node);
+        --_size;
+    }
     
     static rb_node *next(rb_node *node)
     {
@@ -254,6 +260,7 @@ public:
         if (_root == nullptr)
             return ;
         _rb_destroy(_root);
+        _root = nullptr;
         _begin = nullptr;
         _end = nullptr;
         _size = 0;
@@ -262,6 +269,11 @@ public:
     allocator_T get_allocator() const
     {
         return _alloc;
+    }
+
+    cmp_T   get_cmp() const
+    {
+        return _cmp;
     }
 
     void swap(rb_tree &swp)

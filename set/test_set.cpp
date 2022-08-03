@@ -9,8 +9,6 @@ void set_test();
 
 int main()
 {
-    std::set<int>() == std::set<int>();
-
     run_test(set_test);
 
     final();
@@ -76,15 +74,15 @@ void set_test()
         ASSERT(*(((--a.end())++)++) == 3, "advanced iterator test 3");
 
         ASSERT(*a.rbegin() == 3, "basic reverse iterator test 0");
-        ASSERT(*++a.rbegin() == 2, "basic reverse iterator test 1");
-        ASSERT(*++(++a.rbegin()) == 1, "basic reverse itertor test 2");
+        ASSERT(*(++a.rbegin()) == 2, "basic reverse iterator test 1");
+        ASSERT(*(++(++a.rbegin())) == 1, "basic reverse itertor test 2");
 
         ASSERT(*(a.rbegin()++) == 3, "advanced reverse iterator test 0");
         ASSERT(*((a.rbegin()++)++), "advanced reverse iterator test 1");
 
         ASSERT(*--a.rend() == 1, "basic reverse iterator test 3");
         ASSERT(*--(--a.rend()) == 2, "basic reverse iterator test 4");
-        ASSERT(*--(--(--a.end())) == 1, "basic reverse iterator test 5");
+        ASSERT(*--(--(--a.rend())) == 3, "basic reverse iterator test 5");
 
         ASSERT(*((--a.rend())++) == 1, "advanced reverse iterator test 2");
         ASSERT(*(((--a.rend())++)++) == 1, "advanced reverse iterator test 3");
@@ -111,29 +109,28 @@ void set_test()
         tlucanti::set_base<int> a;
         P p = a.insert(1);
         ASSERT(*p.first == 1 && p.second == true, "basic insert test 0");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 1, "basic insert test 0.1");
         p = a.insert(2);
         ASSERT(*p.first == 2 && p.second == true, "basic insert test 1");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 2, "basic insert test 1.1");
         p = a.insert(3);
         ASSERT(*p.first == 3 && p.second == true, "basic insert test 2");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 3, "basic insert test 2.1");
         p = a.insert(1);
         ASSERT(*p.first == 1 && p.second == false, "basic insert test 3");
     }
     {
-        typedef tlucanti::pair_base<tlucanti::set_base<int>::iterator, bool> P;
         typedef tlucanti::set_base<int>::iterator IT;
         tlucanti::set_base<int> a;
         IT p = a.insert(a.begin(), 1);
         ASSERT(*p == 1, "basic hint-insert test 0");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 1, "basic hint-insert test 0.1");
         p = a.insert(a.begin(), 2);
         ASSERT(*p == 2, "basic hint-insert test 1");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 2, "basic hint-insert test 1.1");
         p = a.insert(a.begin(), 3);
         ASSERT(*p == 3, "basic hint-insert test 2");
-        ASSERT(a.size() == 1, "basic insert test 1");
+        ASSERT(a.size() == 3, "basic hint-insert test 2.1");
         p = a.insert(a.begin(), 1);
         ASSERT(*p == 1, "basic hint-insert test 3");
     }
@@ -196,7 +193,7 @@ void set_test()
         ASSERT(a.lower_bound(4) == a.end(), "lower_bound basic test 4");
 
         ASSERT(*a.upper_bound(0) == 1, "upper_bound basic test 0");
-        ASSERT(*a.upper_bound(1) == 1, "upper_bound basic test 1");
+        ASSERT(*a.upper_bound(1) == 2, "upper_bound basic test 1");
         ASSERT(*a.upper_bound(2) == 3, "upper_bound basic test 2");
         ASSERT(a.upper_bound(3) == a.end(), "upper_bound basic test 3");
     }
@@ -219,19 +216,19 @@ void set_test()
         ASSERT(a == b, "comparison test 0");
         ASSERT(a >= b, "comparison test 0.1");
         ASSERT(a <= b, "comparison test 0.2");
-        ASSERT(not a != b, "comparison test 0.3");
+        ASSERT(not (a != b), "comparison test 0.3");
         a.insert(4);
         ASSERT(a > b, "comparison test 1");
         ASSERT(a >= b, "comparison test 1.1");
         ASSERT(a != b, "comparison test 1.2");
-        ASSERT(not a < b, "comparison test 1.3");
-        ASSERT(not a <= b, "comparison test 1.4");
+        ASSERT(not (a < b), "comparison test 1.3");
+        ASSERT(not (a <= b), "comparison test 1.4");
         b.erase(1);
         ASSERT(b > a, "comparison test 2");
         ASSERT(b >= a, "comparison test 2.1");
         ASSERT(a != b, "comparison test 2.2");
-        ASSERT(not b < a, "comaprison test 2.3");
-        ASSERT(not b <= a, "comparison test 2.4");
+        ASSERT(not (b < a), "comaprison test 2.3");
+        ASSERT(not (b <= a), "comparison test 2.4");
     }
     result();
 }

@@ -43,11 +43,6 @@ private:
         key_compare,
         allocator_type
     >   tree_type;
-    typedef rb_tree<
-        const value_type,
-        key_compare,
-        allocator_type
-    >   const_tree_type;
     typedef typename iterator::rb_node                 tree_node;
     typedef pair_base<iterator, bool>                  pair_type;
 
@@ -95,14 +90,10 @@ public:
     {}
 #endif /* CPP11 */
 
-    ~set_base()
-    {
-        _tree.destroy();
-    }
+    ~set_base() DEFAULT
 
     set_base &operator =(const set_base &cmp)
     {
-        _tree.destroy();
         _tree.assign(cmp._tree);
         return *this;
     }
@@ -135,18 +126,17 @@ public:
 
     reverse_iterator rbegin()
     {
-        tree_node *end = _tree.end();
-        return reverse_iterator(end, true);
+        return reverse_iterator(_tree.end(), false);
     }
 
     const_reverse_iterator rbegin() const
     {
-        return const_reverse_iterator(_tree.end(), true);
+        return const_reverse_iterator(_tree.end(), false);
     }
 
     reverse_iterator rend()
     {
-        return reverse_iterator(_tree.begin(), false);
+        return reverse_iterator(_tree.begin(), true);
     }
 
     const_reverse_iterator rend() const
@@ -187,7 +177,8 @@ public:
 
     iterator insert(iterator hint, const_reference value)
     {
-        return iterator(_tree.insert(hint, value), false);
+        bool _;
+        return iterator(_tree.insert(hint.get_node(), value, _), false);
     }
 
     template <class InputIt>
@@ -195,17 +186,19 @@ public:
     {
         bool _;
         while (first != last)
-            _tree.insert(*first, _);
+            _tree.insert(*first++, _);
     }
 
     void erase(iterator pos)
     {
-        _tree.remove_node(pos._node);
+        _tree.remove_node(pos.get_node());
     }
 
     size_type erase(const value_type &value)
     {
-        return _tree.remove(value);
+        size_t prev_size = _tree.size();
+        _tree.remove(value);
+        return prev_size - _tree.size();
     }
 
     void swap(set_base &other)
@@ -217,7 +210,7 @@ public:
 // -------------------------------
     size_type count(const_reference value) const
     {
-        return find(value) != end();
+        return _tree.find(value) != nullptr;
     }
 
     iterator find(const_reference value)
@@ -257,7 +250,7 @@ public:
     {
         tree_node *ret = _tree.lower_bound(value);
         if (ret == nullptr)
-            return iterator(_tree._end, true);
+            return iterator(_tree.end(), true);
         return iterator(ret, false);
     }
 
@@ -265,14 +258,14 @@ public:
     {
         tree_node *ret = _tree.lower_bound(value);
         if (ret == nullptr)
-            return const_iterator(_tree._end, true);
+            return const_iterator(_tree.end(), true);
         return const_iterator(ret, false);    }
 
     iterator upper_bound(const_reference value)
     {
         tree_node *ret = _tree.upper_bound(value);
         if (ret == nullptr)
-            return iterator(_tree._end, true);
+            return iterator(_tree.end(), true);
         return iterator(ret, false);
     }
 
@@ -280,23 +273,51 @@ public:
     {
         tree_node *ret = _tree.upper_bound(value);
         if (ret == nullptr)
-            return const_iterator(_tree._end, true);
-        return const_iterator(ret, false);    }
+            return const_iterator(_tree.end(), true);
+        return const_iterator(ret, false);
+    }
 
     // ============================================================================
 // -------------------------------
     key_compare key_comp() const
     {
-        return _tree.cmp();
+        return _tree.get_cmp();
     }
 
     value_compare value_comp() const
     {
-        return _tree.cmp();
+        return _tree.get_cmp();
     }
 
-private:
+    friend bool operator ==(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree == s2._tree;
+    }
 
+    friend bool operator !=(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree != s2._tree;
+    }
+
+    friend bool operator >(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree > s2._tree;
+    }
+
+    friend bool operator >=(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree >= s2._tree;
+    }
+
+    friend bool operator <(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree < s2._tree;
+    }
+
+    friend bool operator <=(const set_base &s1, const set_base &s2)
+    {
+        return s1._tree <= s2._tree;
+    }
 };
 
 TLU_NAMESPACE_END

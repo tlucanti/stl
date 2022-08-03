@@ -47,6 +47,11 @@ public:
         return _ptr != cmp._ptr;
     }
 
+    virtual rb_node *get_node() const
+    {
+        return _ptr;
+    }
+
 protected:
     rb_tree_iterator_base(rb_node *ptr, bool end) :
         _ptr(ptr), _end(end)
@@ -57,7 +62,7 @@ protected:
         if (_end)
             _end = false;
         else
-            _ptr = rb_tree<value_type>::prev(_ptr);
+            _ptr = rb_tree<value_type>::next(_ptr);
     }
 
     void decrement()
@@ -152,7 +157,7 @@ public: // TODO: remove this
     {}
 
 public:
-    explicit rb_tree_reverse_iterator(const rb_tree_reverse_iterator &cpy) : base_class(cpy)
+    rb_tree_reverse_iterator(const rb_tree_reverse_iterator &cpy) : base_class(cpy)
     {}
 
     ~rb_tree_reverse_iterator() DEFAULT
