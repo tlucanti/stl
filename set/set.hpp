@@ -3,6 +3,7 @@
 # define SET_HPP
 
 # include "set_base.hpp"
+# include "pair.hpp"
 # include "defs.hpp"
 
 namespace ft
@@ -12,10 +13,10 @@ namespace ft
             class key_compare=std::less<key_type>,
             class allocator_type=std::allocator<key_type>
     >
-    class set : public TLU_NAMESPACE::set_base<key_type, key_compare, allocator_type>
+    class set : public TLU_NAMESPACE::set_base<key_type, key_compare, allocator_type, ft::pair<int, int> >
     {
     private:
-        typedef TLU_NAMESPACE::set_base<key_type, key_compare, allocator_type> base_class;
+        typedef TLU_NAMESPACE::set_base<key_type, key_compare, allocator_type, ft::pair<int, int> > base_class;
 
     public:
         constexpr set() noexcept : base_class() {}

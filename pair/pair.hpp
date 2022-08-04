@@ -38,6 +38,15 @@ namespace ft
     {
         return pair<type_T, type_Y>(first, second);
     }
+
 } /* ft */
+
+TLU_NAMESPACE_BEGIN
+
+template <class T, class Y, class type_T, class type_Y> struct change_pair_type<ft::pair<T, Y>, type_T, type_Y> {
+    typedef ft::pair<type_T, type_Y> type;
+};
+
+TLU_NAMESPACE_END
 
 #endif /* PAIR_HPP */

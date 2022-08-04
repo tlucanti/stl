@@ -2,8 +2,9 @@
 #ifndef PAIR_BASE_HPP
 # define PAIR_BASE_HPP
 
-# include "defs.hpp"
 # include <algorithm>
+# include "defs.hpp"
+# include "type_traits.hpp"
 
 TLU_NAMESPACE_BEGIN
 
@@ -95,6 +96,10 @@ int pair_base_compare(
 }
 
 TLU_NAMESPACE_HIDDEN_END
+
+template <class T, class Y, class type_T, class type_Y> struct change_pair_type<pair_base<T, Y>, type_T, type_Y> {
+    typedef pair_base<type_T, type_Y> type;
+};
 
 TLU_NAMESPACE_END
 

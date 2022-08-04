@@ -117,6 +117,8 @@ TLU_NAMESPACE_HIDDEN_END
     template <class type_T> struct remove_const                { typedef type_T type; };
     template <class type_T> struct remove_const<const type_T>  { typedef type_T type; };
 
+    template <class T, class type_T, class type_Y> struct change_pair_type {};
+
 TLU_NAMESPACE_END
 
 #endif /* TYPE_TRAITS_HPP */

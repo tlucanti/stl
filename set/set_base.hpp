@@ -15,7 +15,8 @@ TLU_NAMESPACE_BEGIN
 template <
         class key_T,
         class cmp_T=std::less<key_T>,
-        class allocator_T=std::allocator<key_T>
+        class allocator_T=std::allocator<key_T>,
+        class pair_T=pair_base<int, int>
     >
 class set_base
 {
@@ -43,8 +44,10 @@ private:
         key_compare,
         allocator_type
     >   tree_type;
-    typedef typename iterator::rb_node                 tree_node;
-    typedef pair_base<iterator, bool>                  pair_type;
+    typedef typename iterator::rb_node                                  tree_node;
+    typedef typename change_pair_type<pair_T, iterator, bool>::type     insert_pair;
+    typedef typename change_pair_type<pair_T, iterator, iterator>::type range_pair;
+    typedef typename change_pair_type<pair_T, const_iterator, const_iterator>::type const_range_pair;
 
     tree_type       _tree;
 
@@ -168,11 +171,11 @@ public:
         _tree.destroy();
     }
 
-    pair_type insert(const_reference value)
+    insert_pair insert(const_reference value)
     {
         bool was_inserted;
         iterator node = iterator(_tree.insert(value, was_inserted));
-        return pair_type(node, was_inserted);
+        return insert_pair(node, was_inserted);
     }
 
     iterator insert(iterator hint, const_reference value)
@@ -236,14 +239,14 @@ public:
     }
 #endif /* CPP20 */
 
-    pair_base<iterator, iterator> equal_range(const_reference value)
+    range_pair equal_range(const_reference value)
     {
-        return pair_base<iterator, iterator>(lower_bound(value), upper_bound(value));
+        return range_pair(lower_bound(value), upper_bound(value));
     }
 
-    pair_base<const_iterator, const_iterator> equal_range(const_reference value) const
+    const_range_pair equal_range(const_reference value) const
     {
-        return pair_base<const_iterator, const_iterator>(lower_bound(value), upper_bound(value));
+        return const_range_pair(lower_bound(value), upper_bound(value));
     }
 
     iterator lower_bound(const_reference value)

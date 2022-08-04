@@ -104,7 +104,7 @@ void set_test()
         ASSERT(a.empty(), "clear basic test 0");
     }
     {
-        typedef tlucanti::pair_base<ft::set<int>::iterator, bool> P;
+        typedef ft::pair<ft::set<int>::iterator, bool> P;
         ft::set<int> a;
         P p = a.insert(1);
         ASSERT(*p.first == 1 && p.second == true, "basic insert test 0");
@@ -176,7 +176,7 @@ void set_test()
     }
     {
         typedef ft::set<int>::iterator IT;
-        typedef tlucanti::pair_base<IT, IT> P;
+        typedef ft::pair<IT, IT> P;
 
         set_123(a);
         P p = a.equal_range(1);
@@ -202,6 +202,8 @@ void set_test()
         ft::set<int> a(cmp, alloc);
         std::less<int> kcmpt(a.key_comp());
         std::less<int> vcmpt(a.value_comp());
+        (void)kcmpt;
+        (void)vcmpt;
     }
     {
         ft::set<int> a;

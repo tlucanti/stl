@@ -888,6 +888,6 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 # define RBCPP_LOWERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(lower_bound, __val, __cmp, __msg)
 # define RBCPP_UPPERBOUND_ASSERT(__val, __cmp, __msg) __RBCPP_METHODVAL_CMPASSERT(upper_bound, __val, __cmp, __msg)
 
-# define set_123(__name) tlucanti::set_base<int> __name; __name.insert(1), __name.insert(2), __name.insert(3)
+# define set_123(__name) ft::set<int> __name; (__name).insert(1), (__name).insert(2), (__name).insert(3)
 
 #endif /* PAIR_HPP */
