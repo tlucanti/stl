@@ -28,6 +28,9 @@ struct pair_base
     template <class type_U1, class type_U2>
     constexpr explicit pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
 
+    template <class type_U1, class type_U2>
+    constexpr pair_base(const std::pair<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
+
     constexpr pair_base(const pair_base &cpy) : first(cpy.first), second(cpy.second) {}
 
 #if CPP11
@@ -84,11 +87,11 @@ int pair_base_compare(
         const TLU_NAMESPACE::pair_base<type_T, type_Y> &rhs
     )
 {
-    if (lhs.first > rhs.first)
+    if (rhs.first < lhs.first)
         return 1;
     else if (lhs.first < rhs.first)
         return -1;
-    else if (lhs.second > rhs.second)
+    else if (rhs.second < lhs.second)
         return 1;
     else if (lhs.second < rhs.second)
         return -1;
@@ -156,17 +159,5 @@ bool operator <=(
 {
     return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::pair_base_compare(lhs, rhs) <= 0;
 }
-
-namespace std
-{
-    template <class type_T, class type_Y>
-    constexpr void swap(
-            TLU_NAMESPACE::pair_base<type_T, type_Y> &lhs,
-            TLU_NAMESPACE::pair_base<type_T, type_Y> &rhs
-        )
-    {
-        lhs.swap(rhs);
-    }
-} /* std */
 
 #endif /* PAIR_BASE_HPP */

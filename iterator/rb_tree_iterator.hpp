@@ -7,7 +7,7 @@
 
 TLU_NAMESPACE_BEGIN
 
-template<class value_T, class size_T, class cmp_T=std::less<value_T> >
+template<class value_T, class cmp_T, class alloc_T>
 class rb_tree_iterator_base : public std::iterator<std::bidirectional_iterator_tag, value_T>
 {
 private:
@@ -23,9 +23,12 @@ public:
 
 
 protected:
-    typedef typename rb_tree<
-            typename remove_const<value_type>::type
-        >::rb_node rb_node;
+    typedef rb_tree<
+            typename remove_const<value_type>::type,
+            cmp_T,
+            alloc_T
+        > tree_type;
+    typedef typename tree_type::rb_node rb_node;
 
 private:
     rb_node *_ptr;
@@ -62,7 +65,7 @@ protected:
         if (_end)
             _end = false;
         else
-            _ptr = rb_tree<value_type>::next(_ptr);
+            _ptr = tree_type::next(_ptr);
     }
 
     void decrement()
@@ -70,17 +73,17 @@ protected:
         if (_end)
             _end = false;
         else
-            _ptr = rb_tree<value_type>::prev(_ptr);
+            _ptr = tree_type::prev(_ptr);
     }
 
     virtual ~rb_tree_iterator_base() DEFAULT
 };
 
-template <class value_T, class size_T, class cmp_T=std::less<value_T> >
-class rb_tree_iterator : public rb_tree_iterator_base<value_T, size_T, cmp_T>
+template<class value_T, class cmp_T, class alloc_T>
+class rb_tree_iterator : public rb_tree_iterator_base<value_T, cmp_T, alloc_T>
 {
 private:
-    typedef rb_tree_iterator_base<value_T, size_T, cmp_T> base_class;
+    typedef rb_tree_iterator_base<value_T, cmp_T, alloc_T> base_class;
 
 public:
     typedef typename base_class::iterator_category  iterator_category;
@@ -133,11 +136,11 @@ public:
 
 };
 
-template <class value_T, class size_T, class cmp_T=std::less<value_T> >
-class rb_tree_reverse_iterator : public rb_tree_iterator_base<value_T, size_T, cmp_T>
+template<class value_T, class key_T, class cmp_T>
+class rb_tree_reverse_iterator : public rb_tree_iterator_base<value_T, key_T, cmp_T>
 {
 private:
-    typedef rb_tree_iterator_base<value_T, size_T, cmp_T> base_class;
+    typedef rb_tree_iterator_base<value_T, key_T, cmp_T> base_class;
 
 public:
     typedef typename base_class::iterator_category  iterator_category;

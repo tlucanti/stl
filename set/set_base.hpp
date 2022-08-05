@@ -33,12 +33,12 @@ public:
     typedef typename allocator_type::pointer            pointer;
     typedef typename allocator_type::const_pointer      const_pointer;
 
-    typedef rb_tree_iterator<value_type, size_type, key_compare>                iterator;
-    typedef rb_tree_iterator<const value_type, size_type, key_compare>          const_iterator;
-    typedef rb_tree_reverse_iterator<value_type, size_type, key_compare>        reverse_iterator;
-    typedef rb_tree_reverse_iterator<const value_type, size_type, key_compare>  const_reverse_iterator;
+    typedef rb_tree_iterator<value_type, value_compare, allocator_type>                iterator;
+    typedef rb_tree_iterator<const value_type, value_compare, allocator_type>          const_iterator;
+    typedef rb_tree_reverse_iterator<value_type, value_compare, allocator_type>        reverse_iterator;
+    typedef rb_tree_reverse_iterator<const value_type, value_compare, allocator_type>  const_reverse_iterator;
 
-private:
+protected:
     typedef rb_tree<
         value_type,
         key_compare,
@@ -76,7 +76,10 @@ public:
     {
         bool _;
         while (first != last)
-            _tree.insert(*first++, _);
+        {
+            _tree.insert(*first, _);
+            ++first;
+        }
     }
 
     set_base(const set_base &cmp) :
@@ -189,12 +192,18 @@ public:
     {
         bool _;
         while (first != last)
-            _tree.insert(*first++, _);
+        {
+            _tree.insert(*first, _);
+            ++first;
+        }
     }
 
-    void erase(iterator pos)
+    iterator erase(iterator pos)
     {
-        _tree.remove_node(pos.get_node());
+        tree_node *ret = _tree.remove_node(pos.get_node());
+        if (ret == _tree.end())
+            return iterator(ret, true);
+        return iterator(ret, false);
     }
 
     size_type erase(const value_type &value)
@@ -202,6 +211,13 @@ public:
         size_t prev_size = _tree.size();
         _tree.remove(value);
         return prev_size - _tree.size();
+    }
+
+    template <class InputIt>
+    void erase(InputIt first, InputIt last)
+    {
+        while (first != last)
+            _tree.remove(*first);
     }
 
     void swap(set_base &other)

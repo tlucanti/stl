@@ -162,8 +162,8 @@ public:
 
     rb_node *insert(rb_node *hint, const key_T &key, bool &was_inserted)
     {
-        key_T   *key_ptr = new key_T(key);
-        rb_node *node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
+        AUTO(key_T   *) key_ptr = new key_T(key);
+        AUTO(rb_node *) node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
         was_inserted = true;
         if (UNLIKELY(_root == nullptr))
         {
@@ -210,10 +210,18 @@ public:
         return ret;
     }
 
-    void remove_node(rb_node *node)
+    rb_node *remove_node(rb_node *node)
     {
+        rb_node *ret;
+        if (node == _end)
+            ret = nullptr;
+        else
+            ret = next(node);
         _rb_remove_node(node);
+        if (ret == nullptr)
+            ret = _end;
         --_size;
+        return ret;
     }
     
     static rb_node *next(rb_node *node)

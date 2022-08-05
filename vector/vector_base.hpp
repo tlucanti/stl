@@ -895,7 +895,8 @@ PRIVATE:
     {
         while (first != last)
         {
-            _construct_at(dest++, *first);
+            _construct_at(dest, *first);
+            ++dest;
             ++first;
         }
     }
@@ -953,7 +954,10 @@ PRIVATE:
     WUR constexpr Iter_T _move(Iter_T src, pointer dst, difference_type cnt)
     {
         while (cnt-- > 0)
-            *dst++ = *src++;
+        {
+            *dst++ = *src;
+            ++src;
+        }
         return src;
     }
 

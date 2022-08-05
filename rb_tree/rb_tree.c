@@ -22,7 +22,7 @@ static int          _Rb_is_black_children(_Rb_node *node) WUR NOEXCEPT;
 static void         _Rb_fix_double_black(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static void         _Rb_fix_double_black_left(_Rb_node *node, _Rb_node **root) NOEXCEPT;
 static void         _Rb_fix_double_black_right(_Rb_node *node, _Rb_node **root) NOEXCEPT;
-static void         _Rb_remove_node(_Rb_node **root, _Rb_node *node) NOEXCEPT;
+static void         _Rb_remove_node(_Rb_node **root, _Rb_node *rm) NOEXCEPT;
 static _Rb_node     *_Rb_remove(_Rb_node **root, void *value, compare_fun compare, int *was_removed) WUR NOEXCEPT;
 static _Rb_node     *_BST_next(_Rb_node *node) WUR NOEXCEPT;
 static _Rb_node     *_BST_prev(_Rb_node *node) WUR NOEXCEPT;
@@ -30,8 +30,8 @@ static _Rb_node     *_Rb_tree_copy(_Rb_node *root, copy_fun) WUR NOEXCEPT;
 static void         _Rb_tree_destroy(_Rb_node *root, del_fun) NOEXCEPT;
 static _Rb_node     *_BST_lower_bound(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
 static _Rb_node     *_BST_upper_bound(_Rb_node *root, void *value, compare_fun compare) WUR NOEXCEPT;
-static int          _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp) WUR NOEXCEPT;
-static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun cmp, _Rb_node *end1, _Rb_node *end2) WUR NOEXCEPT;
+static int          _DFS_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun compare) WUR NOEXCEPT;
+static int          _BST_compare(_Rb_node *rt1, _Rb_node *rt2, compare_fun compare, _Rb_node *end1, _Rb_node *end2) WUR NOEXCEPT;
 
 #ifdef __cplusplus
 static _Rb_node   *_Rb_node_create(void *key)
@@ -134,12 +134,19 @@ rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
         root->begin.node = _BST_min(root->root.node);
         root->end.node = _BST_max(root->root.node);
     }
+    if (ret == NULL)
+        return root->end;
     return (rb_node){ret};
 }
 
-void rb_remove_node(rb_tree *root, rb_node *node)
+rb_node rb_remove_node(rb_tree *root, rb_node *node)
 {
     --root->size;
+    _Rb_node *ret;
+    if (root->end.node == node->node)
+        ret = NULL;
+    else
+        ret = _BST_next(node->node);
     _Rb_remove_node(&root->root.node, node->node);
     if (UNLIKELY(root->root.node == NULL))
     {
@@ -151,6 +158,9 @@ void rb_remove_node(rb_tree *root, rb_node *node)
         root->begin.node = _BST_min(root->root.node);
         root->end.node = _BST_max(root->root.node);
     }
+    if (ret == NULL)
+        return root->end;
+    return (rb_node){ret};
 }
 
 rb_node rb_next(rb_node node)
