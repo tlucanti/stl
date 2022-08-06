@@ -23,6 +23,9 @@ namespace ft
         template <class type_U1, class type_U2>
         constexpr explicit pair(const pair<type_U1, type_U2> &cpy) : base_class(cpy) {}
 
+        template <class type_U1, class type_U2>
+        constexpr pair(const std::pair<type_U1, type_U2> &cpy) : base_class(cpy) {}
+
         constexpr pair(const pair &cpy) : base_class(cpy) {}
 
         template <class type_U1, class type_U2>

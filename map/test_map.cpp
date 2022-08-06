@@ -1,5 +1,5 @@
 
-#include "map_base.hpp"
+#include "map.hpp"
 #include "test.hpp"
 #include <map>
 
@@ -42,21 +42,21 @@ void constructor_assign_test() {
     start("map constructor/assign test");
 
     {
-        typedef tlucanti::map_base<int, int>::value_type VT;
-        ASSERT((tlucanti::is_same<bool, tlucanti::map_base<int, int>::value_compare::result_type>::value), "typedef test 0");
-        ASSERT((tlucanti::is_same<VT, tlucanti::map_base<int, int>::value_compare::first_argument_type>::value), "typedef test 1");
-        ASSERT((tlucanti::is_same<VT, tlucanti::map_base<int, int>::value_compare::second_argument_type>::value), "typedef test 2");
+        typedef ft::map<int, int>::value_type VT;
+        ASSERT((tlucanti::is_same<bool, ft::map<int, int>::value_compare::result_type>::value), "typedef test 0");
+        ASSERT((tlucanti::is_same<VT, ft::map<int, int>::value_compare::first_argument_type>::value), "typedef test 1");
+        ASSERT((tlucanti::is_same<VT, ft::map<int, int>::value_compare::second_argument_type>::value), "typedef test 2");
     }
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         ASSERT(a.empty(), "basic constructor test 0");
     }
     {
         std::allocator<int> alloc;
         std::less<int> cmp;
-        tlucanti::TLU_NAMESPACE_HIDDEN::pair_key_compare<std::less<int>, tlucanti::map_base<int, int>::value_type> pair_cmp(cmp);
+        tlucanti::TLU_NAMESPACE_HIDDEN::pair_key_compare<std::less<int>, ft::map<int, int>::value_type> pair_cmp(cmp);
         (void)pair_cmp;
-        tlucanti::map_base<int, int> a(cmp, alloc);
+        ft::map<int, int> a(cmp, alloc);
     }
     {
         std::map<int, int> stda;
@@ -65,15 +65,15 @@ void constructor_assign_test() {
         stda[1] = 2;
         stda[2] = 3;
         stda[3] = 6;
-        tlucanti::map_base<int, int> a(stda.begin(), stda.end(), cmp, alloc);
+        ft::map<int, int> a(stda.begin(), stda.end(), cmp, alloc);
         ASSERT(a[1] == 2, "basic iterator constructor test 0");
         ASSERT(a[2] == 3, "basic iterator constructor test 1");
         ASSERT(a[3] == 6, "basic iterator constructor test 2");
-        tlucanti::map_base<int, int> b(a);
+        ft::map<int, int> b(a);
         ASSERT(b[1] == 2, "basic copy constructor test 0");
         ASSERT(b[2] == 3, "basic copy constructor test 1");
         ASSERT(b[3] == 6, "basic copy constructor test 2");
-        tlucanti::map_base<int, int> c;
+        ft::map<int, int> c;
         ASSERT(c.empty(), "basic assign operator test 0");
         c = a;
         ASSERT(c[1] == 2, "basic copy constructor test 0");
@@ -93,7 +93,7 @@ void get_allocator_test()
     {
         std::allocator<int> alloc;
         std::less<int> cmp;
-        tlucanti::map_base<int, int> a(cmp, alloc);
+        ft::map<int, int> a(cmp, alloc);
         ASSERT(a.get_allocator() == alloc, "basic get_allocator tes 0");
     }
 
@@ -105,7 +105,7 @@ void at_access_test()
     start("access/access test");
 
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         error_test(a.at(0), "at test 0");
         error_test(a.at(123123), "at test 1");
         int q = a[0];
@@ -128,8 +128,8 @@ void iterator_test()
     start("iterator test");
 
     {
-        typedef tlucanti::map_base<int, int>::value_type P;
-        tlucanti::map_base<int, int> a;
+        typedef ft::map<int, int>::value_type P;
+        ft::map<int, int> a;
         a[1] = 2;
         a[2] = 3;
         a[123] = 321;
@@ -159,7 +159,7 @@ void empty_size_test()
     start("empty/size test");
 
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         ASSERT(a.empty(), "empty test 0");
         ASSERT(a.size() == 0, "size test 0");
         a[0] = 123;
@@ -175,7 +175,7 @@ void max_size_test()
     start("max_size test");
 
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         ASSERT(a.max_size() == std::numeric_limits<std::size_t>::max(), "max_size() test 0");
     }
 
@@ -187,7 +187,7 @@ void clear_test()
     start("clear test");
 
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         a[0] = 1;
         a[1] = 2;
         a[2] = 3;
@@ -203,11 +203,11 @@ void insert_test()
 {
     start("insert test");
 
-    typedef tlucanti::map_base<int, int>::iterator IT;
-    typedef tlucanti::pair_base<IT, bool> pIT;
-    typedef tlucanti::map_base<int, int>::value_type P;
+    typedef ft::map<int, int>::iterator IT;
+    typedef ft::pair<IT, bool> pIT;
+    typedef ft::map<int, int>::value_type P;
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
 
         pIT i = a.insert(P(123, 321));
         ASSERT(a.size() == 1, "insert test 0");
@@ -235,7 +235,7 @@ void insert_test()
         stda[1] = 234;
         stda[2] = 345;
 
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         a.insert(stda.begin(), stda.end());
         ASSERT(a.size() == 3, "iterator-insert test 0");
         ASSERT(*a.begin() == P(0, 123), "iterator-insert test 1");
@@ -249,14 +249,14 @@ void erase_test()
     start("erase test");
 
     {
-         tlucanti::map_base<int, int> a;
+         ft::map<int, int> a;
          a[0] = 123;
          ASSERT(a.size() == 1, "erase test 0");
          ASSERT(a.erase(a.begin()) == a.end(), "erase test 1");
          ASSERT(a.empty(), "erase test 2");
     }
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         a[0] = 123;
         a[1] = 321;
         a[3] = 111;
@@ -273,8 +273,8 @@ void swap_test()
     start("swap test");
 
     {
-        tlucanti::map_base<int, int> a;
-        tlucanti::map_base<int, int> b;
+        ft::map<int, int> a;
+        ft::map<int, int> b;
         a[0] = 123;
         a[2] = 321;
         ASSERT(a.size() == 2, "swap test 0");
@@ -295,11 +295,11 @@ void count_test()
     start("count test");
 
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         ASSERT(a.count(0) == 0, "count test 0");
         ASSERT(a.count(11) == 0, "count test 1");
         a[0] = 123;
-        a.insert(tlucanti::map_base<int, int>::value_type(11, 22));
+        a.insert(ft::map<int, int>::value_type(11, 22));
         ASSERT(a.count(0) == 1, "count test 2");
         ASSERT(a.count(11) == 1, "count test 3");
         a[11] = 0;
@@ -313,9 +313,9 @@ void find_test()
 {
     start("find test");
 
-    typedef tlucanti::map_base<int, int>::value_type P;
+    typedef ft::map<int, int>::value_type P;
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         ASSERT(a.find(0) == a.end(), "find test 0");
         ASSERT(a.find(123) == a.end(), "find test 1");
 
@@ -333,10 +333,10 @@ void bound_test()
 {
     start("equal_range/lower/upper-bound test");
 
-    typedef tlucanti::map_base<int, int>::iterator IT;
-    typedef tlucanti::pair_base<IT, IT> P;
+    typedef ft::map<int, int>::iterator IT;
+    typedef ft::pair<IT, IT> P;
     {
-        tlucanti::map_base<int, int> a;
+        ft::map<int, int> a;
         a[0] = 1;
         a[4] = 2;
         a[10] = 3;

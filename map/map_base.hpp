@@ -93,15 +93,13 @@ public:
         base_class(value_compare(comp), alloc)
     {}
 
-    template <class InputIt>
+    template <class InputIterator>
     map_base(
-        InputIt first,
-        InputIt last,
+        InputIterator first,
+        InputIterator last,
         const key_compare &comp=key_compare(),
         const allocator_type &alloc=allocator_type()
-    ) :
-        base_class(first, last, value_compare(comp), alloc)
-    {}
+    ) : base_class(first, last, value_compare(comp), alloc) {}
 
     map_base(const map_base &cpy) : base_class(cpy) {}
 
@@ -175,7 +173,7 @@ private:
     {
         AUTO(tree_node *) nd = reinterpret_cast<tree_node *>(this->_tree.find(value_type(key, _dummy_val)));
         if (nd == nullptr)
-            throw std::out_of_range("");
+            throw std::out_of_range("map_base::_at()");
         return nd->get_key().second;
     }
 };
