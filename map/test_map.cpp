@@ -64,20 +64,20 @@ void constructor_assign_test() {
         stda[1] = 2;
         stda[2] = 3;
         stda[3] = 6;
-//        tlucanti::map_base<int, int> a(stda.begin(), stda.end(), cmp, alloc);
-//        ASSERT(a[1] == 2, "basic iterator constructor test 0");
-//        ASSERT(a[2] == 3, "basic iterator constructor test 1");
-//        ASSERT(a[3] == 6, "basic iterator constructor test 2");
-//        tlucanti::map_base<int, int> b(a, cmp, alloc);
-//        ASSERT(b[1] == 2, "basic copy constructor test 0");
-//        ASSERT(b[2] == 3, "basic copy constructor test 1");
-//        ASSERT(b[3] == 6, "basic copy constructor test 2");
-//        tlucanti::map_base<int, int> c;
-//        ASSERT(c.empty(), "basic assign operator test 0");
-//        c = a;
-//        ASSERT(c[1] == 2, "basic copy constructor test 0");
-//        ASSERT(c[2] == 3, "basic copy constructor test 1");
-//        ASSERT(c[3] == 6, "basic copy constructor test 2");
+        tlucanti::map_base<int, int> a(stda.begin(), stda.end(), cmp, alloc);
+        ASSERT(a[1] == 2, "basic iterator constructor test 0");
+        ASSERT(a[2] == 3, "basic iterator constructor test 1");
+        ASSERT(a[3] == 6, "basic iterator constructor test 2");
+        tlucanti::map_base<int, int> b(a);
+        ASSERT(b[1] == 2, "basic copy constructor test 0");
+        ASSERT(b[2] == 3, "basic copy constructor test 1");
+        ASSERT(b[3] == 6, "basic copy constructor test 2");
+        tlucanti::map_base<int, int> c;
+        ASSERT(c.empty(), "basic assign operator test 0");
+        c = a;
+        ASSERT(c[1] == 2, "basic copy constructor test 0");
+        ASSERT(c[2] == 3, "basic copy constructor test 1");
+        ASSERT(c[3] == 6, "basic copy constructor test 2");
 
         (void)cmp;
     }

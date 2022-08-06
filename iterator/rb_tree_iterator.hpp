@@ -35,17 +35,17 @@ private:
     bool    _end;
 
 public:
-    virtual reference operator *()
+    virtual reference operator *() const
     {
         return _ptr->get_key();
     }
 
-    virtual bool operator ==(const rb_tree_iterator_base &cmp)
+    virtual bool operator ==(const rb_tree_iterator_base &cmp) const
     {
         return _ptr == cmp._ptr;
     }
 
-    virtual bool operator !=(const rb_tree_iterator_base &cmp)
+    virtual bool operator !=(const rb_tree_iterator_base &cmp) const
     {
         return _ptr != cmp._ptr;
     }

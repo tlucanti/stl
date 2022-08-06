@@ -4,6 +4,7 @@
 
 # include "defs.hpp"
 # include "set_base.hpp"
+# include <stdexcept>
 
 TLU_NAMESPACE_BEGIN
 
