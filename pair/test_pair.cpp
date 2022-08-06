@@ -39,7 +39,7 @@ void constructor_test()
     }
     {
         PAIR_SET_ASSERT(a, int, int, 123, 456, "constructor test 0");
-        PAIR_SET_ASSERT(b, float, int, 123.234f, 5345, "constructor test 1");
+        PAIR_SET_ASSERT(b, unsigned long long, int, 123, 5345, "constructor test 1");
         PAIR_SET_ASSERT(c, std::string, int, "lols", 234234, "constructor test 2");
         PAIR_SET_ASSERT(d, std::string, std::string, ")&RT#$*", "", "constructor test 3");
 
@@ -77,10 +77,25 @@ void assignment_operator_test()
         PAIR_ASSERT(b, 123, 346, "assignment test 0");
     }
     {
-        ft::pair<float, float> a(123.345, 432.666);
-        ft::pair<int, int> b;
-        b = a;
-        PAIR_ASSERT(b, 123, 432, "assignment test 1");
+        tlucanti::pair_base<float, float> a(123.345f, 432.666f);
+        tlucanti::pair_base<double, double> b;
+
+        b.operator=(a);
+    }
+    {
+        ft::pair<const char *, const char *> a("123", "234");
+        ft::pair<std::string, std::string> b("qwe", "rew");
+
+        b.operator=(a);
+
+        PAIR_ASSERT(b, "123", "234" ,"assignment test 2");
+    }
+    {
+        ft::pair<int, int> a(123, 234);
+        ft::pair<long, long> b(432, 432);
+
+        b.operator=(a);
+        PAIR_ASSERT(b, 123, 234, "assignment test 1");
     }
 
     result();

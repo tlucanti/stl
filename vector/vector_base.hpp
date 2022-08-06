@@ -48,8 +48,6 @@ public:
 
 // ------------------------------ private fields -------------------------------
 PRIVATE:
-    typedef vector_base<value_type, allocator_type>     self_type;
-
     difference_type _allocated;
     allocator_type  _allocator;
     pointer         _begin;
@@ -180,7 +178,7 @@ public:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr vector_base(const self_type &cpy,
+    constexpr vector_base(const vector_base &cpy,
             const allocator_type &alloc=allocator_type()
     ) :
         _allocated(0),
@@ -208,7 +206,7 @@ public:
 
 // -----------------------------------------------------------------------------
 # if CPP11
-    constexpr vector_base(self_type &&mv,
+    constexpr vector_base(vector_base &&mv,
         const allocator_type &alloc=allocator_type()
     ) noexcept :
         _allocated(mv._allocated),
@@ -278,7 +276,7 @@ public:
     }
 
 // --------------------------------- assigning ---------------------------------
-    constexpr vector_base &operator =(const self_type &cpy)
+    constexpr vector_base &operator =(const vector_base &cpy)
     /**
         \brief copy operator
         \details operator destroys current content of vector (and deallocates
@@ -301,7 +299,7 @@ public:
 
 // -----------------------------------------------------------------------------
 # if CPP11
-    constexpr vector_base &operator =(self_type &&mv) noexcept
+    constexpr vector_base &operator =(vector_base &&mv) noexcept
     /**
         \brief move operator
         \details operator destroys current content of vector (and deallocates
@@ -760,7 +758,7 @@ public:
     }
 
 // -----------------------------------------------------------------------------
-    constexpr void swap(self_type &swp)
+    constexpr void swap(vector_base &swp)
     {
         std::swap(_allocated, swp._allocated);
         std::swap(_allocator, swp._allocator);

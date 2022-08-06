@@ -20,7 +20,7 @@
 
 # ifdef __DEBUG
 #  define PRIVATE public
-#  define PROTECTED protected
+#  define PROTECTED public
 # else
 #  define PRIVATE private
 #  define PROTECTED protected

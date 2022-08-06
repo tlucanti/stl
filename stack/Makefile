@@ -1,9 +1,18 @@
 
 # ------------------------------ compiler options ------------------------------
 NAME		=	test
-CXX			=	clang++ -std=c++2a
-CXXFLAGS	=	-Wall -Wextra -Werror
+NAME_SPEED	=	speed
+CXX			=	g++ -std=c++98
+CXXFLAGS	=	-Wall -Wextra -Wctor-dtor-privacy -Wnon-virtual-dtor \
+					-Wold-style-cast -Woverloaded-virtual -Wsign-promo \
+					-Wduplicated-branches -Wduplicated-cond -Wfloat-equal \
+					-Wshadow=compatible-local -Wcast-qual -Wconversion \
+					-Wzero-as-null-pointer-constant -Wextra-semi \
+					-Wsign-conversion -Wlogical-op
+CXXFLAGS	+= 	-Werror
+# CXXFLAGS	+= 	pedantic-errors
 CXXOPTIONS	=	-O3
+# CXXOPTIONS	+=	-D__DEBUG
 CC			=	CC
 
 # --------------------------------- submodules ---------------------------------
@@ -11,20 +20,25 @@ CC			=	CC
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
 OBJS_DIR	=	../obj
-INCLUDE_DIR	=	../inc ../test .
+INCLUDE_DIR	=	../include ../test ../iterator
 SCRS_DIR	=	.
 DEPS_DIR	=	../dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
 				test_stack
 
+SPEED_SRCS	=
+
 # ======================= UNCHANGEABLE PART OF MAKEFILE ========================
 # ------------------------------------------------------------------------------
 RM			=	rm -f
 OBJS		=	$(addprefix ${OBJS_DIR}/,${SRCS:=.o})
+SPEED_OBJS	=	$(addprefix ${OBJS_DIR}/,${SPEED_SRCS:=.o})
 DEPS		=	$(addprefix ${DEPS_DIR}/,${SRCS:=.d})
+SPEED_DEPS	=	$(addprefix ${DEPS_DIR}/,${SPEED_SRCS:=.d})
 INCLUDE		=	$(addprefix -I, ${INCLUDE_DIR})
-_DEPS_MV	=	$(addprefix ${OBJS_DIR}/,${SRCS:=.d})
+_NM_DEPS_MV	=	$(addprefix ${OBJS_DIR}/,${SRCS:=.d})
+_SP_DEPS_MV	=	$(addprefix ${OBJS_DIR}/,${SPEED_SRCS:=.d})
 LIBINIT		=	ar rc
 
 W			=	\e[1;97m
@@ -39,12 +53,12 @@ SPACE		=	\t                     \t
 # ------------------------------------------------------------------------------
 all:			${OBJS_DIR} ${DEPS_DIR}
 	@$(MAKE)	$(NAME)
-	@printf		"$(G)OK$(S)                                                  \n"
 
 # ------------------------------------------------------------------------------
 $(NAME):		${OBJS}
 	@echo [LD] Linking CXX Executable ${NAME}
 	@${CXX}		-o ${NAME} ${CXXFLAGS} ${CXXOPTIONS} ${OBJS} ${LIBRARY}
+	@printf		"$(G)TEST OK$(S)                                              \n"	
 
 -include ${DEPS}
 
@@ -57,12 +71,16 @@ ${OBJS_DIR}/%.o: ${SCRS_DIR}/%.cpp Makefile
 # ------------------------------------------------------------------------------
 clean:
 	@printf		"$(R)[RM]$(W)\t\t${OBJS} ${DEPS}$(S)$(SPACE)\n"
+	@printf		"$(R)[RM]$(W)\t\t${SPEED_OBJS} ${DEPS}$(S)$(SPACE)\n"
 	@${RM}		${OBJS} ${DEPS}
+	@${RM}		${SPEED_OBJS} ${DEPS}
 
 # ------------------------------------------------------------------------------
 fclean:			clean
 	@printf		"$(R)[RM]$(W)\t\t${NAME}\n"
+	@printf		"$(R)[RM]$(W)\t\t${NAME_SPEED}\n"
 	@${RM}		${NAME}
+	@${RM}		${NAME_SPEED}
 
 # ------------------------------------------------------------------------------
 re:				fclean all
@@ -70,22 +88,22 @@ re:				fclean all
 # ------------------------------------------------------------------------------
 __GXX_98_COMPILE: CXX = g++ -std=c++98
 __GXX_98_COMPILE: CC = G++
-__GXX_98_COMPILE: fclean $(NAME)
+__GXX_98_COMPILE: fclean $(NAME) $(NAME_SPEED)
 __GXX_2a_COMPILE: CXX = g++ -std=c++2a
 __GXX_2a_COMPILE: CC = G++
-__GXX_2a_COMPILE: fclean $(NAME)
+__GXX_2a_COMPILE: fclean $(NAME) $(NAME_SPEED)
 __CLANG_98_COMPILE: CXX = clang++ -std=c++98
 __CLANG_98_COMPILE: CC = CLANG++
-__CLANG_98_COMPILE: fclean $(NAME)
+__CLANG_98_COMPILE: fclean $(NAME) $(NAME_SPEED)
 __CLANG_2a_COMPILE: CXX = clang++ -std=c++2a
 __CLANG_2a_COMPILE: CC = CLANG++
-__CLANG_2a_COMPILE: fclean $(NAME)
+__CLANG_2a_COMPILE: fclean $(NAME) $(NAME_SPEED)
 __CXX_98_COMPILE: CXX = c++ -std=c++98
 __CXX_98_COMPILE: CC = C++
-__CXX_98_COMPILE: fclean $(NAME)
+__CXX_98_COMPILE: fclean $(NAME) $(NAME_SPEED)
 __CXX_2a_COMPILE: CXX = c++ -std=c++2a
 __CXX_2a_COMPILE: CC = C++
-__CXX_2a_COMPILE: fclean $(NAME)
+__CXX_2a_COMPILE: fclean $(NAME) $(NAME_SPEED)
 
 compile:
 	$(MAKE) __GXX_98_COMPILE

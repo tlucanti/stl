@@ -29,6 +29,8 @@ int main()
 
     RUN_TESTS("vec = vec assign operator test", assign_operator_test);
 
+    RUN_TESTS("vec.swap(vec) swap method test", swap_test);
+
     bm.next_test(".at() method test");
     SMALL(at_method_test);
 

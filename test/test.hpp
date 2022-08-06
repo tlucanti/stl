@@ -12,7 +12,6 @@
 # include <stdexcept>
 # include <set>
 
-# define __DEBUG
 # define __SAFE_TEST 0
 
 # include "defs.hpp"
@@ -63,7 +62,8 @@ void run_test(func_T func)
     } \
 } while (false)
 
-# define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
+# ifdef __DEBUG
+#  define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
     ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
     ASSERT((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
     ASSERT((__vec)._allocated == (__allocated), (__msg)  + std::string(" allocated check")); \
@@ -72,6 +72,13 @@ void run_test(func_T func)
     ASSERT((__vec)._end == (__end), (__msg) + std::string(" end iterator check")); \
     ASSERT((__vec)._allocator == (__alloc), (__msg) + std::string(" allocator check")); \
     ASSERT((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
+# else /* no __DEBUG */
+#  define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
+    ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
+    ASSERT((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
+    ASSERT((__vec).capacity() == (__allocated), (__msg) + std::string(" .capacity() check")); \
+    ASSERT((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
+# endif /* __DEBUG */
 
 # define vec_cmp(__msg, __type, __vec, ...) do { \
     __type __cmp[] = {__VA_ARGS__}; \
@@ -856,7 +863,7 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
         _dfs_compare(tree->root.node, std_tree);
 }
 
-# define MAKE_USED(__e) write(-1, &(__e), 8)
+# define MAKE_USED(__e) do { if (write(-1, &(__e), 8)) {} } while (false)
 
 
 # define PAIR_ASSERT(__name, __first, __second, __msg) \

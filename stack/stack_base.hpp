@@ -11,10 +11,10 @@ template <class type_T, class container_T=std::deque<type_T> >
 class stack_base
 {
 public:
-    typedef container_T         container_type;
-    typedef typename container_type::value_type              value_type;
-    typedef typename container_type::size_type   size_type;
-    typedef typename container_type::reference  reference;
+    typedef container_T                                 container_type;
+    typedef typename container_type::value_type         value_type;
+    typedef typename container_type::size_type          size_type;
+    typedef typename container_type::reference          reference;
     typedef typename container_type::const_reference    const_reference;
 
 protected:
@@ -22,11 +22,11 @@ protected:
 
 public:
 // ------------------------------ constructors --------------------------------
-    stack_base() : c(value_type()) {}
+    stack_base() DEFAULT
 
     explicit stack_base(const container_type &cont) : c(cont) {}
 
-    stack_base(const stack_base &cpy) : c(cpy._con) {}
+    stack_base(const stack_base &cpy) : c(cpy.c) {}
 
 #if CPP11
     explicit stack_base(container_type &&cont) : c(std::move(cont)) {}
@@ -41,6 +41,7 @@ public:
     stack_base &operator =(const stack_base &cpy)
     {
         c = cpy.c;
+        return *this;
     }
 
 // --------------------------- element access -----------------------------

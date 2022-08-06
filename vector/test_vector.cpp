@@ -98,17 +98,17 @@ void constructor_test()
     {
         ft::vector<int> a(3);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size constructor test");
-        ASSERT(a._end - a._begin == 3, "size 3 vec iterator test 1");
+        ASSERT(a.size() == 3, "size 3 vec iterator test 1");
     }
     {
         ft::vector<int> a(3, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size + alloc constructor test");
-        ASSERT(a._end - a._begin == 3, "default size iterator test 1");
+        ASSERT(a.size() == 3, "default size iterator test 1");
     }
     {
         ft::vector<int> a(3, 123);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value test");
-        ASSERT(a._end - a._begin == 3, "constructor default value iterator test 1");
+        ASSERT(a.size() == 3, "constructor default value iterator test 1");
         ASSERT(a[0] == 123, "constructor default value test 1");
         ASSERT(a[1] == 123, "constructor default value test 2");
         ASSERT(a[2] == 123, "constructor default value test 3");
@@ -116,7 +116,7 @@ void constructor_test()
     {
         ft::vector<int> a(3, 123, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value + alloc test");
-        ASSERT(a._end - a._begin == 3, "constructor default value + alloc iterator test 1");
+        ASSERT(a.size() == 3, "constructor default value + alloc iterator test 1");
         ASSERT(a[0] == 123, "constructor default value + alloc test 1");
         ASSERT(a[1] == 123, "constructor default value + alloc test 2");
         ASSERT(a[2] == 123, "constructor default value + alloc test 3");
@@ -127,21 +127,21 @@ void constructor_test()
         {
             ft::vector<int> a(v.begin(), v.end());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 1");
-            ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 1");
+            ASSERT(a.size() == 3, "constructor iterator copy iterator test 1");
             ASSERT(a[0] == 1, "constructor iterator copy test 1");
             ASSERT(a[1] == 2, "constructor iterator copy test 2");
             ASSERT(a[2] == 3, "constructor iterator copy test 3");
         } {
             ft::vector<int> a(v.data(), v.data() + v.size());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 2");
-            ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 2");
+            ASSERT(a.size() == 3, "constructor iterator copy iterator test 2");
             ASSERT(a[0] == 1, "constructor iterator copy test 4");
             ASSERT(a[1] == 2, "constructor iterator copy test 5");
             ASSERT(a[2] == 3, "constructor iterator copy test 6");
         } {
             ft::vector<int> a(stdv.begin(), stdv.end());
             vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 3");
-            ASSERT(a._end - a._begin == 3, "constructor iterator copy iterator test 3");
+            ASSERT(a.size() == 3, "constructor iterator copy iterator test 3");
             ASSERT(a[0] == 1, "constructor iterator copy test 7");
             ASSERT(a[1] == 2, "constructor iterator copy test 8");
             ASSERT(a[2] == 3, "constructor iterator copy test 9");
@@ -151,7 +151,7 @@ void constructor_test()
         vec_123(v);
         ft::vector<int> a(v.begin(), v.end(), alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy + alloc test");
-        ASSERT(a._end - a._begin == 3, "constructor iterator copy + alloc iterator test 1");
+        ASSERT(a.size() == 3, "constructor iterator copy + alloc iterator test 1");
         ASSERT(a[0] == 1, "constructor iterator copy + alloc test 1");
         ASSERT(a[1] == 2, "constructor iterator copy + alloc test 2");
         ASSERT(a[2] == 3, "constructor iterator copy + alloc test 3");
@@ -160,7 +160,7 @@ void constructor_test()
         vec_123(v);
         ft::vector<int> a(v);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "copy constructor test");
-        ASSERT(a._end - a._begin == 3, "copy constructor iterator test 1");
+        ASSERT(a.size() == 3, "copy constructor iterator test 1");
         ASSERT(a[0] == 1, "copy constructor test 1");
         ASSERT(a[1] == 2, "copy constructor test 2");
         ASSERT(a[2] == 3, "copy constructor test 3");
@@ -169,7 +169,7 @@ void constructor_test()
         vec_123(v);
         ft::vector<int> a(v, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "copy constructor + alloc test");
-        ASSERT(a._end - a._begin == 3, "copy constructor + alloc iterator test 1");
+        ASSERT(a.size() == 3, "copy constructor + alloc iterator test 1");
         ASSERT(a[0] == 1, "copy constructor + alloc test 1");
         ASSERT(a[1] == 2, "copy constructor + alloc test 2");
         ASSERT(a[2] == 3, "copy constructor + alloc test 3");

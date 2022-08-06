@@ -26,7 +26,7 @@ struct pair_base
     constexpr pair_base(const first_type &_first, const second_type &_second) : first(_first), second(_second) {}
 
     template <class type_U1, class type_U2>
-    constexpr explicit pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
+    constexpr pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
 
     template <class type_U1, class type_U2>
     constexpr pair_base(const std::pair<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}

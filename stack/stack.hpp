@@ -2,7 +2,7 @@
 #ifndef STACK_HPP
 # define STACK_HPP
 
-# include "defs.h"
+# include "defs.hpp"
 # include "stack_base.hpp"
 
 namespace ft

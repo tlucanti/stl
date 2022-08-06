@@ -67,6 +67,26 @@ void copy_constructor_test(typename T::size_type size, unsigned long long times)
 }
 
 template <class T>
+void empty_copy_constructor_test(UNUSED(std::size_t _), unsigned long long times)
+/*
+    empty_container(empty_container);
+*/
+{
+    T a;
+    std::vector<T *> v(times);
+    __test_start();
+    for (unsigned long long i=0; i < times; ++i)
+        v[i] = new T(a);
+    __test_end();
+    for (unsigned long long i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        delete v.at(i);
+    }
+    USED(v);
+}
+
+template <class T>
 void iterator_constructor_test(typename T::size_type size, unsigned long long times)
 /*
     container(a.begin(), a.end());
@@ -105,6 +125,25 @@ void destructor_test(typename T::size_type size, unsigned long long times)
     USED(v);
 }
 
+template <class T>
+void empty_destructor_test(UNUSED(std::size_t _), unsigned long long times)
+/*
+    delete empty_container;
+*/
+{
+    std::vector<T *> v(times);
+    for (unsigned long long i=0; i < times; ++i)
+    {
+        v.at(i) = new T;
+        USED_PTR(v.at(i));
+    }
+    __test_start();
+    for (unsigned long long i=0; i < times; ++i)
+        delete v[i];
+    __test_end();
+    USED(v);
+}
+
 #if PRECPP11
 template <class T>
 void assign_operator_test(typename T::size_type size, unsigned long long times)
@@ -124,7 +163,64 @@ void assign_operator_test(typename T::size_type size, unsigned long long times)
     }
     USED(v);
 }
+
+template <class T>
+void empty_assign_operator_test(UNUSED(std::size_t _), unsigned long long times)
+/*
+    empty_container = empty_container;
+*/
+{
+    T a;
+    std::vector<T> v(times);
+    __test_start();
+    for (unsigned long long i=0; i < times; ++i)
+        v[i] = a;
+    __test_end();
+    for (unsigned long long i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+    }
+    USED(v);
+}
 #endif /* PRECPP11 */
+
+template <class T>
+void swap_test(typename T::size_type size, std::size_t times)
+/*
+    container.swap(container);
+*/
+{
+    T a(size);
+    std::vector<T *> v(times);
+    for (std::size_t i=0; i < times; ++i)
+        v.at(i) = new T(size);
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+        v[i]->swap(a);
+    __test_end();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        delete v.at(i);
+    }
+    USED(v);
+}
+
+template <class T>
+void empty_swap_test(UNUSED(std::size_t _), std::size_t times)
+/*
+    empty_container.swap(empty_container);
+*/
+{
+    T a;
+    std::vector<T> v(times);
+    __test_start();
+    for (typename T::size_type i=0; i < times; ++i)
+        v[i].swap(a);
+    __test_end();
+    USED(v);
+}
+
 
 template <class T>
 void at_method_test(UNUSED(typename T::size_type _), typename T::size_type times)

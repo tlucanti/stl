@@ -27,6 +27,7 @@ add_executable(vector_speed vector/speed_test.cpp)
 add_executable(stack_test stack/test_stack.cpp)
 
 add_executable(pair_test pair/test_pair.cpp)
+add_executable(pair_speed pair/speed_test.cpp)
 
 add_executable(map_test map/test_map.cpp)
 
