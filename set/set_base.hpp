@@ -217,10 +217,7 @@ public:
     void erase(InputIt first, InputIt last)
     {
         while (first != last)
-        {
-            _tree.remove(*first);
-            ++first;
-        }
+            _tree.remove(*first++);
     }
 
     void swap(set_base &other)

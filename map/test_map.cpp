@@ -42,9 +42,10 @@ void constructor_assign_test() {
     start("map constructor/assign test");
 
     {
+        typedef tlucanti::map_base<int, int>::value_type VT;
         ASSERT((tlucanti::is_same<bool, tlucanti::map_base<int, int>::value_compare::result_type>::value), "typedef test 0");
-        ASSERT((tlucanti::is_same<int, tlucanti::map_base<int, int>::value_compare::first_argument_type>::value), "typedef test 1");
-        ASSERT((tlucanti::is_same<int, tlucanti::map_base<int, int>::value_compare::second_argument_type>::value), "typedef test 2");
+        ASSERT((tlucanti::is_same<VT, tlucanti::map_base<int, int>::value_compare::first_argument_type>::value), "typedef test 1");
+        ASSERT((tlucanti::is_same<VT, tlucanti::map_base<int, int>::value_compare::second_argument_type>::value), "typedef test 2");
     }
     {
         tlucanti::map_base<int, int> a;
@@ -108,7 +109,7 @@ void at_access_test()
         error_test(a.at(0), "at test 0");
         error_test(a.at(123123), "at test 1");
         int q = a[0];
-        ASSERT(q == 0, "access tes 0");
+        ASSERT(q == 0, "access test 0");
         ASSERT(a.at(0) == 0, "at test 2");
         ASSERT(a[0] == 0, "access test 1");
         a[1] = 123;
@@ -141,13 +142,13 @@ void iterator_test()
         ASSERT(*--(--a.end()) == P(2, 3), "iterator test 4");
         ASSERT(*--(--(--a.end())) == P(1, 2), "iterator test 5");
 
-        ASSERT(*a.rbegin() == P(1, 2), "reverse iterator test 0");
+        ASSERT(*a.rbegin() == P(123, 321), "reverse iterator test 0");
         ASSERT(*++a.rbegin() == P(2, 3), "reverse iterator test 1");
-        ASSERT(*++(++a.rbegin()) == P(123, 321), "reverse iterator test 2");
+        ASSERT(*++(++a.rbegin()) == P(1, 2), "reverse iterator test 2");
 
-        ASSERT(*--a.rend() == P(123, 321), "reverse iterator test 3");
+        ASSERT(*--a.rend() == P(1, 2), "reverse iterator test 3");
         ASSERT(*--(--a.rend()) == P(2, 3), "reverse iterator test 4");
-        ASSERT(*--(--(--a.rend())) == P(1, 2), "reverse iterator test 5");
+        ASSERT(*--(--(--a.rend())) == P(123, 321), "reverse iterator test 5");
     }
 
     result();
@@ -320,8 +321,9 @@ void find_test()
 
         a[0] = 1;
         a[123] = 321;
-        ASSERT(*a.find(1) == P(0, 1), "find test 2");
+        ASSERT(*a.find(0) == P(0, 1), "find test 2");
         ASSERT(*a.find(123) == P(123, 321), "find test 3");
+        ASSERT(a.find(1) == a.end(), "find test 4");
     }
 
     result();
@@ -341,7 +343,7 @@ void bound_test()
 
         ASSERT(a.equal_range(0) == P(a.begin(), ++a.begin()), "equal_range test 0");
         ASSERT(a.equal_range(1) == P(++a.begin(), ++a.begin()), "equal_range test 1");
-        ASSERT(a.equal_range(4) == P(++(++a.begin()), --a.end()), "equal_range test 2");
+        ASSERT(a.equal_range(4) == P(++a.begin(), --a.end()), "equal_range test 2");
         ASSERT(a.equal_range(9) == P(--a.end(), --a.end()), "equal_range test 3");
         ASSERT(a.equal_range(10) == P(--a.end(), a.end()), "equal_range test 4");
         ASSERT(a.equal_range(123) == P(a.end(), a.end()), "equal_range test 5");

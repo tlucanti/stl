@@ -42,12 +42,15 @@ public:
 
     virtual bool operator ==(const rb_tree_iterator_base &cmp) const
     {
-        return _ptr == cmp._ptr;
+        bool x = _end;
+        bool y = cmp._end;
+        bool z = _ptr == cmp._ptr;
+        return (x and y) or ((not x) and (not y) and z);
     }
 
     virtual bool operator !=(const rb_tree_iterator_base &cmp) const
     {
-        return _ptr != cmp._ptr;
+        return not operator ==(cmp);
     }
 
     virtual rb_node *get_node() const
@@ -66,6 +69,8 @@ protected:
             _end = false;
         else
             _ptr = tree_type::next(_ptr);
+        if (_ptr == nullptr)
+            _end = true;
     }
 
     void decrement()

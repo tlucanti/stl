@@ -119,7 +119,7 @@ public:
 
     mapped_type &operator [](const key_type &key)
     {
-        return this->_tree.insert(value_type(key, _dummy_val))->get_key().second;
+        return this->_tree.insert(value_type(key, mapped_type()))->get_key().second;
     }
 
     size_type count(const key_type &key) const

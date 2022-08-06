@@ -121,7 +121,7 @@ bool operator !=(
         const TLU_NAMESPACE::pair_base<type_T, type_Y> &rhs
     )
 {
-    return TLU_NAMESPACE::TLU_NAMESPACE_HIDDEN::pair_base_compare(lhs, rhs) != 0;
+    return lhs.first != rhs.first or lhs.second != rhs.second;
 }
 
 template <class type_T, class type_Y>
