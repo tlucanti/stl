@@ -8,6 +8,7 @@
 # include <unistd.h>
 # include <sys/time.h>
 # include "color.hpp"
+# include "defs.hpp"
 
 # define USED_PTR(__x) do { /* if (write(-1, __x, 8)) {} */ } while (false)
 # define USED(__x) do { if (write(-1, &__x, 8)) {} } while (false)
@@ -112,6 +113,8 @@ private:
 
     void _result(const std::string &test_size, double ft_time, double std_time)
     {
+        assert(ft_time >= 0);
+        assert(std_time >= 0);
         double div = ft_time / std_time;
         div = 1 - 1 / (div + 1);
         GradientN gradient(GradientN(Cyan, Green), GradientN(Orange, Red));

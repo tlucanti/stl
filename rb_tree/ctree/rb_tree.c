@@ -134,20 +134,18 @@ rb_node rb_remove(rb_tree *root, void *key, compare_fun compare)
         root->begin.node = _BST_min(root->root.node);
         root->end.node = _BST_max(root->root.node);
     }
-    if (ret == NULL)
-        return root->end;
     return (rb_node){ret};
 }
 
-rb_node rb_remove_node(rb_tree *root, rb_node *node)
+rb_node rb_remove_node(rb_tree *root, rb_node node)
 {
     --root->size;
     _Rb_node *ret;
-    if (root->end.node == node->node)
+    if (root->end.node == node.node)
         ret = NULL;
     else
-        ret = _BST_next(node->node);
-    _Rb_remove_node(&root->root.node, node->node);
+        ret = _BST_next(node.node);
+    _Rb_remove_node(&root->root.node, node.node);
     if (UNLIKELY(root->root.node == NULL))
     {
         root->begin.node = NULL;
@@ -219,7 +217,7 @@ int     rb_compare(rb_tree *tree1, rb_tree *tree2, compare_fun cmp)
 {
     if (tree1->size != tree2->size)
     {
-        ptrdiff_t diff = (ptrdiff_t)(tree1->size - tree2->size);
+        ptrdiff_t diff = static_cast(ptrdiff_t, tree1->size - tree2->size);
         return (0 < diff) - (diff < 0);
     }
     else if (UNLIKELY(tree1->size == 0 && tree2->size == 0))
@@ -244,6 +242,7 @@ static _Rb_node     *_Rb_grandparent(_Rb_node *node)
     return node->parent->parent;
 }
 
+UNUSED()
 static _Rb_node     *_Rb_uncle(_Rb_node *node)
 /*
     function returns uncle of node

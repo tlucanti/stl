@@ -116,6 +116,8 @@ public:
         _alloc(cpy._alloc),
         _size(0)
     {
+        if (cpy._size == 0)
+            return ;
         _root = _rb_copy(cpy._root);
         _begin = _bst_min(_root);
         _end = _bst_max(_root);
@@ -212,15 +214,25 @@ public:
 
     rb_node *remove_node(rb_node *node)
     {
+        --_size;
         rb_node *ret;
-        if (node == _end)
+        if (_end == node)
             ret = nullptr;
         else
             ret = next(node);
         _rb_remove_node(node);
+        if (UNLIKELY(_root == nullptr))
+        {
+            _begin = nullptr;
+            _end = nullptr;
+        }
+        else
+        {
+            _begin = _bst_min(_root);
+            _end = _bst_max(_root);
+        }
         if (ret == nullptr)
-            ret = _end;
-        --_size;
+            return _end;
         return ret;
     }
     

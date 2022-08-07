@@ -9,7 +9,22 @@ struct timeval __tv_end_time = {};
 extern ssize_t write(int fd, const void *buf, size_t size);
 
 template <class T>
-void default_constructor_test(UNUSED(std::size_t _), unsigned long long times)
+void sized_container_generate(typename T::size_type size, T &container)
+{
+    container.resize(size);
+    for (typename T::size_type i=0; i < size; ++i)
+        container[i] = static_cast<int>(i);
+}
+
+template <class T>
+void insert_container_generate(typename T::size_type size, T &container)
+{
+    for (typename T::size_type i=0; i < size; ++i)
+        container.insert(static_cast<int>(i));
+}
+
+template <class T, typename gen_fn_t>
+void default_constructor_test(UNUSED(std::size_t _), unsigned long long times, UNUSED(gen_fn_t _gen))
 /*
     container();
 */
@@ -25,6 +40,12 @@ void default_constructor_test(UNUSED(std::size_t _), unsigned long long times)
         delete v.at(i);
     }
     USED(v);
+}
+
+template <class T>
+void default_constructor_test(typename T::size_type size, unsigned long long times)
+{
+    default_constructor_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T>
@@ -46,13 +67,14 @@ void sized_constructor_test(typename T::size_type size, unsigned long long times
     USED(v);
 }
 
-template <class T>
-void copy_constructor_test(typename T::size_type size, unsigned long long times)
+template <class T, class gen_fn_t>
+void copy_constructor_test(typename T::size_type size, unsigned long long times, gen_fn_t generate)
 /*
     container(container);
 */
 {
-    T a(size);
+    T a;
+    generate(size, a);
     std::vector<T *> v(times);
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
@@ -64,6 +86,12 @@ void copy_constructor_test(typename T::size_type size, unsigned long long times)
         delete v.at(i);
     }
     USED(v);
+}
+
+template <class T>
+void copy_constructor_test(typename T::size_type size, unsigned long long times)
+{
+    copy_constructor_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T>
@@ -86,13 +114,14 @@ void empty_copy_constructor_test(UNUSED(std::size_t _), unsigned long long times
     USED(v);
 }
 
-template <class T>
-void iterator_constructor_test(typename T::size_type size, unsigned long long times)
+template <class T, typename gen_fn_t>
+void iterator_constructor_test(typename T::size_type size, unsigned long long times, gen_fn_t generate)
 /*
     container(a.begin(), a.end());
 */
 {
-    T a(size);
+    T a;
+    generate(size, a);
     std::vector<T *> v(times);
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
@@ -107,7 +136,12 @@ void iterator_constructor_test(typename T::size_type size, unsigned long long ti
 }
 
 template <class T>
-void destructor_test(typename T::size_type size, unsigned long long times)
+void iterator_constructor_test(typename T::size_type size, unsigned long long times) {
+    iterator_constructor_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, class gen_fn_t>
+void destructor_test(typename T::size_type size, unsigned long long times, gen_fn_t generate)
 /*
     delete container;
 */
@@ -115,7 +149,8 @@ void destructor_test(typename T::size_type size, unsigned long long times)
     std::vector<T *> v(times);
     for (unsigned long long i=0; i < times; ++i)
     {
-        v.at(i) = new T(size);
+        v.at(i) = new T;
+        generate(size, *v.at(i));
         USED_PTR(v.at(i));
     }
     __test_start();
@@ -123,6 +158,11 @@ void destructor_test(typename T::size_type size, unsigned long long times)
         delete v[i];
     __test_end();
     USED(v);
+}
+
+template <class T>
+void destructor_test(typename T::size_type size, unsigned long long times) {
+    destructor_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T>
@@ -145,13 +185,14 @@ void empty_destructor_test(UNUSED(std::size_t _), unsigned long long times)
 }
 
 #if PRECPP11
-template <class T>
-void assign_operator_test(typename T::size_type size, unsigned long long times)
+template <class T, class gen_fn_t>
+void assign_operator_test(typename T::size_type size, unsigned long long times, gen_fn_t generate)
 /*
     container = container;
 */
 {
-    T a(size);
+    T a;
+    generate(size, a);
     std::vector<T> v(times);
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
@@ -162,6 +203,11 @@ void assign_operator_test(typename T::size_type size, unsigned long long times)
         USED_PTR(v.at(i));
     }
     USED(v);
+}
+
+template <class T>
+void assign_operator_test(typename T::size_type size, unsigned long long times) {
+    assign_operator_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T>
@@ -184,16 +230,20 @@ void empty_assign_operator_test(UNUSED(std::size_t _), unsigned long long times)
 }
 #endif /* PRECPP11 */
 
-template <class T>
-void swap_test(typename T::size_type size, std::size_t times)
+template <class T, typename gen_fn_t>
+void swap_test(typename T::size_type size, std::size_t times, gen_fn_t generate)
 /*
     container.swap(container);
 */
 {
-    T a(size);
+    T a;
+    generate(size, a);
     std::vector<T *> v(times);
     for (std::size_t i=0; i < times; ++i)
-        v.at(i) = new T(size);
+    {
+        v.at(i) = new T;
+        generate(size, *v.at(i));
+    }
     __test_start();
     for (std::size_t i=0; i < times; ++i)
         v[i]->swap(a);
@@ -204,6 +254,11 @@ void swap_test(typename T::size_type size, std::size_t times)
         delete v.at(i);
     }
     USED(v);
+}
+
+template <class T>
+void swap_test(typename T::size_type size, unsigned long long times) {
+    swap_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T>
@@ -302,14 +357,15 @@ void data_method_test(UNUSED(typename T::size_type _), typename T::size_type tim
     USED(dest);
 }
 
-template <class T>
-void begin_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, typename gen_fn_t>
+void begin_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
-
+    container.begin()
 */
 {
     std::vector<typename T::iterator> dest(static_cast<std::size_t>(times));
-    T v(times);
+    T v;
+    generate(times, v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
         dest[i] = v.begin();
@@ -319,13 +375,19 @@ void begin_test(UNUSED(typename T::size_type _), typename T::size_type times)
 }
 
 template <class T>
-void end_test(UNUSED(typename T::size_type _), typename T::size_type times)
+void begin_test(typename T::size_type size, typename T::size_type times) {
+    begin_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, typename gen_fn_t>
+void end_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
     container.end()
 */
 {
     std::vector<typename T::iterator> dest(static_cast<std::size_t>(times));
-    T v(times);
+    T v;
+    generate(times, v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
         dest[i] = v.end();
@@ -335,13 +397,19 @@ void end_test(UNUSED(typename T::size_type _), typename T::size_type times)
 }
 
 template <class T>
-void rbegin_test(UNUSED(typename T::size_type _), typename T::size_type times)
+void end_test(typename T::size_type size, typename T::size_type times) {
+    end_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, typename gen_fn_t>
+void rbegin_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
     container.rbegin();
 */
 {
     std::vector<typename T::reverse_iterator> dest(static_cast<std::size_t>(times));
-    T v(times);
+    T v;
+    generate(times, v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
         dest[i] = v.rbegin();
@@ -351,13 +419,19 @@ void rbegin_test(UNUSED(typename T::size_type _), typename T::size_type times)
 }
 
 template <class T>
-void rend_test(UNUSED(typename T::size_type _), typename T::size_type times)
+void rbegin_test(typename T::size_type size, typename T::size_type times) {
+    rbegin_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, typename gen_fn_t>
+void rend_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
     container.rend();
 */
 {
     std::vector<typename T::reverse_iterator> dest(static_cast<std::size_t>(times));
-    T v(times);
+    T v;
+    generate(times, v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
         dest[i] = v.rend();
@@ -367,7 +441,12 @@ void rend_test(UNUSED(typename T::size_type _), typename T::size_type times)
 }
 
 template <class T>
-void empty_test(unsigned long long size, unsigned long long times)
+void rend_test(typename T::size_type size, typename T::size_type times) {
+    rend_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, typename gen_fn_t>
+void empty_test(unsigned long long size, unsigned long long times, gen_fn_t generate)
 /*
     container.empty();
 */
@@ -375,7 +454,10 @@ void empty_test(unsigned long long size, unsigned long long times)
     std::vector<T *> v(times);
     std::vector<int> dest(times);
     for (unsigned long long i=0; i < times; ++i)
-        v.at(i) = new T(static_cast<typename T::size_type>(size));
+    {
+        v.at(i) = new T;
+        generate(static_cast<typename T::size_type>(size), *v.at(i));
+    }
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
         dest[i] = v[i]->empty();
@@ -390,7 +472,12 @@ void empty_test(unsigned long long size, unsigned long long times)
 }
 
 template <class T>
-void size_test(unsigned long long size, unsigned long long times)
+void empty_test(unsigned long long size, unsigned long long times) {
+    empty_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T, typename gen_fn_t>
+void size_test(unsigned long long size, unsigned long long times, gen_fn_t generate)
 /*
     container.size();
 */
@@ -398,7 +485,10 @@ void size_test(unsigned long long size, unsigned long long times)
     std::vector<T *> v(times);
     std::vector<typename T::size_type> dest(times);
     for (unsigned long long i=0; i < times; ++i)
-        v.at(i) = new T(static_cast<typename T::size_type>(size));
+    {
+        v.at(i) = new T;
+        generate(static_cast<typename T::size_type>(size), *v.at(i));
+    }
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
         dest[i] = v[i]->size();
@@ -413,7 +503,12 @@ void size_test(unsigned long long size, unsigned long long times)
 }
 
 template <class T>
-void max_size_test(unsigned long long size, unsigned long long times)
+void size_test(unsigned long long size, unsigned long long times) {
+    size_test<T>(size, times, sized_container_generate<T>);
+}
+
+template <class T>
+void max_size_test(UNUSED(std::size_t _), unsigned long long times)
 /*
     container.max_size();
 */
@@ -421,7 +516,7 @@ void max_size_test(unsigned long long size, unsigned long long times)
     std::vector<T *> v(times);
     std::vector<typename T::size_type> dest(times);
     for (unsigned long long i=0; i < times; ++i)
-        v.at(i) = new T(static_cast<typename T::size_type>(size));
+        v.at(i) = new T;;
     __test_start();
     for (unsigned long long i=0; i < times; ++i)
         dest[i] = v[i]->max_size();
@@ -472,6 +567,307 @@ void reserve_test(typename T::size_type size, typename T::size_type times)
     USED(v);
 }
 
+template <class T, typename gen_fn_t>
+void clear_test(typename T::size_type size, std::size_t times, gen_fn_t generate)
+/*
+    container.clear();
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        generate(size, v.at(i));
+        USED_PTR(v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+        v[i].clear();
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void insert_val_test(std::size_t size, std::size_t times, UNUSED(gen_fn_t _))
+/*
+    container.insert(value);
+*/
+{
+    std::vector<T> v(times);
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            v[i].insert(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void insert_iterator_test(std::size_t size, std::size_t times, UNUSED(gen_fn_t _))
+/*
+    container.insert(pos, value);
+*/
+{
+    std::vector<T> v(times);
+    __test_start();
+    for(std::size_t i=0; i < times; ++i)
+    {
+        typename T::iterator it = v[i].end();
+        for (std::size_t j=0; j < size; ++j)
+            it = v[i].insert(it, static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void ranged_insert_test(std::size_t size, std::size_t times, UNUSED(gen_fn_t _))
+/*
+    container.insert(iterator, iterator);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<int> a(size);
+    for (std::size_t i=0; i < size; ++i)
+        a.at(i) = static_cast<int>(i);
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+        v[i].insert(a.begin(), a.end());
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void erase_iterator_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.erase(iterator);
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            v[i].erase(v[i].begin());
+    }
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void ranged_erase_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.erase(iterator, iterator);
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+        v[i].erase(v[i].begin(), v[i].end());
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void erase_val_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.erase(value);
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            v[i].erase(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void count_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.count(value);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<std::size_t> dest(size);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            dest[j] = v[i].count(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+    USED(dest);
+}
+
+template <class T, typename gen_fn_t>
+void find_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.find(value);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<typename T::iterator> dest(size);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            dest[j] = v[i].find(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+    USED(dest);
+}
+
+template <class T, typename gen_fn_t>
+void equal_range_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.equal_range(value);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<typename T::iterator> dest(size);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            dest[j] = v[i].equal_range(static_cast<int>(j)).first;
+    }
+    __test_end();
+    USED(v);
+    USED(dest);
+}
+
+template <class T, typename gen_fn_t>
+void lower_bound_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.lower_bound(value);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<typename T::iterator> dest(size);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            dest[j] = v[i].lower_bound(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+    USED(dest);
+}
+
+template <class T, typename gen_fn_t>
+void upper_bound_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    container.lower_bound(value);
+*/
+{
+    std::vector<T> v(times);
+    std::vector<typename T::iterator> dest(size);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        for (std::size_t j=0; j < size; ++j)
+            dest[j] = v[i].upper_bound(static_cast<int>(j));
+    }
+    __test_end();
+    USED(v);
+    USED(dest);
+}
+
+template <class T, typename gen_fn_t>
+void next_iterator_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    ++iterator;
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        typename T::iterator it = v[i].begin();
+        for (std::size_t j=0; j < size; ++j)
+            ++it;
+    }
+    __test_end();
+    USED(v);
+}
+
+template <class T, typename gen_fn_t>
+void prev_iterator_test(std::size_t size, std::size_t times, gen_fn_t generate)
+/*
+    --iterator;
+*/
+{
+    std::vector<T> v(times);
+    for (std::size_t i=0; i < times; ++i)
+    {
+        USED_PTR(v.at(i));
+        generate(size, v.at(i));
+    }
+    __test_start();
+    for (std::size_t i=0; i < times; ++i)
+    {
+        typename T::iterator it = v[i].end();
+        for (std::size_t j=0; j < size; ++j)
+            --it;
+    }
+    __test_end();
+    USED(v);
+}
+
+
 #if CPP11
 template <class T>
 void shrink_to_fit_method_test_1(typename T::size_typen size, unsigned long long times)
@@ -519,4 +915,62 @@ void shrink_to_fit_method_test_1(typename T::size_typen size, unsigned long long
     SMALL(__func); \
     MEDIUM(__func); \
     LARGE(__func); \
+} while (false)
+
+#define run_set_speed_test(__func, ...) do { \
+	__func<ft::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__, insert_container_generate<ft::CONTAINER_TYPE<VALUE_TYPE> >); \
+	ft_time = delta(__tv_start_time, __tv_end_time); \
+	__func<std::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__, insert_container_generate<std::CONTAINER_TYPE<VALUE_TYPE> >); \
+	std_time = delta(__tv_start_time, __tv_end_time); \
+} while (false)
+
+#define SET_SMALL(__func) do { \
+    run_set_speed_test(__func, 5, E6); \
+    bm.small(ft_time, std_time); \
+} while (false)
+
+#define SET_MEDIUM(__func) do { \
+    run_set_speed_test(__func, E3, E4); \
+    bm.medium(ft_time, std_time); \
+} while (false)
+
+#define SET_LARGE(__func) do { \
+    run_set_speed_test(__func, E5, E2); \
+    bm.large(ft_time, std_time); \
+} while (false)
+
+#define RUN_SET_TESTS(__name, __func) do { \
+    bm.next_test(__name); \
+    SET_SMALL(__func); \
+    SET_MEDIUM(__func); \
+    SET_LARGE(__func); \
+} while (false)
+
+#define run_ctree_speed_test(__func, ...) do { \
+    GLUE2(ctree_, __func)<rb_tree>(__VA_ARGS__); \
+    ft_time = delta(__tv_start_time, __tv_end_time); \
+	__func<std::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__, insert_container_generate<std::CONTAINER_TYPE<VALUE_TYPE> >); \
+	std_time = delta(__tv_start_time, __tv_end_time); \
+} while (false)
+
+#define CTREE_SMALL(__func) do { \
+    run_ctree_speed_test(__func, 5, E6); \
+    bm.small(ft_time, std_time); \
+} while (false)
+
+#define CTREE_MEDIUM(__func) do { \
+    run_ctree_speed_test(__func, E3, E4); \
+    bm.medium(ft_time, std_time); \
+} while (false)
+
+#define CTREE_LARGE(__func) do { \
+    run_ctree_speed_test(__func, E5, E2); \
+    bm.large(ft_time, std_time); \
+} while (false)
+
+#define CTREE_RUN_TESTS(__name, __func) do { \
+    bm.next_test(__name); \
+    CTREE_SMALL(__func); \
+    CTREE_MEDIUM(__func); \
+    CTREE_LARGE(__func); \
 } while (false)

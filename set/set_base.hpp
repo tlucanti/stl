@@ -184,7 +184,9 @@ public:
     iterator insert(iterator hint, const_reference value)
     {
         bool _;
-        return iterator(_tree.insert(hint.get_node(), value, _), false);
+        if (not hint.is_end())
+            return iterator(_tree.insert(hint.get_node(), value, _), false);
+        return iterator(_tree.insert(value), false);
     }
 
     template <class InputIt>
@@ -237,7 +239,7 @@ public:
         tree_node *ret = _tree.find(value);
         if (ret == nullptr)
             return iterator(_tree.end(), true);
-        return iterator(ret, true);
+        return iterator(ret, false);
     }
 
     const_iterator find(const_reference value) const
@@ -245,7 +247,7 @@ public:
         tree_node *ret = _tree.find(value);
         if (ret == nullptr)
             return const_iterator(_tree.end(), true);
-        return const_iterator(ret, true);
+        return const_iterator(ret, false);
     }
 
 #if CPP20

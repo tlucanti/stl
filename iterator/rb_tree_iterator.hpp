@@ -58,10 +58,21 @@ public:
         return _ptr;
     }
 
+    virtual bool is_end() const
+    {
+        return _end;
+    }
+
 protected:
+    rb_tree_iterator_base() :
+        _ptr(nullptr), _end(false)
+    {}
+
     rb_tree_iterator_base(rb_node *ptr, bool end) :
         _ptr(ptr), _end(end)
     {}
+
+    virtual ~rb_tree_iterator_base() DEFAULT
 
     void increment() // ++i
     {
@@ -80,8 +91,6 @@ protected:
         else
             _ptr = tree_type::prev(_ptr);
     }
-
-    virtual ~rb_tree_iterator_base() DEFAULT
 };
 
 template<class value_T, class cmp_T, class alloc_T>
@@ -108,6 +117,8 @@ public: // TODO: remove this
     {}
 
 public:
+    rb_tree_iterator() DEFAULT
+
     rb_tree_iterator(const rb_tree_iterator &cpy) : base_class(cpy)
     {}
 
@@ -165,6 +176,9 @@ public: // TODO: remove this
     {}
 
 public:
+
+    rb_tree_reverse_iterator() DEFAULT
+
     rb_tree_reverse_iterator(const rb_tree_reverse_iterator &cpy) : base_class(cpy)
     {}
 

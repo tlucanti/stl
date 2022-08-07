@@ -874,8 +874,6 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
     ft::pair<__type1, __type2> __name(__first, __second); \
     PAIR_ASSERT(__name, __first, __second, __msg)
 
-# define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}, 0}
-
 # define __RBCPP_METHODVAL_CMPASSERT(__method, __val, __cmp, __msg) do { \
     tlucanti::rb_tree<int>::rb_node *node = tree.__method(__val); \
     if (PTR(__cmp) == nullptr) \

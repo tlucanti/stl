@@ -52,11 +52,14 @@ typedef int (*compare_fun)(void *, void *) WUR;
 typedef void *(*copy_fun)(void *) WUR;
 typedef void (*del_fun)(void *);
 
+# define MAKE_EMPTY_TREE (rb_tree){{nullptr}, {nullptr}, {nullptr}, 0}
+
 void    *rb_get_key(rb_node node) WUR NOEXCEPT;
 rb_node rb_insert(rb_tree *root, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
 rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
 rb_node rb_find(rb_tree *root, void *key, compare_fun compare) WUR NOEXCEPT;
 rb_node rb_remove(rb_tree *root, void *key, compare_fun compare) NOEXCEPT;
+rb_node rb_remove_node(rb_tree *root, rb_node node) NOEXCEPT;
 rb_node rb_next(rb_node node) WUR NOEXCEPT;
 rb_node rb_prev(rb_node node) WUR NOEXCEPT;
 rb_tree rb_copy(rb_tree *root, copy_fun copy) WUR NOEXCEPT;

@@ -7,7 +7,7 @@
 # include <stdexcept>
 # include <sstream>
 # include <stdint.h>
-# include "defs.h"
+# include "defs.hpp"
 
 TLU_NAMESPACE_BEGIN
 

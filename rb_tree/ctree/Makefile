@@ -1,6 +1,7 @@
 
 # ------------------------------ compiler options ------------------------------
 NAME		=	test
+NAME_SPEED	=	speed
 CXX			=	g++ -std=c++98
 CXXFLAGS	=	-Wall -Wextra -Wctor-dtor-privacy -Wnon-virtual-dtor \
 					-Wold-style-cast -Woverloaded-virtual -Wsign-promo \
@@ -18,13 +19,18 @@ CC			=	CC
 
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
-OBJS_DIR	=	../obj
-INCLUDE_DIR	=	../include ../test ../iterator
+OBJS_DIR	=	../../obj
+INCLUDE_DIR	=	../../include ../../test
 SCRS_DIR	=	.
-DEPS_DIR	=	../dep
+DEPS_DIR	=	../../dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
-				test_rb_tree_cpp
+				test_rb_tree \
+				rb_tree
+
+SPEED_SRCS	=	\
+				speed_test \
+				rb_tree
 
 # ======================= UNCHANGEABLE PART OF MAKEFILE ========================
 # ------------------------------------------------------------------------------
@@ -50,6 +56,7 @@ SPACE		=	\t                     \t
 # ------------------------------------------------------------------------------
 all:			${OBJS_DIR} ${DEPS_DIR}
 	@$(MAKE)	$(NAME)
+	@$(MAKE)	$(NAME_SPEED)
 
 # ------------------------------------------------------------------------------
 $(NAME):		${OBJS}
@@ -57,10 +64,23 @@ $(NAME):		${OBJS}
 	@${CXX}		-o ${NAME} ${CXXFLAGS} ${CXXOPTIONS} ${OBJS} ${LIBRARY}
 	@printf		"$(G)TEST OK$(S)                                              \n"	
 
+# ------------------------------------------------------------------------------
+$(NAME_SPEED):	${SPEED_OBJS}
+	@echo [LD] Linking CXX Executable ${NAME_SPEED}
+	@${CXX}		-o ${NAME_SPEED} ${CXXFLAGS} ${CXXOPTIONS} ${SPEED_OBJS} ${LIBRARY}
+	@printf		"$(G)SPEED OK$(S)                                            \n"	
+
 -include ${DEPS}
 
 # ------------------------------------------------------------------------------
 ${OBJS_DIR}/%.o: ${SCRS_DIR}/%.cpp Makefile
+	@printf		"$(G)[${CC}]$(W)\t\tBuilding CXX object $(Y)$<$(S)$(SPACE)\r"
+	@${CXX}		${CXXFLAGS} ${CXXOPTIONS} -c -MMD -MT $@ -o $@ $< ${INCLUDE}
+	@mv			${@:.o=.d} ${DEPS_DIR}
+
+# ------------------------------------------------------------------------------
+
+${OBJS_DIR}/%.o: ${SCRS_DIR}/%.c Makefile
 	@printf		"$(G)[${CC}]$(W)\t\tBuilding CXX object $(Y)$<$(S)$(SPACE)\r"
 	@${CXX}		${CXXFLAGS} ${CXXOPTIONS} -c -MMD -MT $@ -o $@ $< ${INCLUDE}
 	@mv			${@:.o=.d} ${DEPS_DIR}
