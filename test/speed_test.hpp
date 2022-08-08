@@ -1,6 +1,7 @@
 
 #include "benchmark.hpp"
 #include "defs.hpp"
+#include "type_traits.hpp"
 #include <vector>
 
 struct timeval __tv_start_time = {};
@@ -9,12 +10,15 @@ struct timeval __tv_end_time = {};
 extern ssize_t write(int fd, const void *buf, size_t size);
 
 template <class T>
-void sized_container_generate(typename T::size_type size, T &container)
+void sized_container_generate(typename tlucanti::complete_size_type<T>::size_type size, typename tlucanti::enable_if<tlucanti::has_size_type<T>::value, T>::type &container)
 {
     container.resize(size);
     for (typename T::size_type i=0; i < size; ++i)
         container[i] = static_cast<int>(i);
 }
+
+template <class T>
+void sized_container_generate(typename tlucanti::enable_if<not tlucanti::has_size_type<T>::value, int>::type) {}
 
 template <class T>
 void insert_container_generate(typename T::size_type size, T &container)
@@ -23,8 +27,8 @@ void insert_container_generate(typename T::size_type size, T &container)
         container.insert(static_cast<int>(i));
 }
 
-template <class T, typename gen_fn_t>
-void default_constructor_test(UNUSED(std::size_t _), unsigned long long times, UNUSED(gen_fn_t _gen))
+template <class T, typename T_>
+void default_constructor_test(UNUSED(std::size_t _), unsigned long long times, T_)
 /*
     container();
 */
@@ -42,14 +46,8 @@ void default_constructor_test(UNUSED(std::size_t _), unsigned long long times, U
     USED(v);
 }
 
-template <class T>
-void default_constructor_test(typename T::size_type size, unsigned long long times)
-{
-    default_constructor_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void sized_constructor_test(typename T::size_type size, unsigned long long times)
+template <class T, class T_>
+void sized_constructor_test(typename T::size_type size, unsigned long long times, T_)
 /*
     container(size);
 */
@@ -88,14 +86,8 @@ void copy_constructor_test(typename T::size_type size, unsigned long long times,
     USED(v);
 }
 
-template <class T>
-void copy_constructor_test(typename T::size_type size, unsigned long long times)
-{
-    copy_constructor_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void empty_copy_constructor_test(UNUSED(std::size_t _), unsigned long long times)
+template <class T, class T_>
+void empty_copy_constructor_test(UNUSED(std::size_t _), unsigned long long times, T_)
 /*
     empty_container(empty_container);
 */
@@ -135,11 +127,6 @@ void iterator_constructor_test(typename T::size_type size, unsigned long long ti
     USED(v);
 }
 
-template <class T>
-void iterator_constructor_test(typename T::size_type size, unsigned long long times) {
-    iterator_constructor_test<T>(size, times, sized_container_generate<T>);
-}
-
 template <class T, class gen_fn_t>
 void destructor_test(typename T::size_type size, unsigned long long times, gen_fn_t generate)
 /*
@@ -160,13 +147,8 @@ void destructor_test(typename T::size_type size, unsigned long long times, gen_f
     USED(v);
 }
 
-template <class T>
-void destructor_test(typename T::size_type size, unsigned long long times) {
-    destructor_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void empty_destructor_test(UNUSED(std::size_t _), unsigned long long times)
+template <class T, class T_>
+void empty_destructor_test(UNUSED(std::size_t _), unsigned long long times, T_)
 /*
     delete empty_container;
 */
@@ -205,13 +187,8 @@ void assign_operator_test(typename T::size_type size, unsigned long long times, 
     USED(v);
 }
 
-template <class T>
-void assign_operator_test(typename T::size_type size, unsigned long long times) {
-    assign_operator_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void empty_assign_operator_test(UNUSED(std::size_t _), unsigned long long times)
+template <class T, class T_>
+void empty_assign_operator_test(UNUSED(std::size_t _), unsigned long long times, T_)
 /*
     empty_container = empty_container;
 */
@@ -256,13 +233,8 @@ void swap_test(typename T::size_type size, std::size_t times, gen_fn_t generate)
     USED(v);
 }
 
-template <class T>
-void swap_test(typename T::size_type size, unsigned long long times) {
-    swap_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void empty_swap_test(UNUSED(std::size_t _), std::size_t times)
+template <class T, class T_>
+void empty_swap_test(UNUSED(std::size_t _), std::size_t times, T_)
 /*
     empty_container.swap(empty_container);
 */
@@ -277,8 +249,8 @@ void empty_swap_test(UNUSED(std::size_t _), std::size_t times)
 }
 
 
-template <class T>
-void at_method_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, class T_>
+void at_method_test(UNUSED(typename T::size_type _), typename T::size_type times, T_)
 /*
     container.at(i);
 */
@@ -293,8 +265,8 @@ void at_method_test(UNUSED(typename T::size_type _), typename T::size_type times
     USED(dest);
 }
 
-template <class T>
-void access_operator_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, class T_>
+void access_operator_test(UNUSED(typename T::size_type _), typename T::size_type times, T_)
 /*
     container[i];
 */
@@ -309,8 +281,8 @@ void access_operator_test(UNUSED(typename T::size_type _), typename T::size_type
     USED(dest);
 }
 
-template <class T>
-void front_method_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, class T_>
+void front_method_test(UNUSED(typename T::size_type _), typename T::size_type times, T_)
 /*
     container.front();
 */
@@ -325,8 +297,8 @@ void front_method_test(UNUSED(typename T::size_type _), typename T::size_type ti
     USED(dest);
 }
 
-template <class T>
-void back_method_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, class T_>
+void back_method_test(UNUSED(typename T::size_type _), typename T::size_type times, T_)
 /*
     container.back();
 */
@@ -341,8 +313,8 @@ void back_method_test(UNUSED(typename T::size_type _), typename T::size_type tim
     USED(dest);
 }
 
-template <class T>
-void data_method_test(UNUSED(typename T::size_type _), typename T::size_type times)
+template <class T, class T_>
+void data_method_test(UNUSED(typename T::size_type _), typename T::size_type times, T_)
 /*
     container.data();
 */
@@ -374,11 +346,6 @@ void begin_test(UNUSED(typename T::size_type _), typename T::size_type times, ge
     USED(dest);
 }
 
-template <class T>
-void begin_test(typename T::size_type size, typename T::size_type times) {
-    begin_test<T>(size, times, sized_container_generate<T>);
-}
-
 template <class T, typename gen_fn_t>
 void end_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
@@ -394,11 +361,6 @@ void end_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_
     __test_end();
     USED(v);
     USED(dest);
-}
-
-template <class T>
-void end_test(typename T::size_type size, typename T::size_type times) {
-    end_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T, typename gen_fn_t>
@@ -418,11 +380,6 @@ void rbegin_test(UNUSED(typename T::size_type _), typename T::size_type times, g
     USED(dest);
 }
 
-template <class T>
-void rbegin_test(typename T::size_type size, typename T::size_type times) {
-    rbegin_test<T>(size, times, sized_container_generate<T>);
-}
-
 template <class T, typename gen_fn_t>
 void rend_test(UNUSED(typename T::size_type _), typename T::size_type times, gen_fn_t generate)
 /*
@@ -438,11 +395,6 @@ void rend_test(UNUSED(typename T::size_type _), typename T::size_type times, gen
     __test_end();
     USED(v);
     USED(dest);
-}
-
-template <class T>
-void rend_test(typename T::size_type size, typename T::size_type times) {
-    rend_test<T>(size, times, sized_container_generate<T>);
 }
 
 template <class T, typename gen_fn_t>
@@ -471,11 +423,6 @@ void empty_test(unsigned long long size, unsigned long long times, gen_fn_t gene
     USED(dest);
 }
 
-template <class T>
-void empty_test(unsigned long long size, unsigned long long times) {
-    empty_test<T>(size, times, sized_container_generate<T>);
-}
-
 template <class T, typename gen_fn_t>
 void size_test(unsigned long long size, unsigned long long times, gen_fn_t generate)
 /*
@@ -502,13 +449,8 @@ void size_test(unsigned long long size, unsigned long long times, gen_fn_t gener
     USED(dest);
 }
 
-template <class T>
-void size_test(unsigned long long size, unsigned long long times) {
-    size_test<T>(size, times, sized_container_generate<T>);
-}
-
-template <class T>
-void max_size_test(UNUSED(std::size_t _), unsigned long long times)
+template <class T, class T_>
+void max_size_test(UNUSED(std::size_t _), unsigned long long times, T_)
 /*
     container.max_size();
 */
@@ -530,8 +472,8 @@ void max_size_test(UNUSED(std::size_t _), unsigned long long times)
     USED(dest);
 }
 
-template <class T>
-void capacity_test(unsigned long long size, unsigned long long times)
+template <class T, class T_>
+void capacity_test(unsigned long long size, unsigned long long times, T_)
 /*
     container.capacity();
 */
@@ -553,8 +495,8 @@ void capacity_test(unsigned long long size, unsigned long long times)
     USED(dest);
 }
 
-template <class T>
-void reserve_test(typename T::size_type size, typename T::size_type times)
+template <class T, class T_>
+void reserve_test(typename T::size_type size, typename T::size_type times, T_)
 /*
     container.reserve();
 */
@@ -889,9 +831,9 @@ void shrink_to_fit_method_test_1(typename T::size_typen size, unsigned long long
 #endif /* CPP11 */
 
 #define run_speed_test(__func, ...) do { \
-	__func<ft::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__); \
+	__func<ft::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__, sized_container_generate<ft::CONTAINER_TYPE<VALUE_TYPE> >); \
 	ft_time = delta(__tv_start_time, __tv_end_time); \
-	__func<std::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__); \
+	__func<std::CONTAINER_TYPE<VALUE_TYPE> >(__VA_ARGS__, sized_container_generate<std::CONTAINER_TYPE<VALUE_TYPE> >); \
 	std_time = delta(__tv_start_time, __tv_end_time); \
 } while (false)
 

@@ -7,6 +7,7 @@
 # include <string>
 # include <unistd.h>
 # include <sys/time.h>
+# include <cassert>
 # include "color.hpp"
 # include "defs.hpp"
 

@@ -13,6 +13,7 @@
 # include <set>
 
 # define __SAFE_TEST 0
+# define __FAST_TEST 0
 
 # include "defs.hpp"
 # include "color.hpp"
@@ -470,6 +471,7 @@ struct UserClass
             throw std::runtime_error("nullptr in `valid` value");
         if (not *valid)
             throw std::runtime_error("invalid class");
+        delete valid;
         a = cpy.a;
         b = cpy.b;
         valid = new(bool);
@@ -517,6 +519,7 @@ struct UserClass
 //            std::cout << cl() << "[" << this << "]:" K " move assign" S "\n";
 //        return *this;
 //    }
+
 DELETED_MEMBERS:
 //    UserClass(const UserClass &) __DELETE
 //    UserClass &operator =(const UserClass &) __DELETE
@@ -697,7 +700,7 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
     rb_node __find = rb_find(&tree, PTR(__val), int_compare); \
     if (__find.node != nullptr) \
         __find = rb_next(__find); \
-    rb_node __rm = rb_remove(&tree, PTR(__val), int_compare); \
+    rb_node __rm = rb_remove(&tree, PTR(__val), int_compare, int_destroy); \
     if (__find.node != nullptr) \
     { \
         ASSERT(__find.node->key == __rm.node->key, "success remove return test"); \

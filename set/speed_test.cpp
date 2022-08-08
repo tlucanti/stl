@@ -52,7 +52,7 @@ int main()
     bm.medium(ft_time, std_time);
 
     bm.next_test(".max_size() method test");
-    SMALL(max_size_test);
+    SET_SMALL(max_size_test);
 
     RUN_SET_TESTS(".clear() method test", clear_test);
 
@@ -84,3 +84,4 @@ int main()
 
     RUN_SET_TESTS("--iterator test", prev_iterator_test);
 }
+

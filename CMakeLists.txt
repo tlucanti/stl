@@ -32,7 +32,7 @@ add_executable(pair_speed pair/speed_test.cpp)
 add_executable(map_test map/test_map.cpp)
 
 add_executable(rb_tree_test rb_tree/ctree/test_rb_tree.cpp rb_tree/ctree/rb_tree.c)
-add_executable(rb_tree_test_speed rb_tree/ctree/speed_test.cpp rb_tree/ctree/rb_tree.c)
+add_executable(rb_tree_speed rb_tree/ctree/speed_test.cpp rb_tree/ctree/rb_tree.c)
 
 add_executable(rb_tree_cpp_test rb_tree/test_rb_tree_cpp.cpp)
 

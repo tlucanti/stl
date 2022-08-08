@@ -26,8 +26,8 @@ public:
     public:
         enum rb_colors
         {
-            rb_red,
-            rb_black
+            rb_red = false,
+            rb_black = true
         };
 
         rb_node(

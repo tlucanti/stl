@@ -15,10 +15,15 @@
 # define NOT_ITERATOR(__type) typename enable_if< \
     not TLU_NAMESPACE::is_iterator<__type>::value, __type>::type
 
-# define IS_POINTER(__type) typename tlucanti::enable_if< \
+# define IS_POINTER(__type) typename TLU_NAMESPACE::enable_if< \
     TLU_NAMESPACE::is_pointer<__type>::value, __type>::type
-# define NOT_POINTER(__type) typename tlucanti::enable_if< \
+# define NOT_POINTER(__type) typename TLU_NAMESPACE::enable_if< \
     not TLU_NAMESPACE::is_pointer<__type>::value, __type>::type
+
+# define HAS_SIZE_TYPE(__type) typename TLU_NAMESPACE::enable_if < \
+    TLU_NAMESPACE::has_size_type<__type>::type, __type>::type
+# define  HAS_NOT_SIZE_TYPE(__type) typename TLU_NAMESPACE::enable_if < \
+    not TLU_NAMESPACE::has_size_type<__type>::type, __type>::type
 
 TLU_NAMESPACE_BEGIN
 
@@ -118,6 +123,23 @@ TLU_NAMESPACE_HIDDEN_END
     template <class type_T> struct remove_const<const type_T>  { typedef type_T type; };
 
     template <class T, class type_T, class type_Y> struct change_pair_type {};
+
+    // --------------------------- make_void -------------------------------
+
+    template<typename Ts> struct make_void { typedef void type;};
+
+    // --------------------------- has_size_type -------------------------------
+    template <class type_T, typename = void> struct has_size_type : false_type {};
+    template <class type_T> struct has_size_type<type_T, typename make_void<typename type_T::size_type>::type> : true_type {};
+
+    // --------------------------- complete_size_type -------------------------------
+
+    TLU_NAMESPACE_HIDDEN_BEGIN
+    template <class type_T, typename = void> struct complete_size_type_base { typedef bool size_type; };
+    template <class type_T> struct complete_size_type_base<type_T, typename make_void<typename type_T::size_type>::type > { typedef typename type_T::size_type size_type; };
+    TLU_NAMESPACE_HIDDEN_END
+
+    template <class type_T> struct complete_size_type : public TLU_NAMESPACE_HIDDEN::complete_size_type_base<type_T> {};
 
 TLU_NAMESPACE_END
 
