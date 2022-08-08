@@ -44,6 +44,8 @@ void *int_copy(void *v)
     return v;
 }
 
+void int_destroy(void *) {}
+
 int main()
 {
     signal(SIGSEGV, sigsegv_catcher);
@@ -133,6 +135,8 @@ void insert_tests()
         CHECK_EDGE(tree.root.node->right, left, 70, 60, _B, _R, "left rotate insert test 0");
         CHECK_EDGE(tree.root.node->right, right, 70, 80, _B, _R, "left rotate insert test 1");
         ASSERT(inserted, "was_inserted test 6");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -154,6 +158,8 @@ void insert_tests()
         print_rb_tree(&tree, "1-2-3 tree");
         CHECK_EDGE(tree.root.node, left, 2, 1, _B, _R, "root insert left rotate test 0");
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert left rotate test 1");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -175,6 +181,8 @@ void insert_tests()
         print_rb_tree(&tree, "1-2-3 tree");
         CHECK_EDGE(tree.root.node, left, 2, 1, _B, _R, "root insert right rotate test 0");
         CHECK_EDGE(tree.root.node, right, 2, 3, _B, _R, "root insert right rotate test 1");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -189,6 +197,8 @@ void insert_tests()
         print_rb_tree(&tree, "post-triangle right tree");
         CHECK_EDGE(tree.root.node->right, left, 4, 3, _B, _R, "triangle insert right test 0");
         CHECK_EDGE(tree.root.node->right, right, 4, 5, _B, _R, "triangle insert right test 1");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -206,6 +216,8 @@ void insert_tests()
         print_rb_tree(&tree, "post-triangle left tree");
         CHECK_EDGE(tree.root.node->left, left, 4, 3, _B, _R, "triangle insert left test 0");
         CHECK_EDGE(tree.root.node->left, right, 4, 5, _B, _R, "triangle insert left test 1");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -228,6 +240,8 @@ void insert_tests()
         RB_INSERT(659);
         RB_INSERT(206);
         check_valid_rb_tree(&tree);
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -236,6 +250,8 @@ void insert_tests()
 //        RB_PRINT_LOCK("inserted 1");
         RB_INSERT(1);
 //        RB_PRINT_LOCK("inserted 1 again");
+
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -252,6 +268,8 @@ void find_tests()
         FIND_ASSERT(tree, 1, "find basic test 0");
         FIND_ASSERT(tree, nullptr, "find basic test 1");
         FIND_ASSERT(tree, 3, "find basic test 2");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -262,18 +280,24 @@ void find_tests()
         FIND_ASSERT(tree, 70, "find recoloring test 4");
         FIND_ASSERT(tree, 10, "find recoloring test 5");
         FIND_ASSERT(tree, 80, "find recoloring test 6");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 1, "find left-rotate test 0");
         FIND_ASSERT(tree, 2, "find left-rotate test 1");
         FIND_ASSERT(tree, 3, "find left-rotate test 2");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         FIND_ASSERT(tree, 3, "find right-rotate test 0");
         FIND_ASSERT(tree, 2, "find right-rotate test 1");
         FIND_ASSERT(tree, 1, "find right-rotate test 2");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -282,6 +306,8 @@ void find_tests()
         FIND_ASSERT(tree, 3, "find right-triangle-rotate test 2");
         FIND_ASSERT(tree, 5, "find right-triangle-rotate test 3");
         FIND_ASSERT(tree, 4, "find right-triangle-rotate test 4");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -290,6 +316,8 @@ void find_tests()
         FIND_ASSERT(tree, 5, "find left-triangle-rotate test 2");
         FIND_ASSERT(tree, 3, "find left-triangle-rotate test 3");
         FIND_ASSERT(tree, 4, "find left-triangle-rotate test 4");
+
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -329,6 +357,7 @@ void _random_insert_find_sized_tests(int div, const std::string &name)
             std::cout << std::endl;
             throw ;
         }
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -357,12 +386,19 @@ void remove_tests()
         rb_tree tree = MAKE_EMPTY_TREE;
         RB_REMOVE(1);
         ASSERT(tree.root.node == nullptr, "empty remove test 0");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
         RB_INSERT(1);
-        RB_REMOVE(1);
-        ASSERT(tree.root.node == nullptr, "root remove test 0");
+        ASSERT(tree.size == 1, "root remove test 0");
+        rb_node n = rb_remove(&tree, PTR(1), int_compare, int_destroy);
+        ASSERT(n.node == nullptr, "root remove test 1");
+        ASSERT(tree.size == 0, "root remove test 2");
+        ASSERT(tree.root.node == nullptr, "root remove test 3");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -371,10 +407,14 @@ void remove_tests()
         RB_INSERT(3);
 
         RB_REMOVE(1);
+//        std::cout << "removed 1\n";
         RB_REMOVE(3);
+//        std::cout << "removed 3\n";
 
         RB_NOT_FOUND(1, "red leaf remove test 0");
         RB_NOT_FOUND(1, "red leaf remove test 1");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -386,6 +426,8 @@ void remove_tests()
         RB_REMOVE(2);
 
         RB_NOT_FOUND(2, "replacement removal test 0");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -401,6 +443,7 @@ void remove_tests()
 
         RB_NOT_FOUND(5, "inorder successor removal test 0");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -415,6 +458,7 @@ void remove_tests()
         RB_REMOVE(5);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -432,6 +476,7 @@ void remove_tests()
         RB_REMOVE(5);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -442,6 +487,7 @@ void remove_tests()
         RB_REMOVE(3);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -456,6 +502,7 @@ void remove_tests()
         RB_REMOVE(3);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -474,6 +521,7 @@ void remove_tests()
         RB_REMOVE(4);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -492,6 +540,7 @@ void remove_tests()
         RB_REMOVE(5);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -504,6 +553,7 @@ void remove_tests()
         RB_REMOVE(10);
 //        RB_PRINT_LOCK("after removal");
         check_valid_rb_tree(&tree);
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -567,6 +617,8 @@ void iterator_test()
         ASSERT(rb_get_key(node) == PTR(2), "iterator test 17");
         node = rb_prev(node);
         ASSERT(rb_get_key(node) == PTR(1), "iterator test 18");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -588,6 +640,8 @@ void iterator_test()
 //        RB_PRINT_LOCK("empty");
         ASSERT(tree.begin.node == nullptr, "begin test 3");
         ASSERT(tree.end.node == nullptr, "end test 3");
+
+        rb_destroy(&tree, int_destroy);
     }
     {
         rb_tree tree = MAKE_EMPTY_TREE;
@@ -624,6 +678,8 @@ void iterator_test()
 //        RB_PRINT_LOCK("end");
         ASSERT(tree.begin.node->key == PTR(6), "begin test 4");
         ASSERT(tree.end.node->key == PTR(7), "end test 4");
+
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -653,6 +709,9 @@ void copy_destroy_test()
             compare_trees(&tree2, std_tree);
             ASSERT(tree.begin.node->key == tree2.begin.node->key, "copy begin compare");
             ASSERT(tree.end.node->key == tree2.end.node->key, "copy end compare");
+
+            rb_destroy(&tree, int_destroy);
+            rb_destroy(&tree2, int_destroy);
         }
     }
 
@@ -680,6 +739,8 @@ void copy_destroy_user_test()
         ASSERT(UserClass::total_instances == intnum, "class count copy/destroy test 2");
         rb_destroy(&tree, destroy_UserClass);
         ASSERT(UserClass::total_instances == 0, "class count copy/destroy test 3");
+
+        rb_destroy(&tree, int_destroy);
     }
 
     result();
@@ -723,6 +784,9 @@ void compare_test()
         ASSERT(rb_compare(&tree1, &tree2, int_compare) == -1, "compare test 1");
         ASSERT(rb_equal(&tree2, &tree1, int_compare) == 0, "invert compare test 0");
         ASSERT(rb_compare(&tree2, &tree1, int_compare) == 1, "invert compare test 1");
+
+        rb_destroy(&tree1, int_destroy);
+        rb_destroy(&tree2, int_destroy);
     }
 
     result();
@@ -758,7 +822,7 @@ void _random_remove_sized_tests(int div, const std::string &name, bool root_remo
                 else
                 {
 //                    std::cout << "removing " << insert_moves[cnt] << std::endl;
-                    rb_remove(&tree, PTR(insert_moves[cnt]), int_compare);
+                    rb_remove(&tree, PTR(insert_moves[cnt]), int_compare, int_destroy);
 //                    RB_PRINT_LOCK("after removal");
                     std_tree.erase(insert_moves[cnt]);
                     RB_NOT_FOUND(insert_moves[cnt], name + " random test");
@@ -788,6 +852,8 @@ void _random_remove_sized_tests(int div, const std::string &name, bool root_remo
                 << "(index " << cnt << ')' << std::endl;
             throw ;
         }
+        rb_destroy(&tree, int_destroy);
+        rb_destroy(&starting_tree, int_destroy);
     }
 
     result();
@@ -855,6 +921,7 @@ void _random_bound_test(const std::string &name, int div)
         RB_INSERT(r);
         std_tree.insert(r);
     }
+    rb_destroy(&tree, int_destroy);
 
     result();
 }
