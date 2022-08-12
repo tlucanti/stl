@@ -14,21 +14,21 @@
 # define USED_PTR(__x) do { /* if (write(-1, __x, 8)) {} */ } while (false)
 # define USED(__x) do { if (write(-1, &__x, 8)) {} } while (false)
 
-#define E1 10LL
-#define E2 100LL
-#define E3 1000LL
-#define E4 10000LL
-#define E5 100000LL
-#define E6 1000000LL
-#define E7 10000000LL
-#define E8 100000000LL
-#define E9 1000000000LL
-#define E10 10000000000LL
-#define E11 100000000000LL
-#define E12 1000000000000LL
-#define E13 10000000000000LL
-#define E14 100000000000000LL
-#define E15 1000000000000000LL
+#define E1 10L
+#define E2 100L
+#define E3 1000L
+#define E4 10000L
+#define E5 100000L
+#define E6 1000000L
+#define E7 10000000L
+#define E8 100000000L
+#define E9 1000000000L
+#define E10 10000000000L
+#define E11 100000000000L
+#define E12 1000000000000L
+#define E13 10000000000000L
+#define E14 100000000000000L
+#define E15 1000000000000000L
 
 #define __test_start() gettimeofday(&__tv_start_time, NULL)
 #define __test_end()   gettimeofday(&__tv_end_time, NULL)

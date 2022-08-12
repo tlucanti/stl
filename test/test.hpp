@@ -81,8 +81,7 @@ void run_test(func_T func)
     ASSERT((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
 # endif /* __DEBUG */
 
-# define vec_cmp(__msg, __type, __vec, ...) do { \
-    __type __cmp[] = {__VA_ARGS__}; \
+# define vec_cmp(__msg, __type, __vec, __cmp) do { \
     std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
     std::stringstream __ssvc, __sscm, __ss; \
     std::ptrdiff_t __vec_size = static_cast<std::ptrdiff_t>((__vec).size()); \
@@ -129,15 +128,13 @@ void run_test(func_T func)
     ASSERT(__ok, __ss.str() + (__msg)); \
 } while (false)
 
-# define make_vec(__name, __type, ...) \
-    __type __cmp[] = {__VA_ARGS__}; \
+# define make_vec(__name, __type, __cmp) \
     std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
     ft::vector<__type> __name(__cmp, __cmp + __size)
 
-# define make_std_vec(__name, __type, ...) \
+# define make_std_vec(__name, __type, __cmp) \
     std::vector<__type> __name; \
     { \
-        __type __cmp[] = {__VA_ARGS__}; \
         std::ptrdiff_t __size = sizeof(__cmp) / sizeof(__type); \
         __name.assign(__cmp, __cmp + __size); \
     }
@@ -194,7 +191,7 @@ void final() {
     std::cout << c << "╰────────────────────╯" << tlucanti::S << "\n";
 }
 
-void sigsegv_catcher(UNUSED(int sig))
+void sigsegv_catcher(UNUSED int sig)
 {
 #if __SAFE_TEST
     throw std::runtime_error("test fall with SIGSEGV");
@@ -204,7 +201,7 @@ void sigsegv_catcher(UNUSED(int sig))
 #endif
 }
 
-void sigill_cathcer(UNUSED(int sig))
+void sigill_cathcer(UNUSED int sig)
 {
 #if __SAFE_TEST
     throw std::runtime_error("test fall with SIGILL");
@@ -214,7 +211,7 @@ void sigill_cathcer(UNUSED(int sig))
 #endif
 }
 
-void sigabrt_catcher(UNUSED(int sig))
+void sigabrt_catcher(UNUSED int sig)
 {
 #if __SAFE_TEST
     throw std::runtime_error("test fall with SIGABRT");
@@ -533,14 +530,14 @@ int UserClass::total_instances = 0;
 bool UserClass::verbose = false;
 bool UserClass::monitoring = false;
 
-# define vec_cmp_lock(__msg, __type, __vec, ...) \
+# define vec_cmp_lock(__msg, __type, __vec, __va_arg) \
     UserClass::monitoring = false; \
-    vec_cmp(__msg, __type, __vec, __VA_ARGS__); \
+    vec_cmp(__msg, __type, __vec, __va_arg); \
     UserClass::monitoring = true
 
-# define make_std_vec_lock(__name, __type, ...) \
+# define make_std_vec_lock(__name, __type, __va_arg) \
     UserClass::monitoring = false; \
-    make_std_vec(__name, __type, __VA_ARGS__); \
+    make_std_vec(__name, __type, __va_arg); \
     UserClass::monitoring = true
 
 # define std_vec_cmp_lock(__v1, __v2, __msg) \
@@ -602,7 +599,7 @@ std::string string_mul(const std::string &str, size_t mul)
     return ret;
 }
 
-unsigned long long ipow(unsigned long long base, unsigned long long power)
+unsigned long ipow(unsigned long base, unsigned long power)
 {
     if (power == 0)
         return 1;
@@ -610,7 +607,7 @@ unsigned long long ipow(unsigned long long base, unsigned long long power)
         return base;
     else if (power % 2 == 1)
         return base * ipow(base, power - 1);
-    unsigned long long pow_half = ipow(base, power / 2);
+    unsigned long pow_half = ipow(base, power / 2);
     return pow_half * pow_half;
 }
 
@@ -631,10 +628,10 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     {
         std::vector<_Rb_node *> line;
         _print_rb_level(tree, level, line);
-        std::cout << string_mul("    ", ipow(2, static_cast<unsigned long long>(h - level - 1)) - 1);
+        std::cout << string_mul("    ", ipow(2, static_cast<unsigned long>(h - level - 1)) - 1);
         for (size_t i=0; i < line.size(); ++i)
         {
-            std::string space = string_mul("    ", ipow(2, static_cast<unsigned long long>(h - level)) - 1);
+            std::string space = string_mul("    ", ipow(2, static_cast<unsigned long>(h - level)) - 1);
             if (line[i] == nullptr)
             {
                 std::cout << " .  " << space;

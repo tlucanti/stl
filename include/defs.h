@@ -7,7 +7,7 @@
 # endif /* WUR */
 
 #ifndef UNUSED
-# define UNUSED(__x) __attribute__((unused)) __x
+# define UNUSED __attribute__((unused))
 # endif
 
 # ifndef NOEXCEPT

@@ -179,7 +179,7 @@ void constructor_test()
         vec_123(v);
         ft::vector<int> a(std::move(v));
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move constructor test");
-        ASSERT(a._end - a._begin == 3, "move constructor iterator test 1");
+        ASSERT(a.size() == 3, "move constructor iterator test 1");
         ASSERT(a[0] == 1, "move constructor test 1");
         ASSERT(a[1] == 2, "move constructor test 2");
         ASSERT(a[2] == 3, "move constructor test 3");
@@ -189,7 +189,7 @@ void constructor_test()
         vec_123(v);
         ft::vector<int> a(std::move(v), alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move + alloc constructor test");
-        ASSERT(a._end - a._begin == 3, "move + alloc constructor iterator test 1");
+        ASSERT(a.size() == 3, "move + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "move + alloc constructor test 1");
         ASSERT(a[1] == 2, "move + alloc constructor test 2");
         ASSERT(a[2] == 3, "move + alloc constructor test 3");
@@ -198,7 +198,7 @@ void constructor_test()
     {
         ft::vector<int> a({1, 2, 3});
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list constructor test");
-        ASSERT(a._end - a._begin == 3, "initializer list constructor iterator test 1");
+        ASSERT(a.size() == 3, "initializer list constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list constructor test 1");
         ASSERT(a[1] == 2, "initializer list constructor test 2");
         ASSERT(a[2] == 3, "initializer list constructor test 3");
@@ -206,7 +206,7 @@ void constructor_test()
     {
         ft::vector<int> a({1, 2, 3}, alloc);
         vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list + alloc constructor test");
-        ASSERT(a._end - a._begin == 3, "initializer list + alloc constructor iterator test 1");
+        ASSERT(a.size() == 3, "initializer list + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list + alloc constructor test 1");
         ASSERT(a[1] == 2, "initializer list + alloc constructor test 2");
         ASSERT(a[2] == 3, "initializer list + alloc constructor test 3");
@@ -247,7 +247,8 @@ void fn_assign_test()
     {
         vec_123(a);
         a.assign(3, 1);
-        vec_cmp("sized assign test 1", int, a, 1, 1, 1);
+        int _vec_[3] = {1, 1, 1};
+        vec_cmp("sized assign test 1", int, a, _vec_);
     }
 
     {
@@ -260,13 +261,15 @@ void fn_assign_test()
         std_vec_123(a);
         ft::vector<int> b;
         b.assign(a.begin(), a.end());
-        vec_cmp("iterator assign test 1", int, b, 1, 2, 3);
+        int _vec_[3] = {1, 2, 3};
+        vec_cmp("iterator assign test 1", int, b, _vec_);
     }
     {
         ft::vector<int> a;
         vec_123(b);
         a.assign(b.begin(), b.end());
-        vec_cmp("iterator assign test 2", int, a, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("iterator assign test 2", int, a, _vec_);
     }
 
     result();
@@ -576,7 +579,7 @@ void fn_size_tests()
 
     {
         ft::vector<int> a;
-        ASSERT(a.size() == 0, "basic size test 2");
+        ASSERT(a.size() + 1 == 1, "basic size test 2");
         a.push_back(1);
         ASSERT(a.size() == 1, "basic size test 2");
     } {
@@ -694,52 +697,61 @@ void fn_insert_tests()
     {
         vec_123(a);
         a.insert(a.begin(), 123);
-        vec_cmp("basic insert test 0", int, a, 123, 1, 2, 3);
+        int _vec_[] = {123, 1, 2, 3};
+        vec_cmp("basic insert test 0", int, a, _vec_);
     }
     {
         vec_123(a);
         a.insert(a.end(), 123);
-        vec_cmp("basic insert test 1", int, a, 1, 2, 3, 123);
+        int _vec_[] = {1, 2, 3, 123};
+        vec_cmp("basic insert test 1", int, a, _vec_);
     }
     {
         vec_123(a);
         a.insert(++a.begin(), 111);
-        vec_cmp("basic insert test 2", int, a, 1, 111, 2, 3);
+        int _vec_[] = {1, 111, 2, 3};
+        vec_cmp("basic insert test 2", int, a, _vec_);
     }
 
     {
         vec_123(a);
         a.insert(a.begin(), 3, 234);
-        vec_cmp("basic insert test 3", int, a, 234, 234, 234, 1, 2, 3);
+        int _vec_[] = {234, 234, 234, 1, 2, 3};
+        vec_cmp("basic insert test 3", int, a, _vec_);
     }
     {
         vec_123(a);
         a.insert(a.end(), 3, 432);
-        vec_cmp("basic insert 4", int, a, 1, 2, 3, 432, 432, 432);
+        int _vec_[] = {1, 2, 3, 432, 432, 432};
+        vec_cmp("basic insert 4", int, a, _vec_);
     }
     {
         vec_123(a);
         a.insert(++a.begin(), 3, 345);
-        vec_cmp("basic insert test 5", int, a, 1, 345, 345, 345, 2, 3);
+        int _vec_[] = {1, 345, 345, 345, 2, 3};
+        vec_cmp("basic insert test 5", int, a, _vec_);
     }
 
     {
         vec_123(a);
         vec_111(b);
         a.insert(a.begin(), b.begin(), b.end());
-        vec_cmp("basic insert test 6", int, a, 123, 456, 789, 1, 2, 3);
+        int _vec_[] = {123, 456, 789, 1, 2, 3};
+        vec_cmp("basic insert test 6", int, a, _vec_);
     }
     {
         vec_123(a);
         vec_111(b);
         a.insert(a.end(), b.begin(), b.end());
-        vec_cmp("basic insert test 7", int, a, 1, 2, 3, 123, 456, 789);
+        int _vec_[] = {1, 2, 3, 123, 456, 789};
+        vec_cmp("basic insert test 7", int, a, _vec_);
     }
     {
         vec_123(a);
         vec_111(b);
         a.insert(++a.begin(), b.begin(), b.end());
-        vec_cmp("basic insert test 8", int, a, 1, 123, 456, 789, 2, 3);
+        int _vec_[] = {1, 123, 456, 789, 2, 3};
+        vec_cmp("basic insert test 8", int, a, _vec_);
     }
     {
         vec_123(a);
@@ -753,18 +765,21 @@ void fn_insert_tests()
     {
         ft::vector<int> a;
         a.insert(a.end(), 123);
-        vec_cmp("empty insert test 0", int, a, 123);
+        int _vec_[] = {123};
+        vec_cmp("empty insert test 0", int, a, _vec_);
     }
     {
         ft::vector<int> a;
         a.insert(a.end(), 3, 123);
-        vec_cmp("empty insert test 1", int, a, 123, 123, 123);
+        int _vec_[] = {123, 123, 123};
+        vec_cmp("empty insert test 1", int, a, _vec_);
     }
     {
         ft::vector<int> a;
         vec_123(b);
         a.insert(a.end(), b.begin(), b.end());
-        vec_cmp("empty insert test 2", int, a, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("empty insert test 2", int, a, _vec_);
     }
 
     result();
@@ -843,12 +858,14 @@ void fn_push_back_tests()
     {
         ft::vector<int> a;
         a.push_back(123);
-        vec_cmp("push back basic test 0", int, a, 123);
+        int _vec_[] = {123};
+        vec_cmp("push back basic test 0", int, a, _vec_);
     }
     {
         vec_123(a);
         a.push_back(321);
-        vec_cmp("push back basic test 1", int, a, 1, 2, 3, 321);
+        int _vec_[] = {1, 2, 3, 321};
+        vec_cmp("push back basic test 1", int, a, _vec_);
     }
 
     {
@@ -864,7 +881,8 @@ void fn_push_back_tests()
         a.push_back(9);
         a.push_back(10);
         a.push_back(11);
-        vec_cmp("push back advanced test 0", int, a, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+        int _vec_[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+        vec_cmp("push back advanced test 0", int, a, _vec_);
     }
 
     result();
@@ -884,7 +902,8 @@ void fn_pop_back_tests()
     {
         vec_123(a);
         a.pop_back();
-        vec_cmp("pop back basic test 0", int, a, 1, 2);
+        int _vec_[] = {1, 2};
+        vec_cmp("pop back basic test 0", int, a, _vec_);
     }
     {
         ft::vector<int> a;
@@ -909,7 +928,8 @@ void fn_resize_test()
     {
         vec_123(a);
         a.resize(2);
-        vec_cmp("resize basic test 2", int, a, 1, 2);
+        int _vec_[] = {1, 2};
+        vec_cmp("resize basic test 2", int, a, _vec_);
     }
     {
         ft::vector<int> a;
@@ -927,28 +947,34 @@ void fn_resize_test()
     {
         ft::vector<int> a;
         a.resize(4, 111);
-        vec_cmp("resize basic test 8", int, a, 111, 111, 111, 111);
+        int _vec_[] = {111, 111, 111, 111};
+        vec_cmp("resize basic test 8", int, a, _vec_);
     }
     {
         vec_123(a);
         a.resize(2, 888);
-        vec_cmp("resize basic test 9", int, a, 1, 2);
+        int _vec_[] = {1, 2};
+        vec_cmp("resize basic test 9", int, a, _vec_);
     }
     {
         ft::vector<int> a;
         a.resize(6, 111);
         a.resize(1, 222);
-        vec_cmp("resize basic test 10", int, a, 111);
+        int _vec1_[] = {111};
+        vec_cmp("resize basic test 10", int, a, _vec1_);
         a.resize(6, 333);
-        vec_cmp("resize basic test 11", int, a, 111, 333, 333, 333, 333, 333);
+        int _vec2_[] = {111, 333, 333, 333, 333, 333};
+        vec_cmp("resize basic test 11", int, a, _vec2_);
         ASSERT(a.capacity() == 7, "resize basic test 12");
         a.resize(7, 44);
-        vec_cmp("resize basic test 13", int, a, 111, 333, 333, 333, 333, 333, 44);
+        int _vec3_[] = {111, 333, 333, 333, 333, 333, 44};
+        vec_cmp("resize basic test 13", int, a, _vec3_);
         ASSERT(a.capacity() == 11, "resize basic test 14");
         a.resize(0, 999);
         ASSERT(a.empty(), "resize basic test 15");
         a.resize(1, 145145);
-        vec_cmp("resize basic test 16", int, a, 145145);
+        int _vec4_[] = {145145};
+        vec_cmp("resize basic test 16", int, a, _vec4_);
     }
 
     result();
@@ -962,22 +988,26 @@ void swap_tests()
         vec_123(a);
         vec_111(b);
         a.swap(b);
-        vec_cmp("basic swap test 0", int, a, 123, 456, 789);
-        vec_cmp("basic swap test 1", int, b, 1, 2, 3);
+        int _vec1_[] = {123, 456, 789};
+        vec_cmp("basic swap test 0", int, a, _vec1_);
+        int _vec2_[] = {1, 2, 3};
+        vec_cmp("basic swap test 1", int, b, _vec2_);
     }
     {
         vec_123(a);
         ft::vector<int> b;
         a.swap(b);
         ASSERT(a.empty(), "basic swap test 3");
-        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("basic swap test 4", int, b, _vec_);
     }
     {
         vec_123(a);
         ft::vector<int> b;
         b.swap(a);
         ASSERT(a.empty(), "basic swap test 3");
-        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("basic swap test 4", int, b, _vec_);
     }
 
     result();
@@ -990,35 +1020,41 @@ void std_vector_test()
     {
         vec_123(a);
         std::vector<int> b(a.begin(), a.end());
-        vec_cmp("vector iterator test 0", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("vector iterator test 0", int, b, _vec_);
     }
     {
         std_vec_123(a);
         ft::vector<int> b(a.begin(), a.end());
-        vec_cmp("vector iterator test 1", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("vector iterator test 1", int, b, _vec_);
     }
     {
         vec_123(a);
         std::vector<int> b(a.rbegin(), a.rend());
-        vec_cmp("vector iterator test 2", int, b, 3, 2, 1);
+        int _vec_[] = {3, 2, 1};
+        vec_cmp("vector iterator test 2", int, b, _vec_);
     }
     {
         std_vec_123(a);
         ft::vector<int> b(a.rbegin(), a.rend());
-        vec_cmp("vector iterator test 3", int, b, 3, 2, 1);
+        int _vec_[] = {3, 2, 1};
+        vec_cmp("vector iterator test 3", int, b, _vec_);
     }
 
     {
         vec_123(a);
         std::vector<int> b;
         b.assign(a.begin(), a.end());
-        vec_cmp("vector iterator test 2", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("vector iterator test 2", int, b, _vec_);
     }
     {
         std_vec_123(a);
         ft::vector<int> b;
         b.assign(a.begin(), a.end());
-        vec_cmp("vector iterator test 3", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("vector iterator test 3", int, b, _vec_);
     }
 
     {
@@ -1026,80 +1062,104 @@ void std_vector_test()
         std::vector<int> b;
 
         b.assign(++a.begin(), ++(++(a.begin())));
-        vec_cmp("iterator operators test 0", int, b, 2);
+        int _vec1_[] = {2};
+        vec_cmp("iterator operators test 0", int, b, _vec1_);
 
         b.assign(--(--a.end()), --a.end());
-        vec_cmp("iterator operators test 1", int, b, 2);
+        int _vec2_[] = {2};
+        vec_cmp("iterator operators test 1", int, b, _vec2_);
 
         b.assign(++a.rbegin(), ++(++a.rbegin()));
-        vec_cmp("iterator operators test 2", int, b, 2);
+        int _vec3_[] = {2};
+        vec_cmp("iterator operators test 2", int, b, _vec3_);
 
         b.assign(--(--a.rend()), --a.rend());
-        vec_cmp("iterator operators test 3", int, b, 2);
+        int _vec4_[] = {2};
+        vec_cmp("iterator operators test 3", int, b, _vec4_);
 
         b.assign(a.begin() + 1, a.end() + 0);
-        vec_cmp("iterator operators test 4", int, b, 2, 3);
+        int _vec5_[] = {2, 3};
+        vec_cmp("iterator operators test 4", int, b, _vec5_);
 
         b.assign(a.end() - 3, a.end() - 0);
-        vec_cmp("iterator operators test 5", int, b, 1, 2, 3);
+        int _vec6_[] = {1, 2, 3};
+        vec_cmp("iterator operators test 5", int, b, _vec6_);
 
         b.assign(a.rbegin() + 1, a.rend() + 0);
-        vec_cmp("iterator operators test 6", int, b, 2, 1);
+        int _vec7_[] = {2, 1};
+        vec_cmp("iterator operators test 6", int, b, _vec7_);
 
         b.assign(a.rend() - 3, a.rend() - 0);
-        vec_cmp("iterator operators test 7", int, b, 3, 2, 1);
+        int _vec8_[] = {3, 2, 1};
+        vec_cmp("iterator operators test 7", int, b, _vec8_);
 
         b.assign(a.begin() += 1, a.end() += 0);
-        vec_cmp("iterator operators test 4", int, b, 2, 3);
+        int _vec9_[] = {2, 3};
+        vec_cmp("iterator operators test 4", int, b, _vec9_);
 
         b.assign(a.end() -= 3, a.end() -= 0);
-        vec_cmp("iterator operators test 5", int, b, 1, 2, 3);
+        int _vecA_[] = {1, 2, 3};
+        vec_cmp("iterator operators test 5", int, b, _vecA_);
 
         b.assign(a.rbegin() += 1, a.rend() += 0);
-        vec_cmp("iterator operators test 6", int, b, 2, 1);
+        int _vecB_[] = {2, 1};
+        vec_cmp("iterator operators test 6", int, b, _vecB_);
 
         b.assign(a.rend() -= 3, a.rend() -= 0);
-        vec_cmp("iterator operators test 7", int, b, 3, 2, 1);
+        int _vecC_[] = {3, 2, 1};
+        vec_cmp("iterator operators test 7", int, b, _vecC_);
     }
     {
         std_vec_123(a);
         ft::vector<int> b;
 
         b.assign(++a.begin(), ++(++(a.begin())));
-        vec_cmp("std iterator operators test 0", int, b, 2);
+        int _vec1_[] = {2};
+        vec_cmp("std iterator operators test 0", int, b, _vec1_);
 
         b.assign(--(--a.end()), --a.end());
-        vec_cmp("std iterator operators test 1", int, b, 2);
+        int _vec2_[] = {2};
+        vec_cmp("std iterator operators test 1", int, b, _vec2_);
 
         b.assign(++a.rbegin(), ++(++a.rbegin()));
-        vec_cmp("std iterator operators test 2", int, b, 2);
+        int _vec3_[] = {2};
+        vec_cmp("std iterator operators test 2", int, b, _vec3_);
 
         b.assign(--(--a.rend()), --a.rend());
-        vec_cmp("std iterator operators test 3", int, b, 2);
+        int _vec4_[] = {2};
+        vec_cmp("std iterator operators test 3", int, b, _vec4_);
 
         b.assign(a.begin() + 1, a.end() + 0);
-        vec_cmp("std iterator operators test 4", int, b, 2, 3);
+        int _vec5_[] = {2, 3};
+        vec_cmp("std iterator operators test 4", int, b, _vec5_);
 
         b.assign(a.end() - 3, a.end() - 0);
-        vec_cmp("std iterator operators test 5", int, b, 1, 2, 3);
+        int _vec6_[] = {1, 2, 3};
+        vec_cmp("std iterator operators test 5", int, b, _vec6_);
 
         b.assign(a.rbegin() + 1, a.rend() + 0);
-        vec_cmp("std iterator operators test 6", int, b, 2, 1);
+        int _vec7_[] = {2, 1};
+        vec_cmp("std iterator operators test 6", int, b, _vec7_);
 
         b.assign(a.rend() - 3, a.rend() - 0);
-        vec_cmp("std iterator operators test 7", int, b, 3, 2, 1);
+        int _vec8_[] = {3, 2, 1};
+        vec_cmp("std iterator operators test 7", int, b, _vec8_);
 
         b.assign(a.begin() += 1, a.end() += 0);
-        vec_cmp("std iterator operators test 4", int, b, 2, 3);
+        int _vec9_[] = {2, 3};
+        vec_cmp("std iterator operators test 4", int, b, _vec9_);
 
         b.assign(a.end() -= 3, a.end() -= 0);
-        vec_cmp("std iterator operators test 5", int, b, 1, 2, 3);
+        int _vecA_[] = {1, 2, 3};
+        vec_cmp("std iterator operators test 5", int, b, _vecA_);
 
         b.assign(a.rbegin() += 1, a.rend() += 0);
-        vec_cmp("std iterator operators test 6", int, b, 2, 1);
+        int _vecB_[] = {2, 1};
+        vec_cmp("std iterator operators test 6", int, b, _vecB_);
 
         b.assign(a.rend() -= 3, a.rend() -= 0);
-        vec_cmp("std iterator operators test 7", int, b, 3, 2, 1);
+        int _vecC_[] = {3, 2, 1};
+        vec_cmp("std iterator operators test 7", int, b, _vecC_);
     }
 
     result();
@@ -1143,9 +1203,11 @@ void user_type_test()
         {
             ft::vector<UserClass> a;
             a.push_back(UserClass());
-            vec_cmp_lock("user class modern test 0", ColString, moves, Def, Cpy, Del);
+            ColString _vec_[] = {Def, Cpy, Del};
+            vec_cmp_lock("user class modern test 0", ColString, moves, _vec_);
         }
-        vec_cmp_lock("user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
+        ColString _v_[] = {Def, Cpy, Del * 2};
+        vec_cmp_lock("user class modern test 1", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 9");
     }
     {{{
@@ -1153,9 +1215,11 @@ void user_type_test()
         {
             std::vector<UserClass> a;
             a.push_back(UserClass());
-            vec_cmp_lock("std -- user class modern test 0", ColString, moves, Def, Cpy, Del);
+            ColString _vec_[] = {Def, Cpy, Del};
+            vec_cmp_lock("std -- user class modern test 0", ColString, moves, _vec_);
         }
-        vec_cmp_lock("std -- user class modern test 1", ColString, moves, Def, Cpy, Del * 2);
+        ColString _v_[] = {Def, Cpy, Del * 2};
+        vec_cmp_lock("std -- user class modern test 1", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 9");
     }}}
     UserClass::verbose = false;
@@ -1163,64 +1227,76 @@ void user_type_test()
         moves.clear();
         {
             ft::vector<UserClass> a(6);
-            make_std_vec_lock(cmp1, ColString, Def * 6);
+            ColString _vec1_[] = {Def * 6};
+            make_std_vec_lock(cmp1, ColString, _vec1_);
             std_vec_cmp_lock(cmp1, moves, "user class modern test 2");
             moves.clear();
             a.push_back(UserClass(111, 222));
-            make_std_vec_lock(cmp2, ColString, Cons, Cpy * 6, Del * 6, Cpy, Del);
+            ColString _vec2_[] = {Cons, Cpy * 6, Del * 6, Cpy, Del};
+            make_std_vec_lock(cmp2, ColString, _vec2_);
             std_vec_cmp_lock(cmp2, moves, "user class modern test 3");
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 4", ColString, moves, Del * 7);
+        ColString _v_[] = {Del * 7};
+        vec_cmp_lock("user class modern test 4", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 10");
     }
     {{{
         moves.clear();
         {
             std::vector<UserClass> a(6);
-            make_std_vec_lock(cmp1, ColString, Def * 6);
+            ColString _vec1_[] = {Def * 6};
+            make_std_vec_lock(cmp1, ColString, _vec1_);
             std_vec_cmp_lock(cmp1, moves, "std -- user class modern test 2");
             moves.clear();
             a.push_back(UserClass(111, 222));
-            make_std_vec_lock(cmp2, ColString, Cons, Cpy * 7, Del * 7);
+            ColString _vec2_[] = {Cons, Cpy * 7, Del * 7};
+            make_std_vec_lock(cmp2, ColString, _vec2_);
             std_vec_cmp_lock(cmp2, moves, "std -- user class modern test 3");
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 4", ColString, moves, Del * 7);
+        ColString _v_[] = {Del * 7};
+        vec_cmp_lock("std -- user class modern test 4", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 10");
     }}}
     {
         moves.clear();
         {
             ft::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
-            vec_cmp_lock("user class modern test 5", ColString, moves, Cons, Cpy * 11, Del);
+            ColString _vec1_[] = {Cons, Cpy * 11, Del};
+            vec_cmp_lock("user class modern test 5", ColString, moves, _vec1_);
             moves.clear();
             a.pop_back(); // 10 left + 1 del
             a.pop_back(); // 9 left + 2 del
             a.pop_back(); // 8 left + 3 del
             a.pop_back(); // 7 left + 4 del
             a.pop_back(); // 6 left + 5 del --> reallocation
-            vec_cmp_lock("user class modern test 6", ColString, moves, Del * 5, Cpy * 6, Del * 6);
+            ColString _vec2_[] = {Del * 5, Cpy * 6, Del * 6};
+            vec_cmp_lock("user class modern test 6", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 7", ColString, moves, Del * 6);
+        ColString _v_[] = {Del * 6};
+        vec_cmp_lock("user class modern test 7", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 11");
     }
     {{{
         moves.clear();
         {
             std::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
-            vec_cmp_lock("std -- user class modern test 5", ColString, moves, Cons, Cpy * 11, Del);
+            ColString _vec1_[] = {Cons, Cpy * 11, Del};
+            vec_cmp_lock("std -- user class modern test 5", ColString, moves, _vec1_);
             moves.clear();
             a.pop_back(); // 10 left + 1 del
             a.pop_back(); // 9 left + 2 del
             a.pop_back(); // 8 left + 3 del
             a.pop_back(); // 7 left + 4 del
             a.pop_back(); // 6 left + 5 del --> reallocation
-            vec_cmp_lock("std -- user class modern test 6", ColString, moves, Del * 5);
+            ColString _vec2_[] = {Del * 5};
+            vec_cmp_lock("std -- user class modern test 6", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 7", ColString, moves, Del * 6);
+        ColString _v_[] = {Del * 6};
+        vec_cmp_lock("std -- user class modern test 7", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 11");
     }}}
     UserClass::verbose = false;
@@ -1228,13 +1304,16 @@ void user_type_test()
         moves.clear();
         {
             ft::vector<UserClass> a(3);
-            vec_cmp_lock("user class modern test 8", ColString, moves, Def * 3);
+            ColString _vec1_[] = {Def * 3};
+            vec_cmp_lock("user class modern test 8", ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin());
-            vec_cmp_lock("user class modern test 9", ColString, moves, Icpy, Del);
+            ColString _vec2_[] = {Icpy, Del};
+            vec_cmp_lock("user class modern test 9", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 10", ColString, moves, Del * 2);
+        ColString _v_[] = {Del * 2};
+        vec_cmp_lock("user class modern test 10", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 12");
     }
     UserClass::verbose = false;
@@ -1242,41 +1321,50 @@ void user_type_test()
         moves.clear();
         {
             std::vector<UserClass> a(3);
-            vec_cmp_lock("std -- user class modern test 8", ColString, moves, Def * 3);
+            ColString _vec1_[] = {Def * 3};
+            vec_cmp_lock("std -- user class modern test 8", ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin());
-            vec_cmp_lock("std -- user class modern test 9", ColString, moves, Icpy, Del);
+            ColString _vec2_[] = {Icpy, Del};
+            vec_cmp_lock("std -- user class modern test 9", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 10", ColString, moves, Del * 2);
+        ColString _v_[] = {Del * 2};
+        vec_cmp_lock("std -- user class modern test 10", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 12");
     }}}
     {
         moves.clear();
         {
             ft::vector<UserClass> a(5);
-            vec_cmp_lock("user class modern test 11", ColString, moves, Def * 5);
+            ColString _vec1_[] = {Def * 5};
+            vec_cmp_lock("user class modern test 11", ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin(), --a.end());
             ASSERT(a.size() == 2, "user class test 13");
-            vec_cmp_lock("user class modern test 12", ColString, moves, Icpy, Del * 3);
+            ColString _vec2_[] = {Icpy, Del * 3};
+            vec_cmp_lock("user class modern test 12", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 13", ColString, moves, Del * 2);
+        ColString _v_[] = {Del * 2};
+        vec_cmp_lock("user class modern test 13", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 14");
     }
     {{{
         moves.clear();
         {
             std::vector<UserClass> a(5);
-            vec_cmp_lock("std -- user class modern test 11", ColString, moves, Def * 5);
+            ColString _vec1_[] = {Def * 5};
+            vec_cmp_lock("std -- user class modern test 11", ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin(), --a.end());
             ASSERT(a.size() == 2, "user class test 13");
-            vec_cmp_lock("std -- user class modern test 12", ColString, moves, Icpy, Del * 3);
+            ColString _vec2_[] = {Icpy, Del * 3};
+            vec_cmp_lock("std -- user class modern test 12", ColString, moves, _vec2_);
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 13", ColString, moves, Del * 2);
+        ColString _v_[] = {Del * 2};
+        vec_cmp_lock("std -- user class modern test 13", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 14");
     }}}
     UserClass::verbose = false;
@@ -1286,10 +1374,12 @@ void user_type_test()
             ft::vector<UserClass> a;
             ASSERT(UserClass::total_instances == 0, "user type test 15");
             a.insert(a.end(), UserClass(1, 2));
-            vec_cmp_lock("user class modern test 14", ColString, moves, Cons, Cpy, Del);
+            ColString _vec_[] = {Cons, Cpy, Del};
+            vec_cmp_lock("user class modern test 14", ColString, moves, _vec_);
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 15", ColString, moves, Del);
+        ColString _v_[] = {Del};
+        vec_cmp_lock("user class modern test 15", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 16");
     }
     {{{
@@ -1298,10 +1388,12 @@ void user_type_test()
             std::vector<UserClass> a;
             ASSERT(UserClass::total_instances == 0, "std -- user type test 15");
             a.insert(a.end(), UserClass(1, 2));
-            vec_cmp_lock("std -- user class modern test 14", ColString, moves, Cons, Cpy, Del);
+            ColString _vec_[] = {Cons, Cpy, Del};
+            vec_cmp_lock("std -- user class modern test 14", ColString, moves, _vec_);
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 15", ColString, moves, Del);
+        ColString _v_[] = {Del};
+        vec_cmp_lock("std -- user class modern test 15", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 16");
     }}}
     UserClass::verbose = false;
@@ -1309,43 +1401,53 @@ void user_type_test()
         moves.clear();
         {
             ft::vector<UserClass> a(2);
-            vec_cmp_lock("user class modern test 16", ColString, moves, Def * 2);
+            ColString _vec1_[] = {Def * 2};
+            vec_cmp_lock("user class modern test 16", ColString, moves, _vec1_);
             moves.clear();
             {
                 ft::vector<UserClass> b(3, UserClass(4, 5));
-                vec_cmp_lock("user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
+                ColString _vec2_[] = {Cons, Cpy * 3, Del};
+                vec_cmp_lock("user class modern test 17", ColString, moves, _vec2_);
                 moves.clear();
                 a.insert(++a.begin(), b.begin(), b.end());
-                vec_cmp_lock("user class modern test 18", ColString, moves, Cpy, Icpy, Cpy * 2);
+                ColString _vec3_[] = {Cpy, Icpy, Cpy * 2};
+                vec_cmp_lock("user class modern test 18", ColString, moves, _vec3_);
                 moves.clear();
                 ASSERT(UserClass::total_instances == 8, "user type test 16.1");
             }
-            vec_cmp_lock("user class modern test 18.1", ColString, moves, Del * 3);
+            ColString _v1_[] = {Del * 3};
+            vec_cmp_lock("user class modern test 18.1", ColString, moves, _v1_);
             ASSERT(UserClass::total_instances == 5, "user type test 17");
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 19", ColString, moves, Del * 5);
+        ColString _v2_[] = {Del * 5};
+        vec_cmp_lock("user class modern test 19", ColString, moves, _v2_);
         ASSERT(UserClass::total_instances == 0, "user type test 18");
     }
     {{{
         moves.clear();
         {
             std::vector<UserClass> a(2);
-            vec_cmp_lock("std -- user class modern test 16", ColString, moves, Def * 2);
+            ColString _vec1_[] = {Def * 2};
+            vec_cmp_lock("std -- user class modern test 16", ColString, moves, _vec1_);
             moves.clear();
             {
                 std::vector<UserClass> b(3, UserClass(4, 5));
-                vec_cmp_lock("std -- user class modern test 17", ColString, moves, Cons, Cpy * 3, Del);
+                ColString _vec2_[] = {Cons, Cpy * 3, Del};
+                vec_cmp_lock("std -- user class modern test 17", ColString, moves, _vec2_);
                 moves.clear();
                 a.insert(++(++a.begin()), b.begin(), b.end());
-                vec_cmp_lock("std -- user class modern test 18", ColString, moves, Cpy * 5, Del * 2);
+                ColString _vec3_[] = {Cpy * 5, Del * 2};
+                vec_cmp_lock("std -- user class modern test 18", ColString, moves, _vec3_);
                 moves.clear();
             }
-            vec_cmp_lock("std -- user class modern test 18.1", ColString, moves, Del * 3);
+            ColString _v1_[] = {Del * 3};
+            vec_cmp_lock("std -- user class modern test 18.1", ColString, moves, _v1_);
             ASSERT(UserClass::total_instances == 5, "std -- user type test 17");
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 19", ColString, moves, Del * 5);
+        ColString _v2_[] = {Del * 5};
+        vec_cmp_lock("std -- user class modern test 19", ColString, moves, _v2_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 18");
     }}}
     {
@@ -1355,18 +1457,22 @@ void user_type_test()
             ASSERT(UserClass::total_instances == 0, "user type test 19");
             {
                 ft::vector<UserClass> b(3);
-                vec_cmp_lock("user class modern test 20", ColString, moves, Def * 3);
+                ColString _vec1_[] = {Def * 3};
+                vec_cmp_lock("user class modern test 20", ColString, moves, _vec1_);
                 moves.clear();
                 a.insert(a.begin(), b.begin(), b.end());
-                vec_cmp_lock("user class modern test 21", ColString, moves, Cpy * 3);
+                ColString _vec2_[] = {Cpy * 3};
+                vec_cmp_lock("user class modern test 21", ColString, moves, _vec2_);
                 ASSERT(UserClass::total_instances == 6, "user type test 20");
                 moves.clear();
             }
-            vec_cmp_lock("user class modern test 22", ColString, moves, Del * 3);
+            ColString _vec3_[] = {Del * 3};
+            vec_cmp_lock("user class modern test 22", ColString, moves, _vec3_);
             ASSERT(UserClass::total_instances == 3, "user type test 21");
             moves.clear();
         }
-        vec_cmp_lock("user class modern test 23", ColString, moves, Del * 3);
+        ColString _v_[] = {Del * 3};
+        vec_cmp_lock("user class modern test 23", ColString, moves, _v_);
         ASSERT(UserClass::total_instances == 0, "user type test 22");
     }
     {{{
@@ -1376,18 +1482,22 @@ void user_type_test()
             ASSERT(UserClass::total_instances == 0, "std -- user type test 19");
             {
                 std::vector<UserClass> b(3);
-                vec_cmp_lock("std -- user class modern test 20", ColString, moves, Def * 3);
+                ColString _vec1_[] = {Def * 3};
+                vec_cmp_lock("std -- user class modern test 20", ColString, moves, _vec1_);
                 moves.clear();
                 a.insert(a.begin(), b.begin(), b.end());
-                vec_cmp_lock("std -- user class modern test 21", ColString, moves, Cpy * 3);
+                ColString _vec2_[] = {Cpy * 3};
+                vec_cmp_lock("std -- user class modern test 21", ColString, moves, _vec2_);
                 ASSERT(UserClass::total_instances == 6, "std -- user type test 20");
                 moves.clear();
             }
-            vec_cmp_lock("std -- user class modern test 22", ColString, moves, Del * 3);
+            ColString _v1_[] = {Del * 3};
+            vec_cmp_lock("std -- user class modern test 22", ColString, moves, _v1_);
             ASSERT(UserClass::total_instances == 3, "std -- user type test 21");
             moves.clear();
         }
-        vec_cmp_lock("std -- user class modern test 23", ColString, moves, Del * 3);
+        ColString _v2_[] = {Del * 3};
+        vec_cmp_lock("std -- user class modern test 23", ColString, moves, _v2_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 22");
     }}}
     result();
@@ -1462,22 +1572,26 @@ void std_swap_tests()
         vec_123(a);
         vec_111(b);
         std::swap(a, b);
-        vec_cmp("basic swap test 0", int, a, 123, 456, 789);
-        vec_cmp("basic swap test 1", int, b, 1, 2, 3);
+        int _vec1_[] = {123, 456, 789};
+        vec_cmp("basic swap test 0", int, a, _vec1_);
+        int _vec2_[] = {1, 2, 3};
+        vec_cmp("basic swap test 1", int, b, _vec2_);
     }
     {
         vec_123(a);
         ft::vector<int> b;
         std::swap(a, b);
         ASSERT(a.empty(), "basic swap test 3");
-        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("basic swap test 4", int, b, _vec_);
     }
     {
         vec_123(a);
         ft::vector<int> b;
         std::swap(b, a);
         ASSERT(a.empty(), "basic swap test 3");
-        vec_cmp("basic swap test 4", int, b, 1, 2, 3);
+        int _vec_[] = {1, 2, 3};
+        vec_cmp("basic swap test 4", int, b, _vec_);
     }
 
     result();

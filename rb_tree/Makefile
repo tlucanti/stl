@@ -9,7 +9,7 @@ CXXFLAGS	=	-Wall -Wextra -Wctor-dtor-privacy -Wnon-virtual-dtor \
 					-Wzero-as-null-pointer-constant -Wextra-semi \
 					-Wsign-conversion -Wlogical-op
 CXXFLAGS	+= 	-Werror
-# CXXFLAGS	+= 	pedantic-errors
+CXXFLAGS	+= 	-pedantic-errors
 CXXOPTIONS	=	-O3
 # CXXOPTIONS	+=	-D__DEBUG
 CC			=	CC

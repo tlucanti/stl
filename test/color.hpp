@@ -14,42 +14,42 @@ TLU_NAMESPACE_BEGIN
 class TermColor
 {
 public:
-    TermColor() : _red(255u), _green(255u), _blue(255u), _bold(false), _bg(false)
+    TermColor() : _red(255u), _green(255u), _blue(255u), _bold(false), _bg(false), _buff()
     {
         _init();
     }
 
     TermColor(uint8_t red, uint8_t green, uint8_t blue, bool bold=true, bool bg=false)
-        : _red(red), _green(green), _blue(blue), _bold(bold), _bg(bg)
+        : _red(red), _green(green), _blue(blue), _bold(bold), _bg(bg), _buff()
     {
         _init();
     }
 
-    void set_red(uint8_t redv)
+    void set_red(uint8_t redv) UNUSED
     {
         _red = redv;
         _init();
     }
 
-    void set_green(uint8_t greenv)
+    void set_green(uint8_t greenv) UNUSED
     {
         _green = greenv;
         _init();
     }
 
-    void set_blue(uint8_t bluev)
+    void set_blue(uint8_t bluev) UNUSED
     {
         _blue = bluev;
         _init();
     }
 
-    void set_bold(bool boldv)
+    void set_bold(bool boldv) UNUSED
     {
         _bold = boldv;
         _init();
     }
 
-    void set_bg(bool bgv)
+    void set_bg(bool bgv) UNUSED
     {
         _bg = bgv;
         _init();
@@ -58,8 +58,8 @@ public:
     uint8_t red() const { return _red; }
     uint8_t green() const { return _green; }
     uint8_t blue() const { return _blue; }
-    bool bold() const { return _bold; }
-    bool bg() const { return _bg; }
+    bool bold() const UNUSED { return _bold; }
+    bool bg() const UNUSED { return _bg; }
 
     std::string str() const
     {
@@ -140,7 +140,7 @@ private:
             _buff[2] = '4';
 	}
 
-    void itoa3(char *str, uint8_t num)
+    static void itoa3(char *str, uint8_t num)
     {
         str[2] = static_cast<char>(num % 10 + '0');
         num /= 10;
@@ -199,17 +199,12 @@ std::string operator +(const TermColor &color, const std::string &str)
 class Gradient
 {
 public:
-    Gradient(const TermColor &start, const TermColor &end)
-    {
-        bias = (t_color){start.red(), start.green(), start.blue()};
-        coef = (t_color){
-            end.red() - start.red(),
-            end.green() - start.green(),
-            end.blue() - start.blue()
-        };
-    }
+    Gradient(const TermColor &start, const TermColor &end) :
+        coef(end.red() - start.red(), end.green() - start.green(), end.blue() - start.blue()),
+        bias(start.red(), start.green(), start.blue())
+    {}
 
-    TermColor operator [](double value)
+    TermColor operator [](double value) const
     {
         return TermColor(
             static_cast<uint8_t>(coef.red * value + bias.red),
@@ -219,12 +214,15 @@ public:
     }
 
 private:
-    typedef struct s_color
+    struct t_color
     {
+        t_color(int _red, int _green, int _blue) :
+            red(_red), green(_green), blue(_blue) {}
+
         int red;
         int green;
         int blue;
-    } t_color;
+    };
 
     t_color coef;
     t_color bias;
@@ -273,9 +271,10 @@ private:
 class ProgressBar
 {
 public:
-    ProgressBar(int _width) : width(_width) {}
+    explicit ProgressBar(int _width) : width(_width) {}
 
-    std::string operator[](double progress) {
+    std::string operator[](double progress) const
+    {
         if (UNLIKELY(progress < 0 or progress > 1))
             throw std::runtime_error("value can be only in range from 0 to 1");
         static const char l0[] = " ";
@@ -295,7 +294,8 @@ public:
         int current_progress = static_cast<int>(progress * max_progess);
         std::stringstream ss;
         int i = 0;
-        while (current_progress >= len) {
+        while (current_progress >= len)
+        {
             ss << l8;
             ++i;
             current_progress -= len;

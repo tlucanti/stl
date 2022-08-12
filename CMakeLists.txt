@@ -11,7 +11,7 @@ endif(LINUX)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__DEBUG")
 
 include_directories(include)
@@ -38,5 +38,3 @@ add_executable(rb_tree_cpp_test rb_tree/test_rb_tree_cpp.cpp)
 
 add_executable(set_test set/test_set.cpp)
 add_executable(set_speed set/speed_test.cpp)
-
-add_executable(test test/main.cpp)

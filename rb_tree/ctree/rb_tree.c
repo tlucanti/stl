@@ -244,7 +244,7 @@ static _Rb_node     *_Rb_grandparent(_Rb_node *node)
     return node->parent->parent;
 }
 
-UNUSED()
+UNUSED
 static _Rb_node     *_Rb_uncle(_Rb_node *node)
 /*
     function returns uncle of node

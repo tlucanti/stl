@@ -30,15 +30,17 @@ void generate_tree(std::size_t size, rb_tree *tree)
         rb_insert(tree, reinterpret_cast<void *>(i), _int_compare, nullptr);
 }
 
+#define RB_INIT_(__c) {(__c).root.node = nullptr; (__c).begin.node = nullptr; (__c).end.node = nullptr; (__c).size = 0L; }
+
 template <class T>
-void ctree_default_constructor_test(UNUSED(std::size_t size), std::size_t times)
+void ctree_default_constructor_test(UNUSED std::size_t size, std::size_t times)
 {
     std::vector<T> v(times);
     __test_start();
-    for (unsigned long long i=0; i < times; ++i)
-        v[i] = MAKE_EMPTY_TREE;
+    for (unsigned long i=0; i < times; ++i)
+        RB_INIT_(v[i]);
     __test_end();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
         USED_PTR(v.at(i));
     USED(v);
 }
@@ -49,16 +51,16 @@ void ctree_copy_constructor_test(std::size_t size, std::size_t times)
     container(container);
 */
 {
-    T a = MAKE_EMPTY_TREE;
+    T a = RB_TREE_INITIALIZER;
     generate_tree(size, &a);
     std::vector<T> v(times);
     for (std::size_t i=0; i < times; ++i)
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
     __test_start();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
         v[i] = rb_copy(&a, _int_copy);
     __test_end();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
         rb_destroy(&v.at(i), _int_destroy);
@@ -76,11 +78,11 @@ void ctree_destructor_test(std::size_t size, std::size_t times)
     std::vector<T> v(times);
     for (std::size_t i=0; i < times; ++i)
     {
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
         rb_destroy(&v[i], _int_destroy);
     __test_end();
     USED(v);
@@ -93,7 +95,7 @@ void ctree_begin_test(std::size_t, std::size_t times)
 */
 {
     std::vector<rb_node> dest(times);
-    T v = MAKE_EMPTY_TREE;
+    T v = RB_TREE_INITIALIZER;
     generate_tree(times, &v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
@@ -111,7 +113,7 @@ void ctree_end_test(std::size_t, std::size_t times)
 */
 {
     std::vector<rb_node> dest(times);
-    T v = MAKE_EMPTY_TREE;
+    T v = RB_TREE_INITIALIZER;
     generate_tree(times, &v);
     __test_start();
     for (std::size_t i=0; i < static_cast<std::size_t>(times); ++i)
@@ -130,16 +132,16 @@ void ctree_size_test(std::size_t size, std::size_t times)
 {
     std::vector<T> v(times);
     std::vector<std::size_t> dest(times);
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
     {
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
         dest[i] = v[i].size;
     __test_end();
-    for (unsigned long long i=0; i < times; ++i)
+    for (unsigned long i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
         rb_destroy(&v.at(i), _int_destroy);
@@ -156,7 +158,7 @@ void ctree_insert_val_test(std::size_t size, std::size_t times)
 {
     std::vector<T> v(times);
     for (std::size_t i=0; i < times; ++i)
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
     __test_start();
     for (std::size_t i=0; i < times; ++i)
     {
@@ -180,7 +182,7 @@ void ctree_insert_iterator_test(std::size_t size, std::size_t times)
 {
     std::vector<T> v(times);
     for (std::size_t i=0; i < times; ++i)
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
     __test_start();
     for(std::size_t i=0; i < times; ++i)
     {
@@ -207,7 +209,7 @@ void ctree_erase_iterator_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -230,7 +232,7 @@ void ctree_erase_val_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -254,7 +256,7 @@ void ctree_find_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -281,7 +283,7 @@ void ctree_lower_bound_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -308,7 +310,7 @@ void ctree_upper_bound_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -334,7 +336,7 @@ void ctree_next_iterator_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();
@@ -360,7 +362,7 @@ void ctree_prev_iterator_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         USED_PTR(v.at(i));
-        v.at(i) = MAKE_EMPTY_TREE;
+        RB_INIT_(v.at(i));
         generate_tree(size, &v.at(i));
     }
     __test_start();

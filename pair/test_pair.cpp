@@ -39,7 +39,7 @@ void constructor_test()
     }
     {
         PAIR_SET_ASSERT(a, int, int, 123, 456, "constructor test 0");
-        PAIR_SET_ASSERT(b, unsigned long long, int, 123, 5345, "constructor test 1");
+        PAIR_SET_ASSERT(b, unsigned long, int, 123, 5345, "constructor test 1");
         PAIR_SET_ASSERT(c, std::string, int, "lols", 234234, "constructor test 2");
         PAIR_SET_ASSERT(d, std::string, std::string, ")&RT#$*", "", "constructor test 3");
 
