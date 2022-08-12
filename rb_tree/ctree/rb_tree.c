@@ -192,14 +192,6 @@ void    rb_destroy(rb_tree *root, del_fun del)
     root->size = 0;
 }
 
-void    rb_destroy_node(rb_node node, del_fun del)
-{
-    if (UNLIKELY(node.node == NULL))
-        return ;
-    del(node.node->key);
-    _Rb_node_destroy(node.node);
-}
-
 rb_node rb_lower_bound(rb_tree *root, void *value, compare_fun cmp)
 {
     if (root->root.node == NULL)
@@ -800,10 +792,10 @@ void _Rb_remove_node(_Rb_node **root, _Rb_node *rm, del_fun del)
 
     if (*root == NULL)
         return ;
+    del(rm->key);
     _Rb_node *leaf = _BST_remove(rm, del);
     if (leaf == NULL)
         return ;
-    del(leaf->key);
     if (leaf == *root)
     {
         if (leaf->left)

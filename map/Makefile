@@ -20,15 +20,12 @@ CC			=	CC
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
 OBJS_DIR	=	obj
-INCLUDE_DIR	=	../include ../test ../iterator
+INCLUDE_DIR	=	../include ../test ../iterator ../rb_tree ../pair ../set
 SCRS_DIR	=	.
 DEPS_DIR	=	dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
-				test_vector
-
-SPEED_SRCS	=	\
-				speed_test
+				test_map
 
 # ======================= UNCHANGEABLE PART OF MAKEFILE ========================
 # ------------------------------------------------------------------------------
@@ -54,19 +51,12 @@ SPACE		=	\t                     \t
 # ------------------------------------------------------------------------------
 all:			${OBJS_DIR} ${DEPS_DIR}
 	@$(MAKE)	$(NAME)
-	@$(MAKE)	$(NAME_SPEED)
 
 # ------------------------------------------------------------------------------
 $(NAME):		${OBJS}
 	@echo [LD] Linking CXX Executable ${NAME}
 	@${CXX}		-o ${NAME} ${CXXFLAGS} ${CXXOPTIONS} ${OBJS} ${LIBRARY}
 	@printf		"$(G)TEST OK$(S)                                              \n"	
-
-# ------------------------------------------------------------------------------
-$(NAME_SPEED):	${SPEED_OBJS}
-	@echo [LD] Linking CXX Executable ${NAME_SPEED}
-	@${CXX}		-o ${NAME_SPEED} ${CXXFLAGS} ${CXXOPTIONS} ${SPEED_OBJS} ${LIBRARY}
-	@printf		"$(G)SPEED OK$(S)                                            \n"	
 
 -include ${DEPS}
 

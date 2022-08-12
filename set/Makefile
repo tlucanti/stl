@@ -19,10 +19,10 @@ CC			=	CC
 
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
-OBJS_DIR	=	../obj
+OBJS_DIR	=	obj
 INCLUDE_DIR	=	../include ../test ../iterator ../rb_tree ../pair
 SCRS_DIR	=	.
-DEPS_DIR	=	../dep
+DEPS_DIR	=	dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
 				test_set

@@ -60,7 +60,7 @@ int main()
     run_test(copy_destroy_test);
     run_test(copy_destroy_user_test);
     run_test(compare_test);
-    return 0;
+//    return 0;
     run_test(random_insert_find_small_tests);
     run_test(random_insert_find_medium_tests);
     run_test(random_insert_find_large_tests);

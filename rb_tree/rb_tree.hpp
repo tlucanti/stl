@@ -125,7 +125,7 @@ public:
 
     ~rb_tree()
     {
-        if (_root != nullptr)
+        if (LIKELY(_root != nullptr))
             _rb_destroy(_root);
     }
 
@@ -558,6 +558,8 @@ private:
                 node->parent->right = child;
             child->parent = node->parent;
             child->color = node->color;
+            delete node->key;
+            delete node;
             return nullptr;
         }
         // case 3
@@ -674,6 +676,7 @@ private:
     {
         if (_root == nullptr)
             return ;
+        delete rm->key;
         rb_node *leaf = _bst_remove(rm);
         if (leaf == nullptr)
             return ;
@@ -684,12 +687,14 @@ private:
             else if (leaf->right)
                 _root = leaf->right;
             else
-                _root = nullptr;
-            if (_root)
             {
-                (_root)->parent = nullptr;
-                (_root)->color = rb_black;
+                delete _root;
+                _root = nullptr;
+                return ;
             }
+            delete leaf;
+            _root->parent = nullptr;
+            _root->color = rb_black;
             return ;
         }
         if (leaf->color != rb_red)
@@ -698,6 +703,7 @@ private:
             leaf->parent->left = nullptr;
         else
             leaf->parent->right = nullptr;
+        delete leaf;
     }
 
     rb_node     *_rb_remove(const key_T *value)

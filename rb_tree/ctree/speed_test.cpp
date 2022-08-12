@@ -214,7 +214,7 @@ void ctree_erase_iterator_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            rb_remove_node(&v[i], v[i].begin);
+            rb_remove_node(&v[i], v[i].begin, _int_destroy);
     }
     __test_end();
     USED(v);
@@ -237,7 +237,7 @@ void ctree_erase_val_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            rb_remove(&v[i], reinterpret_cast<void *>(j), _int_compare);
+            rb_remove(&v[i], reinterpret_cast<void *>(j), _int_compare, _int_destroy);
     }
     __test_end();
     USED(v);
