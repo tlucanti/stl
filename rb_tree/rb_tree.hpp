@@ -49,7 +49,7 @@ private:
         rb_node     *left;
         rb_node     *right;
         rb_colors   color;
-        key_T    *key;
+        key_T       *key;
 
     public:
         key_T &get_key()

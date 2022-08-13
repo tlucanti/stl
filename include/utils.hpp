@@ -7,18 +7,21 @@
 
 TLU_NAMESPACE_BEGIN
 
+// ------------------------------------ min ------------------------------------
 template <class type_T>
 constexpr const type_T &min(const type_T &a, const type_T &b)
 {
     return (b < a) ? b : a;
 }
 
+// ------------------------------------ min ------------------------------------
 template <class type_T>
 constexpr const type_T &max(const type_T &a, const type_T &b)
 {
     return (a < b) ? b : a;
 }
 
+// ------------------------------------ min ------------------------------------
 template <class type_T>
 constexpr int sign(const type_T &val) {
     return (type_T() < val) - (val < type_T());

@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   type_traits.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/13 15:56:23 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/13 19:00:39 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
@@ -26,81 +37,67 @@
 
 TLU_NAMESPACE_BEGIN
 
-// ------------------------------- integral constant -------------------------------
+// ----------------------------- integral constant -----------------------------
 
     template<typename type_T, type_T type_value>
     struct integral_constant
     {
-        const static constexpr type_T value = type_value;
+        const static constexpr type_T       value = type_value;
     };
 
-    typedef integral_constant<bool, true> true_type;
-    typedef integral_constant<bool, false> false_type;
+    typedef integral_constant<bool, true>   true_type;
+    typedef integral_constant<bool, false>  false_type;
 
-// ------------------------------- is_same -------------------------------
-    template <class type_T, class type_Y>   struct is_same                  : public false_type {};
-    template <class type_T>                 struct is_same<type_T, type_T>  : public true_type {};
+// ---------------------------------- is_same ----------------------------------
+    template <class type_T, class type_Y> struct is_same    : public false_type
+    {};
+    template <class type_T> struct is_same<type_T, type_T>  : public true_type
+    {};
 
-// ------------------------------- enable_if -------------------------------
-    template <bool term, class type_T = void> struct enable_if {};
-    template <class type_T> struct enable_if<true, type_T>
+// --------------------------------- enable_if ---------------------------------
+    template <bool term, class type_T = void>
+    struct enable_if
+    {};
+
+    template <class type_T>
+    struct enable_if<true, type_T>
     {
         typedef type_T  type;
     };
 
-// ------------------------------- is_integral -------------------------------
-    template <class type_T> struct is_integral : public false_type {};
+// -------------------------------- is_integral --------------------------------
+    template <class type_T> struct is_integral          : public false_type {};
 
-    template <> struct is_integral<bool>            : public true_type {};
-    template <> struct is_integral<char>            : public true_type {};
+    template <> struct is_integral<bool>                : public true_type {};
+    template <> struct is_integral<char>                : public true_type {};
+
+    template <> struct is_integral<wchar_t>             : public true_type {};
+    template <> struct is_integral<short int>           : public true_type {};
+    template <> struct is_integral<int>                 : public true_type {};
+    template <> struct is_integral<long int>            : public true_type {};
+    template <> struct is_integral<unsigned char>       : public true_type {};
+    template <> struct is_integral<unsigned short int>  : public true_type {};
+    template <> struct is_integral<unsigned int>        : public true_type {};
+    template <> struct is_integral<unsigned long int>   : public true_type {};
+#if CPP11
+    template <> struct is_integral<char16_t>            : public true_type {};
+    template <> struct is_integral<char32_t>            : public true_type {};
+    template <> struct is_integral<long long>           : public true_type {};
+    template <> struct is_integral<unsigned long long>  : public true_type {};
+#endif /* CPP11 */
 #if CPP20
-    template <> struct is_integral<char8_t>         : public true_type {};
+    template <> struct is_integral<char8_t>             : public true_type {};
 #endif /* CPP20 */
-#if CPP11
-    template <> struct is_integral<char16_t>        : public true_type {};
-    template <> struct is_integral<char32_t>        : public true_type {};
-#endif /* CPP11 */
-    template <> struct is_integral<wchar_t>         : public true_type {};
-    template <> struct is_integral<short int>       : public true_type {};
-    template <> struct is_integral<int>             : public true_type {};
-    template <> struct is_integral<long int>        : public true_type {};
-    template <> struct is_integral<unsigned char>            : public true_type {};
-    template <> struct is_integral<unsigned short int>       : public true_type {};
-    template <> struct is_integral<unsigned int>             : public true_type {};
-    template <> struct is_integral<unsigned long int>        : public true_type {};
-#if CPP11
-	template <> struct is_integral<long long int>   : public true_type {};
-    template <> struct is_integral<unsigned long long int>   : public true_type {};
-#endif /* CPP11 */
 
-	// ------------------------------- is_pointer -------------------------------
-	template <class type_T> struct is_pointer : public false_type {};
+// -------------------------------- is_pointer ---------------------------------
+    template <class type_T> struct is_pointer           : public false_type {};
+    template <class type_T> struct is_pointer<type_T *> : public true_type {}
 
-	template <> struct is_pointer<bool *>            : public true_type {};
-	template <> struct is_pointer<char *>            : public true_type {};
-#if CPP20
-	template <> struct is_integral<char8_t *>         : public true_type {};
-#endif /* CPP20 */
-#if CPP11
-	template <> struct is_pointer<char16_t *>        : public true_type {};
-	template <> struct is_pointer<char32_t *>        : public true_type {};
-#endif /* CPP11 */
-	template <> struct is_pointer<wchar_t *>         : public true_type {};
-	template <> struct is_pointer<short int *>       : public true_type {};
-	template <> struct is_pointer<int *>             : public true_type {};
-	template <> struct is_pointer<long int *>        : public true_type {};
-	template <> struct is_pointer<unsigned char *>            : public true_type {};
-	template <> struct is_pointer<unsigned short int *>       : public true_type {};
-	template <> struct is_pointer<unsigned int *>             : public true_type {};
-	template <> struct is_pointer<unsigned long int *>        : public true_type {};
-#if CPP11
-	template <> struct is_integral<long long int *>   : public true_type {};
-	template <> struct is_integral<unsigned long long int *>   : public true_type {};
-#endif /* CPP11 */
-
-// ------------------------------- is_iterator -------------------------------
+// -------------------------------- is_iterator --------------------------------
 TLU_NAMESPACE_HIDDEN_BEGIN
-    template<typename type_T, typename = void> struct _is_iterator_base : public false_type {};
+    template<typename type_T, typename = void>
+    struct _is_iterator_base : public false_type
+    {};
 
     template<typename type_T>
     struct _is_iterator_base<
@@ -114,31 +111,71 @@ TLU_NAMESPACE_HIDDEN_BEGIN
         > : public true_type {};
 TLU_NAMESPACE_HIDDEN_END
 
-    template <typename type_T> struct is_iterator : public TLU_NAMESPACE_HIDDEN::_is_iterator_base<type_T> {};
+    template <typename type_T>
+    struct is_iterator : public TLU_NAMESPACE_HIDDEN::_is_iterator_base<type_T>
+    {};
 
-    // --------------------------- remove_const -------------------------------
+// ------------------------------- remove_const --------------------------------
+    template <class type_T>
+    struct remove_const
+    {
+        typedef type_T type;
+    };
 
-    template <class type_T> struct remove_const                { typedef type_T type; };
-    template <class type_T> struct remove_const<const type_T>  { typedef type_T type; };
+    template <class type_T>
+    struct remove_const<const type_T>
+    {
+        typedef type_T type;
+    };
 
+// ----------------------------- change_pair_type ------------------------------
     template <class T, class type_T, class type_Y> struct change_pair_type {};
 
-    // --------------------------- make_void -------------------------------
+// --------------------------------- make_void ---------------------------------
+    template<typename>
+    struct make_void
+    {
+        typedef void type;
+    };
 
-    template<typename> struct make_void { typedef void type;};
+// ------------------------------- has_size_type -------------------------------
+    template <class type_T, typename = void>
+    struct has_size_type : false_type
+    {};
 
-    // --------------------------- has_size_type -------------------------------
-    template <class type_T, typename = void> struct has_size_type : false_type {};
-    template <class type_T> struct has_size_type<type_T, typename make_void<typename type_T::size_type>::type> : true_type {};
+    template <class type_T>
+    struct has_size_type<
+            type_T,
+            typename make_void<
+                typename type_T::size_type
+            >::type
+        > : true_type
+    {};
 
-    // --------------------------- complete_size_type -------------------------------
+// ---------------------------- complete_size_type -----------------------------
+TLU_NAMESPACE_HIDDEN_BEGIN
+    template <class type_T, typename = void>
+    struct complete_size_type_base
+    {
+        typedef bool size_type;
+    };
 
-    TLU_NAMESPACE_HIDDEN_BEGIN
-    template <class type_T, typename = void> struct complete_size_type_base { typedef bool size_type; };
-    template <class type_T> struct complete_size_type_base<type_T, typename make_void<typename type_T::size_type>::type > { typedef typename type_T::size_type size_type; };
-    TLU_NAMESPACE_HIDDEN_END
+    template <class type_T>
+    struct complete_size_type_base<
+            type_T,
+            typename make_void<
+                typename type_T::size_type
+            >::type
+        >
+    {
+        typedef typename type_T::size_type size_type;
+    };
+TLU_NAMESPACE_HIDDEN_END
 
-    template <class type_T> struct complete_size_type : public TLU_NAMESPACE_HIDDEN::complete_size_type_base<type_T> {};
+    template <class type_T>
+    struct complete_size_type
+        : public TLU_NAMESPACE_HIDDEN::complete_size_type_base<type_T>
+    {};
 
 TLU_NAMESPACE_END
 

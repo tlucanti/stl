@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   defs.h                                             :+:      :+:    :+:   */
+/*   defs.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/16 12:09:17 by kostya            #+#    #+#             */
-/*   Updated: 2022/03/16 12:58:39 by tlucanti         ###   ########.fr       */
+/*   Created: 2022/08/13 18:40:45 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/13 19:00:39 by tlucanti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@
 # include <cctype>
 
 # ifdef __DEBUG
-#  define PRIVATE public
+#  define PRIVATE   public
 #  define PROTECTED public
 # else
-#  define PRIVATE private
+#  define PRIVATE   private
 #  define PROTECTED protected
 # endif
 
@@ -40,29 +40,36 @@
 # define PRECPP20	__cplusplus <  202002L
 # define PRECPP23	1
 
-# define TLU_NAMESPACE tlucanti
-# define TLU_NAMESPACE_BEGIN namespace TLU_NAMESPACE {
-# define TLU_NAMESPACE_END }
-# define TLU_NAMESPACE_HIDDEN __hidden_tlucanti_namespace__
+# define TLU_NAMESPACE              tlucanti
+# define TLU_NAMESPACE_BEGIN        namespace TLU_NAMESPACE {
+# define TLU_NAMESPACE_END          }
+# define TLU_NAMESPACE_HIDDEN       __hidden_tlucanti_namespace__
 # define TLU_NAMESPACE_HIDDEN_BEGIN namespace TLU_NAMESPACE_HIDDEN {
-# define TLU_NAMESPACE_HIDDEN_END }
+# define TLU_NAMESPACE_HIDDEN_END   }
 
-# define LIKELY(__expr) __builtin_expect((__expr), 1)
-# define UNLIKELY(__expr) __builtin_expect((__expr), 0)
+# define LIKELY(__expr)     __builtin_expect((__expr), 1)
+# define UNLIKELY(__expr)   __builtin_expect((__expr), 0)
 
-# define GLUE2(__a, __b) __a##__b
-# define GLUE3(__a, __b, __c) GLUE2(__a, __b)##__c
-# define GLUE4(__a, __b, __c, __d) GLUE3(__a, __b, __c)##__d
+# define GLUE2(__a, __b)                __a##__b
+# define GLUE3(__a, __b, __c)           GLUE2(__a, __b)##__c
+# define GLUE4(__a, __b, __c, __d)      GLUE3(__a, __b, __c)##__d
 # define GLUE5(__a, __b, __c, __d, __e) GLUE4(__a, __b, __c, __d)##__e
 
-# /* internal */ define INT_TO_STRING_MACRO_(__x) #__x
-# /* internal */ define INT_TO_STRING_(__x) INT_TO_STRING_MACRO_(__x)
-# define INT_TO_STRING(x) INT_TO_STRING_(x)
-# define STR_LEN(x) strlen(x)
+# /* internal */ define INT_TO_STRING_MACRO_(__x)   #__x
+# /* internal */ define INT_TO_STRING_(__x)         INT_TO_STRING_MACRO_(__x)
+# define INT_TO_STRING(x)                           INT_TO_STRING_(x)
+# define STR_LEN(x)                                 strlen(x)
 
-# define ABORT(msg, arg) do_abort_(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
+# define ABORT(msg, arg) do { \
+    do_abort_(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__)) \
+} while (false)
 
-inline void do_abort_(const char *msg, const char *arg, const char *func, const char *lineno)
+inline void do_abort_(
+        const char *msg,
+        const char *arg,
+        const char *func,
+        const char *lineno
+    )
 {
     write(2, "[", 1);
     while (not isspace(*func))
@@ -86,45 +93,45 @@ inline void do_abort_(const char *msg, const char *arg, const char *func, const 
 
 # if CPP11
 #  ifndef DEFAULT
-#   define DEFAULT =default;
+#   define DEFAULT      =default;
 #  endif /* DEFAULT */
 #  ifndef DELETE
-#   define DELETE =delete;
+#   define DELETE       =delete;
 #  endif /* DELETE */
 #  ifndef DELETED_MEMBERS
-#   define DELETED_MEMBERS public
+#   define DELETED_MEMBERS  public
 #  endif /* DELETED_MEMBERS */
 #  ifndef AUTO
-#   define AUTO(__x) auto
+#   define AUTO(__x)    auto
 #  endif /* AUTO */
 #  ifndef EXCEPT
-#   define EXCEPT(__e) noexcept(false)
+#   define EXCEPT(__e)  noexcept(false)
 #  endif /* EXCEPT */
 
 # else /* PRECPP11 */
 #  ifndef DEFAULT
-#   define DEFAULT {}
+#   define DEFAULT  {}
 #  endif /* DEFAULT */
 #  ifndef DELETE
-#   define DELETE ;
+#   define DELETE   ;
 #  endif /* DELETE */
 #  ifndef DELETED_MEMBERS
-#   define DELETED_MEMBERS private
+#   define DELETED_MEMBERS  private
 #  endif /* DELETED_MEMBERS */
 #  ifndef noexcept
-#   define noexcept throw()
+#   define noexcept     throw()
 #  endif /* noexcept */
 #  ifndef EXCEPT
-#   define EXCEPT(__e) throw(__e)
+#   define EXCEPT(__e)  throw(__e)
 #  endif /* EXCEPT */
 #  ifndef override
 #   define override
 #  endif /* override */
 #  ifndef nullptr
-#   define nullptr NULL
+#   define nullptr      NULL
 #  endif /* nullptr */
 #  ifndef AUTO
-#   define AUTO(__x) __x
+#   define AUTO(__x)    __x
 #  endif /* AUTO */
 # endif /* CPP11 */
 
@@ -137,23 +144,23 @@ inline void do_abort_(const char *msg, const char *arg, const char *func, const 
 
 # if CPP17
 #  ifndef WUR
-#   define WUR [[nodiscard]]
+#   define WUR      [[nodiscard]]
 #  endif /* WUR */
 #  ifndef UNUSED
-#   define UNUSED(__x) [[maybe_unused]] __x
+#   define UNUSED   [[maybe_unused]]
 #  endif /* UNUSED */
 #  ifndef NORET
-#   define NORET [[noreturn]]
+#   define NORET    [[noreturn]]
 #  endif /* NORET */
 # else /* PRECPP17 */
 #  ifndef WUR
-#   define WUR __attribute__((warn_unused_result))
+#   define WUR      __attribute__((warn_unused_result))
 #  endif /* WUR */
 #  ifndef UNUSED
-#   define UNUSED __attribute__((unused))
+#   define UNUSED   __attribute__((unused))
 #  endif /* UNUSED */
 #  ifndef NORET
-#   define NORET __attribute__((noreturn))
+#   define NORET    __attribute__((noreturn))
 #  endif /* NORET */
 # endif /* CPP17 */
 

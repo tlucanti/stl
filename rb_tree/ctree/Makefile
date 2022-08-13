@@ -19,10 +19,10 @@ CC			=	CC
 
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	
-OBJS_DIR	=	../../obj
+OBJS_DIR	=	obj
 INCLUDE_DIR	=	../../include ../../test
 SCRS_DIR	=	.
-DEPS_DIR	=	../../dep
+DEPS_DIR	=	dep
 # ------------------------------- project sorces -------------------------------
 SRCS		=	\
 				test_rb_tree \
@@ -138,7 +138,7 @@ ${OBJS_DIR}:
 # ------------------------------------------------------------------------------
 ${DEPS_DIR}:
 	@printf		"$(P)[MK]\t$(Y)${DEPS_DIR}$(S)$(SPACE)\n"
-	mkdir		-p ${DEPS_DIR}
+	@mkdir		-p ${DEPS_DIR}
 
 # ------------------------------------------------------------------------------
 .PHONY:			all clean fclean re
