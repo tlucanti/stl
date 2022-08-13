@@ -314,4 +314,3 @@ private:
 TLU_NAMESPACE_END
 
 #endif /* COLOR_HPP */
-

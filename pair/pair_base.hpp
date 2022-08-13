@@ -26,10 +26,10 @@ struct pair_base
     constexpr pair_base(const first_type &_first, const second_type &_second) : first(_first), second(_second) {}
 
     template <class type_U1, class type_U2>
-    constexpr pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
+    constexpr explicit pair_base(const pair_base<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
 
     template <class type_U1, class type_U2>
-    constexpr pair_base(const std::pair<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
+    constexpr explicit pair_base(const std::pair<type_U1, type_U2> &cpy) : first(cpy.first), second(cpy.second) {}
 
     constexpr pair_base(const pair_base &cpy) : first(cpy.first), second(cpy.second) {}
 
@@ -89,11 +89,11 @@ int pair_base_compare(
 {
     if (rhs.first < lhs.first)
         return 1;
-    else if (lhs.first < rhs.first)
+    if (lhs.first < rhs.first)
         return -1;
-    else if (rhs.second < lhs.second)
+    if (rhs.second < lhs.second)
         return 1;
-    else if (lhs.second < rhs.second)
+    if (lhs.second < rhs.second)
         return -1;
     return 0;
 }

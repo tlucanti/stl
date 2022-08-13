@@ -558,7 +558,6 @@ private:
                 node->parent->right = child;
             child->parent = node->parent;
             child->color = node->color;
-            delete node->key;
             delete node;
             return nullptr;
         }

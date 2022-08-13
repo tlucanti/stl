@@ -5,6 +5,9 @@
 void basic_method_test();
 void basic_comparison_test();
 
+const volatile int null_ = 0;
+#define NULLPTR (reinterpret_cast<void *>(null_))
+
 int main()
 {
     signal(SIGSEGV, sigsegv_catcher);
@@ -36,7 +39,7 @@ void basic_method_test()
     ASSERT(tree.size() == 4, "size test 4");
     RBCPP_FIND_ASSERT(33, "basic find test 0");
     ASSERT(tree.size() == 4, "size test 5");
-    RBCPP_REMOVE_ASSERT(33, nullptr, "basic remove test 0");
+    RBCPP_REMOVE_ASSERT(33, NULLPTR, "basic remove test 0");
     RBCPP_FIND_ASSERT(3, "basic find test 1");
     ASSERT(tree.size() == 3, "size test 6");
 
@@ -46,13 +49,13 @@ void basic_method_test()
     RBCPP_LOWERBOUND_ASSERT(3, 3, "basic bound test 0");
     RBCPP_LOWERBOUND_ASSERT(4, 5, "basic bound test 1");
     RBCPP_LOWERBOUND_ASSERT(5, 5, "basic bound test 2");
-    RBCPP_LOWERBOUND_ASSERT(6, nullptr, "basic bound test 3");
-    RBCPP_LOWERBOUND_ASSERT(6, nullptr, "basic bound test 4");
+    RBCPP_LOWERBOUND_ASSERT(6, NULLPTR, "basic bound test 3");
+    RBCPP_LOWERBOUND_ASSERT(6, NULLPTR, "basic bound test 4");
 
     RBCPP_UPPERBOUND_ASSERT(3, 5, "basic bound test 5");
     RBCPP_UPPERBOUND_ASSERT(4, 5, "basic bound test 6");
-    RBCPP_UPPERBOUND_ASSERT(5, nullptr, "basic bound test 7");
-    RBCPP_UPPERBOUND_ASSERT(6, nullptr, "basic bound test 8");
+    RBCPP_UPPERBOUND_ASSERT(5, NULLPTR, "basic bound test 7");
+    RBCPP_UPPERBOUND_ASSERT(6, NULLPTR, "basic bound test 8");
 
     result();
 }

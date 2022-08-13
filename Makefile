@@ -7,6 +7,15 @@ speed: _DO_RUN compile vector_speed pair_speed set_speed ctree_speed
 
 compile: _DO_RUN vector_compile stack_compile pair_compile tree_compile set_compile map_compile ctree_compile
 
+clean: _DO_RUN
+	$(MAKE) -C vector fclean
+	$(MAKE) -C stack fclean
+	$(MAKE) -C pair fclean
+	$(MAKE) -C rb_tree fclean
+	$(MAKE) -C set fclean
+	$(MAKE) -C map fclean
+	$(MAKE) -C rb_tree/ctree fclean
+
 # ------------------------------------------------------------
 vector: _DO_RUN vector_compile vector_test vector_speed
 

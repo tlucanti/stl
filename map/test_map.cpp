@@ -161,7 +161,7 @@ void empty_size_test()
     {
         ft::map<int, int> a;
         ASSERT(a.empty(), "empty test 0");
-        ASSERT(a.size() == 0, "size test 0");
+        ASSERT(a.size() + 1 == 1, "size test 0");
         a[0] = 123;
         ASSERT(not a.empty(), "empty test 1");
         ASSERT(a.size() == 1, "size test 1");

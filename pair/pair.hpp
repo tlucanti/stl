@@ -2,7 +2,7 @@
 #ifndef PAIR_HPP
 # define PAIR_HPP
 
-# include "defs.h"
+# include "defs.hpp"
 # include "pair_base.hpp"
 
 namespace ft
@@ -21,7 +21,7 @@ namespace ft
         ) : base_class(_first, _second) {}
 
         template <class type_U1, class type_U2>
-        constexpr explicit pair(const pair<type_U1, type_U2> &cpy) : base_class(cpy) {}
+        constexpr pair(const pair<type_U1, type_U2> &cpy) : base_class(cpy) {}
 
         template <class type_U1, class type_U2>
         constexpr pair(const std::pair<type_U1, type_U2> &cpy) : base_class(cpy) {}

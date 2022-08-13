@@ -18,7 +18,7 @@ struct pair_key_compare : public key_compare
     typedef value_type  second_argument_type;
 
     constexpr pair_key_compare() : key_compare() {}
-    constexpr pair_key_compare(const key_compare &cmp) : key_compare(cmp) {}
+    constexpr explicit pair_key_compare(const key_compare &cmp) : key_compare(cmp) {}
 
     constexpr bool operator()(const value_type &lhs, const value_type &rhs) const
     {

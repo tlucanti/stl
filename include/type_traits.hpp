@@ -2,8 +2,7 @@
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
 
-//# include <type_traits>
-# include "defs.h"
+# include "defs.hpp"
 
 # define IS_INTEGRAL(__type) typename TLU_NAMESPACE::enable_if< \
     TLU_NAMESPACE::is_integral<__type>::value, __type>::type
@@ -126,7 +125,7 @@ TLU_NAMESPACE_HIDDEN_END
 
     // --------------------------- make_void -------------------------------
 
-    template<typename Ts> struct make_void { typedef void type;};
+    template<typename> struct make_void { typedef void type;};
 
     // --------------------------- has_size_type -------------------------------
     template <class type_T, typename = void> struct has_size_type : false_type {};

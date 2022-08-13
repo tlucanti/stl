@@ -55,17 +55,16 @@
 # define GLUE4(__a, __b, __c, __d) GLUE3(__a, __b, __c)##__d
 # define GLUE5(__a, __b, __c, __d, __e) GLUE4(__a, __b, __c, __d)##__e
 
-# /* internal */ define __INT_TO_STRING_MACRO(__x) #__x
-# /* internal */ define __INT_TO_STRING(__x) __INT_TO_STRING_MACRO(__x)
-# define INT_TO_STRING(x) __INT_TO_STRING(x)
+# /* internal */ define INT_TO_STRING_MACRO_(__x) #__x
+# /* internal */ define INT_TO_STRING_(__x) INT_TO_STRING_MACRO_(__x)
+# define INT_TO_STRING(x) INT_TO_STRING_(x)
 # define STR_LEN(x) strlen(x)
 
-# define ABORT(msg, arg) __do_ABORT(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
+# define ABORT(msg, arg) do_abort_(msg, arg, __PRETTY_FUNCTION__, INT_TO_STRING(__LINE__))
 
-inline void __do_ABORT(const char *msg, const char *arg, const char *func, const char *lineno)
+inline void do_abort_(const char *msg, const char *arg, const char *func, const char *lineno)
 {
     write(2, "[", 1);
-//    write(2, func, STR_LEN(func));
     while (not isspace(*func))
         ++func;
     while (isspace(*func))
@@ -121,9 +120,9 @@ inline void __do_ABORT(const char *msg, const char *arg, const char *func, const
 #  ifndef override
 #   define override
 #  endif /* override */
-#  undef nullptr
+#  ifndef nullptr
 #   define nullptr NULL
-//#  endif /* nullptr */
+#  endif /* nullptr */
 #  ifndef AUTO
 #   define AUTO(__x) __x
 #  endif /* AUTO */

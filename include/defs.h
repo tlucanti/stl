@@ -23,13 +23,13 @@
 # endif /* UNLIKELY */
 
 # ifdef __cplusplus
-#  define static_cast(__type, __expr) static_cast<__type>(__expr)
-#  define reinterpret_cast(__type, __expr) reinterpret_cast<__type>(__expr)
-#  define const_cast(__type, __expr) const_cast<__type>(__expr)
+#  define _static_cast(__type, __expr) static_cast<__type>(__expr)
+#  define _reinterpret_cast(__type, __expr) reinterpret_cast<__type>(__expr)
+#  define _const_cast(__type, __expr) const_cast<__type>(__expr)
 # else
-#  define static_cast(__type, __expr) (__type)(__expr)
-#  define reinterpret_cast(__type, __expr) (__type)(__expr)
-#  define const_cast(__type, __expr) (__type)(__expr)
+#  define _static_cast(__type, __expr) (__type)(__expr)
+#  define _reinterpret_cast(__type, __expr) (__type)(__expr)
+#  define _const_cast(__type, __expr) (__type)(__expr)
 # endif /* __cplusplus */
 
 #endif /* DEFS_H */

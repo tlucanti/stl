@@ -113,7 +113,7 @@ public:
 
 
 public: // TODO: remove this
-    rb_tree_iterator(rb_node *ptr, bool end=false) : base_class(ptr, end)
+    explicit rb_tree_iterator(rb_node *ptr, bool end=false) : base_class(ptr, end)
     {}
 
 public:

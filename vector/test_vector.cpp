@@ -362,9 +362,9 @@ void fn_front_test()
     start(".front() tests");
 
     vec_123(a);
-    
+
     ASSERT(_op(a) == 1, "basic " fn " test 1");
-    
+
     ft::vector<int> b;
 
     error_test(_op(b), "empty" fn "test 1");
@@ -381,9 +381,9 @@ void fn_back_test()
     start(".back() tests");
 
     vec_123(a);
-    
+
     ASSERT(_op(a) == 3, "basic " fn " test 1");
-    
+
     ft::vector<int> b;
 
     error_test(_op(b), "empty" fn "test 1");

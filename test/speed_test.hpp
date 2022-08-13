@@ -1,8 +1,11 @@
 
-#include "benchmark.hpp"
-#include "defs.hpp"
-#include "type_traits.hpp"
-#include <vector>
+#ifndef SPEED_TEST_HPP
+# define SPEED_TEST_HPP
+
+# include "benchmark.hpp"
+# include "defs.hpp"
+# include "type_traits.hpp"
+# include <vector>
 
 struct timeval __tv_start_time = {};
 struct timeval __tv_end_time = {};
@@ -916,3 +919,5 @@ void shrink_to_fit_method_test_1(typename T::size_typen size, unsigned long time
     CTREE_MEDIUM(__func); \
     CTREE_LARGE(__func); \
 } while (false)
+
+#endif /* SPEED_TEST */
