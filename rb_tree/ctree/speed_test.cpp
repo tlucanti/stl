@@ -1,12 +1,13 @@
 
-#include "rb_tree.h"
 #include <set>
+#include "rb_tree.h"
 #include "benchmark.hpp"
 
 #undef CONTAINER_TYPE
 # define CONTAINER_TYPE set
 #undef VALUE_TYPE
 # define VALUE_TYPE int
+
 #include "speed_test.hpp"
 
 int _int_compare(void *lhs, void *rhs)
@@ -30,7 +31,7 @@ void generate_tree(std::size_t size, rb_tree *tree)
         rb_insert(tree, reinterpret_cast<void *>(i), _int_compare, nullptr);
 }
 
-#define RB_INIT_(__c) {(__c).root.node = nullptr; (__c).begin.node = nullptr; (__c).end.node = nullptr; (__c).size = 0L; }
+#define RB_INIT_(__c) do {(__c).root.node = nullptr; (__c).begin.node = nullptr; (__c).end.node = nullptr; (__c).size = 0L; } while (false)
 
 template <class T>
 void ctree_default_constructor_test(UNUSED std::size_t size, std::size_t times)

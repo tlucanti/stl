@@ -2,6 +2,9 @@
 #include "rb_tree.h"
 #include "test.hpp"
 
+const volatile int null_ = 0;
+#define NULLPTR (reinterpret_cast<void *>(null_))
+
 void insert_tests();
 void find_tests();
 void remove_tests();
@@ -93,7 +96,7 @@ void insert_tests()
 
         _START:
         SINGLE_OPERATION(rb_insert(&tree, PTR(50), int_compare, &inserted), _START, 0);
-        print_rb_tree(&tree, "5 tree");
+        _print_rb_tree(tree.root.node, "5 tree");
         ASSERT(tree.root.node, "root insert test 0");
         ASSERT(tree.root.node->key == PTR(50), "root insert test 1");
         ASSERT(tree.root.node->color == _Rb_Black, "root insert test 2");
@@ -266,7 +269,7 @@ void find_tests()
 
         ASSERT(rb_get_key(rb_find(&tree, nullptr, int_compare)) == nullptr, "empty find test 0");
         FIND_ASSERT(tree, 1, "find basic test 0");
-        FIND_ASSERT(tree, nullptr, "find basic test 1");
+        FIND_ASSERT(tree, NULLPTR, "find basic test 1");
         FIND_ASSERT(tree, 3, "find basic test 2");
 
         rb_destroy(&tree, int_destroy);
@@ -469,9 +472,9 @@ void remove_tests()
         RB_INSERT(4);
         RB_INSERT(8);
         RB_INSERT(10);
-        RB_INSERT(nullptr);
+        RB_INSERT(NULLPTR);
 
-        RB_REMOVE(nullptr);
+        RB_REMOVE(NULLPTR);
 //        RB_PRINT_LOCK("before removal");
         RB_REMOVE(5);
 //        RB_PRINT_LOCK("after removal");
@@ -514,9 +517,9 @@ void remove_tests()
         RB_INSERT(7);
         RB_INSERT(10);
         RB_INSERT(6);
-        RB_INSERT(nullptr);
+        RB_INSERT(NULLPTR);
 
-        RB_REMOVE(nullptr);
+        RB_REMOVE(NULLPTR);
 //        RB_PRINT_LOCK("before removal");
         RB_REMOVE(4);
 //        RB_PRINT_LOCK("after removal");
