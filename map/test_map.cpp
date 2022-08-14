@@ -1,8 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_map.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 19:44:50 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "map.hpp"
 #include "test.hpp"
 #include <map>
-
 
 void constructor_assign_test();
 void get_allocator_test();
@@ -37,15 +47,23 @@ int main()
     final();
 }
 
-
 void constructor_assign_test() {
     start("map constructor/assign test");
 
     {
         typedef ft::map<int, int>::value_type VT;
-        ASSERT((tlucanti::is_same<bool, ft::map<int, int>::value_compare::result_type>::value), "typedef test 0");
-        ASSERT((tlucanti::is_same<VT, ft::map<int, int>::value_compare::first_argument_type>::value), "typedef test 1");
-        ASSERT((tlucanti::is_same<VT, ft::map<int, int>::value_compare::second_argument_type>::value), "typedef test 2");
+        ASSERT((tlucanti::is_same<
+                bool,
+                ft::map<int, int>::value_compare::result_type
+            >::value), "typedef test 0");
+        ASSERT((tlucanti::is_same<
+                VT,
+                ft::map<int, int>::value_compare::first_argument_type
+            >::value), "typedef test 1");
+        ASSERT((tlucanti::is_same<
+                VT,
+                ft::map<int, int>::value_compare::second_argument_type
+            >::value), "typedef test 2");
     }
     {
         ft::map<int, int> a;
@@ -54,7 +72,10 @@ void constructor_assign_test() {
     {
         std::allocator<int> alloc;
         std::less<int> cmp;
-        tlucanti::TLU_NAMESPACE_HIDDEN::pair_key_compare<std::less<int>, ft::map<int, int>::value_type> pair_cmp(cmp);
+        tlucanti::TLU_NAMESPACE_HIDDEN::pair_key_compare<
+            std::less<int>,
+            ft::map<int, int
+        >::value_type> pair_cmp(cmp);
         (void)pair_cmp;
         ft::map<int, int> a(cmp, alloc);
     }
@@ -176,7 +197,8 @@ void max_size_test()
 
     {
         ft::map<int, int> a;
-        ASSERT(a.max_size() == std::numeric_limits<std::size_t>::max(), "max_size() test 0");
+        ASSERT(a.max_size() == std::numeric_limits<std::size_t>::max(),
+            "max_size() test 0");
     }
 
     result();
@@ -341,12 +363,18 @@ void bound_test()
         a[4] = 2;
         a[10] = 3;
 
-        ASSERT(a.equal_range(0) == P(a.begin(), ++a.begin()), "equal_range test 0");
-        ASSERT(a.equal_range(1) == P(++a.begin(), ++a.begin()), "equal_range test 1");
-        ASSERT(a.equal_range(4) == P(++a.begin(), --a.end()), "equal_range test 2");
-        ASSERT(a.equal_range(9) == P(--a.end(), --a.end()), "equal_range test 3");
-        ASSERT(a.equal_range(10) == P(--a.end(), a.end()), "equal_range test 4");
-        ASSERT(a.equal_range(123) == P(a.end(), a.end()), "equal_range test 5");
+        ASSERT(a.equal_range(0) == P(a.begin(), ++a.begin()),
+            "equal_range test 0");
+        ASSERT(a.equal_range(1) == P(++a.begin(), ++a.begin()),
+            "equal_range test 1");
+        ASSERT(a.equal_range(4) == P(++a.begin(), --a.end()),
+            "equal_range test 2");
+        ASSERT(a.equal_range(9) == P(--a.end(), --a.end()),
+            "equal_range test 3");
+        ASSERT(a.equal_range(10) == P(--a.end(), a.end()),
+            "equal_range test 4");
+        ASSERT(a.equal_range(123) == P(a.end(), a.end()),
+            "equal_range test 5");
     }
 
     result();

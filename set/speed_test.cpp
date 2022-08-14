@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   speed_test.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 20:09:20 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:09:23 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "set.hpp"
 #include <set>
@@ -19,7 +30,8 @@ int main()
     bm.next_test("set() constructor test");
     SET_SMALL(default_constructor_test);
 
-    RUN_SET_TESTS("set(a.begin(), a.end()) iterator constructor test", iterator_constructor_test);
+    RUN_SET_TESTS("set(a.begin(), a.end()) iterator constructor test",
+        iterator_constructor_test);
 
     RUN_SET_TESTS("set(set) copy constructor test", copy_constructor_test);
 
@@ -60,7 +72,8 @@ int main()
 
     RUN_SET_TESTS(".insert(hint, value) method test", insert_iterator_test);
 
-    RUN_SET_TESTS(".insert(first, last) ranged insert test", ranged_insert_test);
+    RUN_SET_TESTS(".insert(first, last) ranged insert test",
+        ranged_insert_test);
 
     RUN_SET_TESTS(".erase(pos) method test", erase_iterator_test);
 

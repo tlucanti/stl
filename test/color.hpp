@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   color.hpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:12:06 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef COLOR_HPP
 # define COLOR_HPP
@@ -14,13 +25,30 @@ TLU_NAMESPACE_BEGIN
 class TermColor
 {
 public:
-    TermColor() : _red(255u), _green(255u), _blue(255u), _bold(false), _bg(false), _buff()
+    TermColor() :
+        _red(255u),
+        _green(255u),
+        _blue(255u),
+        _bold(false),
+        _bg(false),
+        _buff()
     {
         _init();
     }
 
-    TermColor(uint8_t red, uint8_t green, uint8_t blue, bool bold=true, bool bg=false)
-        : _red(red), _green(green), _blue(blue), _bold(bold), _bg(bg), _buff()
+    TermColor(
+        uint8_t red,
+        uint8_t green,
+        uint8_t blue,
+        bool bold=true,
+        bool bg=false
+    ) :
+        _red(red),
+        _green(green),
+        _blue(blue),
+        _bold(bold),
+        _bg(bg),
+        _buff()
     {
         _init();
     }
@@ -49,24 +77,24 @@ public:
         _init();
     }
 
-    void set_bg(bool bgv) UNUSED
+    void    set_bg(bool bgv) UNUSED
     {
         _bg = bgv;
         _init();
     }
 
-    uint8_t red() const { return _red; }
-    uint8_t green() const { return _green; }
-    uint8_t blue() const { return _blue; }
-    bool bold() const UNUSED { return _bold; }
-    bool bg() const UNUSED { return _bg; }
+    uint8_t red() const         { return _red; }
+    uint8_t green() const       { return _green; }
+    uint8_t blue() const        { return _blue; }
+    bool    bold() const UNUSED { return _bold; }
+    bool    bg() const UNUSED   { return _bg; }
 
-    std::string str() const
+    std::string     str() const
     {
         return std::string(_buff);
     }
 
-    TermColor operator +(const TermColor &other) const
+    TermColor       operator +(const TermColor &other) const
     {
         return TermColor(
             static_cast<uint8_t>(_red + other._red),
@@ -76,7 +104,7 @@ public:
         );
     }
 
-    TermColor operator -(const TermColor &other) const
+    TermColor       operator -(const TermColor &other) const
     {
         return TermColor(
             static_cast<uint8_t>(_red - other._red),
@@ -86,7 +114,7 @@ public:
         );
     }
 
-    TermColor operator *(const TermColor &other) const
+    TermColor       operator *(const TermColor &other) const
     {
         return TermColor(
             static_cast<uint8_t>(_red * other._red),
@@ -95,7 +123,7 @@ public:
         );
     }
 
-    TermColor operator *(double value) const
+    TermColor       operator *(double value) const
     {
         if (UNLIKELY(value < 0 or value > 1))
             throw std::runtime_error("value can be only in range from 0 to 1");
@@ -107,13 +135,13 @@ public:
         );
     }
 
-    std::string operator [](const std::string &str) const
+    std::string     operator [](const std::string &str) const
     {
         return this->str() + str + "\033[0m";
     }
 
 #if PRECPP11
-    TermColor &operator =(const TermColor &cpy)
+    TermColor       &operator =(const TermColor &cpy)
     {
         if (this == &cpy)
             return *this;
@@ -128,7 +156,7 @@ public:
 #endif /* PRECPP11 */
 
 private:
-    void _init()
+    void        _init()
 	{
         memcpy(_buff, "\033[38;2;RED;GRE;BLU;2m", 22);
 		itoa3(_buff + 7, _red);
@@ -180,18 +208,18 @@ TermColor W = White;
 TermColor K = Black;
 const char S[] = "\033[0m";
 
-std::ostream &operator <<(std::ostream &out, const TermColor &color)
+std::ostream    &operator <<(std::ostream &out, const TermColor &color)
 {
     out << color.str();
     return out;
 }
 
-std::string operator +(const std::string &str, const TermColor &color)
+std::string     operator +(const std::string &str, const TermColor &color)
 {
     return str + color.str();
 }
 
-std::string operator +(const TermColor &color, const std::string &str)
+std::string     operator +(const TermColor &color, const std::string &str)
 {
     return color.str() + str;
 }
@@ -200,11 +228,15 @@ class Gradient
 {
 public:
     Gradient(const TermColor &start, const TermColor &end) :
-        coef(end.red() - start.red(), end.green() - start.green(), end.blue() - start.blue()),
+        coef(
+            end.red() - start.red(),
+            end.green() - start.green(),
+            end.blue() - start.blue()
+        ),
         bias(start.red(), start.green(), start.blue())
     {}
 
-    TermColor operator [](double value) const
+    TermColor   operator [](double value) const
     {
         return TermColor(
             static_cast<uint8_t>(coef.red * value + bias.red),
@@ -217,7 +249,10 @@ private:
     struct t_color
     {
         t_color(int _red, int _green, int _blue) :
-            red(_red), green(_green), blue(_blue) {}
+            red(_red),
+            green(_green),
+            blue(_blue)
+        {}
 
         int red;
         int green;
@@ -231,21 +266,22 @@ private:
 class GradientN
 {
 public:
-    GradientN(const TermColor &c1, const TermColor &c2)
-        : g1(nullptr), g2(nullptr)
+    GradientN(const TermColor &c1, const TermColor &c2) :
+        g1(nullptr),
+        g2(nullptr)
     {
         g = new Gradient(c1, c2);
     }
 
-    GradientN(const GradientN &_g1, const GradientN &_g2)
-        : g(nullptr)
+    GradientN(const GradientN &_g1, const GradientN &_g2) :
+        g(nullptr)
     {
         g1 = new GradientN(_g1);
         g2 = new GradientN(_g2);
     }
 
-    GradientN(const GradientN &cpy)
-        : g(cpy.g), g1(cpy.g1), g2(cpy.g2) {}
+    GradientN(const GradientN &cpy) :
+        g(cpy.g), g1(cpy.g1), g2(cpy.g2) {}
 
     ~GradientN()
     {
@@ -254,7 +290,7 @@ public:
 //        delete g2;
     }
 
-    TermColor operator[](double val)
+    TermColor   operator[](double val)
     {
         if (g != nullptr)
             return g->operator[](val);
@@ -264,14 +300,16 @@ public:
     }
 
 private:
-    Gradient *g;
-    GradientN *g1, *g2;
+    Gradient    *g;
+    GradientN   *g1, *g2;
 };
 
 class ProgressBar
 {
 public:
-    explicit ProgressBar(int _width) : width(_width) {}
+    explicit ProgressBar(int _width) :
+        width(_width)
+    {}
 
     std::string operator[](double progress) const
     {
@@ -309,6 +347,7 @@ public:
 
 private:
     int width;
+
 };
 
 TLU_NAMESPACE_END

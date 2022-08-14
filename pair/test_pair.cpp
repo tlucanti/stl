@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_pair.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/12 16:53:46 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 16:45:46 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "test.hpp"
 #include "pair.hpp"
@@ -38,10 +49,14 @@ void constructor_test()
         MAKE_USED(d);
     }
     {
-        PAIR_SET_ASSERT(a, int, int, 123, 456, "constructor test 0");
-        PAIR_SET_ASSERT(b, unsigned long, int, 123, 5345, "constructor test 1");
-        PAIR_SET_ASSERT(c, std::string, int, "lols", 234234, "constructor test 2");
-        PAIR_SET_ASSERT(d, std::string, std::string, ")&RT#$*", "", "constructor test 3");
+        PAIR_SET_ASSERT(a, int, int, 123, 456,
+            "constructor test 0");
+        PAIR_SET_ASSERT(b, unsigned long, int, 123, 5345,
+            "constructor test 1");
+        PAIR_SET_ASSERT(c, std::string, int, "lols", 234234,
+            "constructor test 2");
+        PAIR_SET_ASSERT(d, std::string, std::string, ")&RT#$*", "",
+            "constructor test 3");
 
         MAKE_USED(a);
         MAKE_USED(b);
@@ -109,7 +124,10 @@ void make_pair_test()
         PAIR_ASSERT(ft::make_pair(1, 2), 1, 2, "make_pair test 0");
     }
     {
-        PAIR_ASSERT(ft::make_pair(1231431, std::string("lols")), 1231431, std::string("lols"), "make_pair test 1");
+        PAIR_ASSERT(
+            ft::make_pair(1231431, std::string("lols")),
+            1231431, std::string("lols"),
+            "make_pair test 1");
     }
     {
         ft::pair<int, int> a = ft::make_pair(1, 2);

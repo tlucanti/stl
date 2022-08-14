@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_set.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:09:45 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <iostream>
 #include <set>
@@ -96,7 +107,10 @@ void set_test()
     }
     {
         ft::set<int> a;
-        ASSERT(a.max_size() == std::numeric_limits<ft::set<int>::size_type>::max(), "max_size basic test 0");
+        ASSERT(
+            a.max_size() == std::numeric_limits<ft::set<int>::size_type>::max(),
+            "max_size basic test 0"
+        );
     }
     {
         set_123(a);

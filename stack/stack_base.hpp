@@ -1,15 +1,30 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   stack_base.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:11:25 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef STACK_BASE_HPP
 # define STACK_BASE_HPP
 
-# include "defs.hpp"
 # include <deque>
+# include "defs.hpp"
 
 TLU_NAMESPACE_BEGIN
 
+
+// =============================================================================
+// -------------------------------- stack_base ---------------------------------
 template <class type_T, class container_T=std::deque<type_T> >
 class stack_base
 {
+// --------------------------------- typedefs ----------------------------------
 public:
     typedef container_T                                 container_type;
     typedef typename container_type::value_type         value_type;
@@ -17,73 +32,95 @@ public:
     typedef typename container_type::reference          reference;
     typedef typename container_type::const_reference    const_reference;
 
+// ----------------------------- protected fields ------------------------------
 protected:
     container_T c;
 
+// =============================================================================
+// ------------------------------ initialization -------------------------------
 public:
-// ------------------------------ constructors --------------------------------
-    stack_base() DEFAULT
+    constexpr stack_base() DEFAULT
 
-    explicit stack_base(const container_type &cont) : c(cont) {}
+// -----------------------------------------------------------------------------
+    explicit constexpr stack_base(const container_type &cont) :
+        c(cont)
+    {}
 
-    stack_base(const stack_base &cpy) : c(cpy.c) {}
+// -----------------------------------------------------------------------------
+    constexpr stack_base(const stack_base &cpy) :
+        c(cpy.c)
+    {}
 
+// -----------------------------------------------------------------------------
 #if CPP11
-    explicit stack_base(container_type &&cont) : c(std::move(cont)) {}
+    explicit constexpr stack_base(container_type &&cont) noexcept :
+        c(std::move(cont))
+    {}
 
-    stack_base(stack_base &&mv) noexcept : c(std::move(mv.c)) {}
+// -----------------------------------------------------------------------------
+    constexpr stack_base(stack_base &&mv) noexcept :
+        c(std::move(mv.c))
+    {}
 #endif /* CPP11 */
 
-// ------------------------------------- destructors -------------------------
+// -------------------------------- destructors --------------------------------
     ~stack_base() DEFAULT
 
-// --------------------------------- opearator = -----------------------------
-    stack_base &operator =(const stack_base &cpy)
+// --------------------------------- assigning ---------------------------------
+    constexpr stack_base    &operator =(const stack_base &cpy)
     {
         c = cpy.c;
         return *this;
     }
 
-// --------------------------- element access -----------------------------
-    reference top()
+// =============================================================================
+// ------------------------------ element access -------------------------------
+    constexpr reference         top()
     {
         return c.back();
     }
 
-    const_reference top() const
+// -----------------------------------------------------------------------------
+    constexpr const_reference   top() const
     {
         return c.back();
     }
 
-// ------------------------------- capacity --------------------------------
-    WUR bool empty() const
+// =============================================================================
+// --------------------------------- capacity ----------------------------------
+    WUR constexpr bool          empty() const
     {
         return c.empty();
     }
 
-    WUR size_type size() const
+// -----------------------------------------------------------------------------
+    WUR constexpr size_type     size() const
     {
         return c.size();
     }
 
-// ------------------------------- modifiers ----------------------------------
-    void push(const value_type &value)
+// =============================================================================
+// --------------------------------- modifiers ---------------------------------
+    constexpr void              push(const value_type &value)
     {
         c.push_back(value);
     }
 
-    void pop()
+// -----------------------------------------------------------------------------
+    constexpr void              pop()
     {
         c.pop_back();
     }
 
-    void swap(stack_base &other)
+// -----------------------------------------------------------------------------
+    constexpr void              swap(stack_base &other)
     {
         c.swap(other.c);
     }
 
-// ----------------------------------- non-member functions ----------------------
-    friend bool operator ==(
+// =============================================================================
+// -------------------------- lexicographical compare --------------------------
+    friend constexpr bool operator ==(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
         )
@@ -91,59 +128,53 @@ public:
         return lhs.c == rhs.c;
     }
 
-    friend bool operator !=(
+// -----------------------------------------------------------------------------
+    friend constexpr bool operator !=(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
-    )
+        )
     {
         return lhs.c != rhs.c;
     }
 
-    friend bool operator >(
+// -----------------------------------------------------------------------------
+    friend constexpr bool operator >(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
-    )
+        )
     {
         return lhs.c > rhs.c;
     }
 
-    friend bool operator >=(
+// -----------------------------------------------------------------------------
+    friend constexpr bool operator >=(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
-    )
+        )
     {
         return lhs.c >= rhs.c;
     }
 
-    friend bool operator <(
+// -----------------------------------------------------------------------------
+    friend constexpr bool operator <(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
-    )
+        )
     {
         return lhs.c < rhs.c;
     }
 
-    friend bool operator <=(
+// -----------------------------------------------------------------------------
+    friend constexpr bool operator <=(
             const stack_base<type_T, container_T> &lhs,
             const stack_base<type_T, container_T> &rhs
-    )
+        )
     {
         return lhs.c <= rhs.c;
     }
+
 }; /* stack_base */
 
 TLU_NAMESPACE_END
-
-namespace std
-{
-    template <class type_T, class container_T>
-    void swap(
-            TLU_NAMESPACE::stack_base<type_T, container_T> &lhs,
-            TLU_NAMESPACE::stack_base<type_T, container_T> &rhs
-        )
-    {
-        lhs.swao(rhs);
-    }
-} /* std */
 
 #endif /* STACK_BASE_HPP */

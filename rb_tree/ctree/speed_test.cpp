@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   speed_test.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 19:50:12 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <set>
 #include "rb_tree.h"
@@ -31,7 +42,12 @@ void generate_tree(std::size_t size, rb_tree *tree)
         rb_insert(tree, reinterpret_cast<void *>(i), _int_compare, nullptr);
 }
 
-#define RB_INIT_(__c) do {(__c).root.node = nullptr; (__c).begin.node = nullptr; (__c).end.node = nullptr; (__c).size = 0L; } while (false)
+#define RB_INIT_(__c) do { \
+    (__c).root.node = nullptr; \
+    (__c).begin.node = nullptr; \
+    (__c).end.node = nullptr; \
+    (__c).size = 0L; \
+} while (false)
 
 template <class T>
 void ctree_default_constructor_test(UNUSED std::size_t size, std::size_t times)
@@ -164,7 +180,8 @@ void ctree_insert_val_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            rb_insert(&v[i], reinterpret_cast<void *>(j), _int_compare, nullptr);
+            rb_insert(&v[i], reinterpret_cast<void *>(j),
+                _int_compare, nullptr);
     }
     __test_end();
     for (std::size_t i=0; i < times; ++i)
@@ -189,7 +206,8 @@ void ctree_insert_iterator_test(std::size_t size, std::size_t times)
     {
         rb_node it = v[i].end;
         for (std::size_t j=0; j < size; ++j)
-            it = rb_insert_hint(&v[i], it, reinterpret_cast<void *>(j), _int_compare, nullptr);
+            it = rb_insert_hint(&v[i], it, reinterpret_cast<void *>(j),
+                _int_compare, nullptr);
     }
     __test_end();
     for (std::size_t i=0; i < times; ++i)
@@ -240,7 +258,8 @@ void ctree_erase_val_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            rb_remove(&v[i], reinterpret_cast<void *>(j), _int_compare, _int_destroy);
+            rb_remove(&v[i], reinterpret_cast<void *>(j),
+                _int_compare, _int_destroy);
     }
     __test_end();
     USED(v);
@@ -291,7 +310,8 @@ void ctree_lower_bound_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            dest[j] = rb_lower_bound(&v[i], reinterpret_cast<void *>(j), _int_compare);
+            dest[j] = rb_lower_bound(&v[i],
+                reinterpret_cast<void *>(j), _int_compare);
     }
     __test_end();
     for (std::size_t i=0; i < times; ++i)
@@ -318,7 +338,8 @@ void ctree_upper_bound_test(std::size_t size, std::size_t times)
     for (std::size_t i=0; i < times; ++i)
     {
         for (std::size_t j=0; j < size; ++j)
-            dest[j] = rb_upper_bound(&v[i], reinterpret_cast<void *>(j), _int_compare);
+            dest[j] = rb_upper_bound(&v[i],
+                reinterpret_cast<void *>(j), _int_compare);
     }
     __test_end();
     for (std::size_t i=0; i < times; ++i)

@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   benchmark.hpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/12 16:52:25 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:11:57 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef BENCHMARK_HPP
 # define BENCHMARK_HPP
@@ -71,9 +82,9 @@ public:
 
         if (not first_time)
             std::cout << ' ' << Gr[mid_line] << std::endl;
-        std::cout << ' ' << Gr[vert] <<
-                  _string_middle(len - 2, static_cast<int>(func.size()), Y[func]) <<
-                  Gr[vert] << std::endl;
+        std::cout << ' ' << Gr[vert]
+            << _string_middle(len - 2, static_cast<int>(func.size()), Y[func])
+            << Gr[vert] << std::endl;
 
         first_time = false;
     }
@@ -97,11 +108,13 @@ private:
     void _start(const std::string &container)
     {
         std::cout << ' ' << Gr[upper_box] << std::endl;
-        std::cout << ' ' << Gr[vert] <<
-                  _string_middle(len - 2, static_cast<int>(35 + container.size()),
-                                Y["Benchmark speed test for "] +
-                                P[container] + Y[" container"]) <<
-                  Gr[vert] << std::endl;
+        std::cout << ' ' << Gr[vert]
+            << _string_middle(
+                len - 2,
+                static_cast<int>(35 + container.size()),
+                Y["Benchmark speed test for "]
+                    + P[container] + Y[" container"]
+            ) << Gr[vert] << std::endl;
         std::cout << ' ' << Gr[lower_box] << std::endl;
 
         std::cout << ' ' << Gr[upper_box] << std::endl;
@@ -127,7 +140,8 @@ private:
         if (ft_time > std_time)
             std::swap(ft_col, std_col);
 
-        std::cout << ' ' << Gr[vert] << _string_mul(" ", len - 2) << Gr[vert] << std::endl;
+        std::cout << ' ' << Gr[vert] << _string_mul(" ", len - 2) << Gr[vert]
+            << std::endl;
         std::string left;
         std::string right;
         {
@@ -165,7 +179,8 @@ private:
         int delta = width - str_size;
         int left_space = delta / 2;
         int right_space = delta / 2 + delta % 2;
-        return _string_mul(" ", left_space) + str + _string_mul(" ", right_space);
+        return
+            _string_mul(" ", left_space) + str + _string_mul(" ", right_space);
     }
 
     std::string _string_mul(const std::string &str, int n)
@@ -185,7 +200,8 @@ private:
             time = round(time * 100) / 100;
         ss << time << "s";
         std::string ret = ss.str();
-        return Purple + ret + _string_mul(" ", static_cast<int>(6 - ret.size()));
+        return
+            Purple + ret + _string_mul(" ", static_cast<int>(6 - ret.size()));
     }
 
     int len;

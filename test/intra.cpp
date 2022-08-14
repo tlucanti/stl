@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   intra.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/14 16:26:14 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:12:34 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <iostream>
 #include <string>
 #include <deque>
@@ -118,7 +130,11 @@ int main(int argc, char** argv) {
 	MutantStack<char> iterable_stack;
 	for (char letter = 'a'; letter <= 'z'; letter++)
 		iterable_stack.push(letter);
-	for (MutantStack<char>::iterator it = iterable_stack.begin(); it != iterable_stack.end(); it++)
+	for (
+			MutantStack<char>::iterator it = iterable_stack.begin();
+			it != iterable_stack.end();
+			it++
+		)
 	{
 		std::cout << *it;
 	}

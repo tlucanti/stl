@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test.hpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:23:54 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef TEST_HPP
 # define TEST_HPP
@@ -49,7 +60,8 @@ void run_test(func_T func)
     try { \
         if (not (e)) \
         { \
-            std::cout << tlucanti::R << "assertion failed: " << tlucanti::Y << (msg) << tlucanti::S << std::endl; \
+            std::cout << tlucanti::R << "assertion failed: " << tlucanti::Y \
+                << (msg) << tlucanti::S << std::endl; \
             if (do_throw) throw std::logic_error("assertation failed"); \
         } \
         else { \
@@ -57,27 +69,56 @@ void run_test(func_T func)
             ++grand_total_ok; \
         } \
     } catch (std::exception &ex) { \
-        std::cout << tlucanti::R << "task fall with exception: " << tlucanti::Y << ex.what() << tlucanti::S << std::endl; \
+        std::cout << tlucanti::R << "task fall with exception: " \
+            << tlucanti::Y << ex.what() << tlucanti::S << std::endl; \
         if (do_throw) throw ; \
     } \
 } while (false)
 
 # ifdef __DEBUG
-#  define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
-    ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
-    ASSERT((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
-    ASSERT((__vec)._allocated == (__allocated), (__msg)  + std::string(" allocated check")); \
-    ASSERT((__vec).capacity() == (__allocated), (__msg) + std::string(" .capacity() check")); \
-    ASSERT((__vec)._begin == (__begin), (__msg) + std::string(" begin iterator check")); \
-    ASSERT((__vec)._end == (__end), (__msg) + std::string(" end iterator check")); \
-    ASSERT((__vec)._allocator == (__alloc), (__msg) + std::string(" allocator check")); \
-    ASSERT((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
+#  define vec_ASSERT( \
+        __vec, \
+        __size, \
+        __allocated, \
+        __begin, \
+        __end, \
+        __alloc, \
+        __msg \
+    ) \
+    ASSERT((__vec).size() == (__size), \
+        (__msg) + std::string(" size() check")); \
+    ASSERT((__vec).empty() == !(__size), \
+        (__msg) + std::string(" empty() check")); \
+    ASSERT((__vec)._allocated == (__allocated), \
+        (__msg)  + std::string(" allocated check")); \
+    ASSERT((__vec).capacity() == (__allocated), \
+        (__msg) + std::string(" .capacity() check")); \
+    ASSERT((__vec)._begin == (__begin), \
+        (__msg) + std::string(" begin iterator check")); \
+    ASSERT((__vec)._end == (__end), \
+        (__msg) + std::string(" end iterator check")); \
+    ASSERT((__vec)._allocator == (__alloc), \
+        (__msg) + std::string(" allocator check")); \
+    ASSERT((__vec).get_allocator() == (__alloc), \
+        (__msg) + std::string(" .get_allocator() check"))
 # else /* no __DEBUG */
-#  define vec_ASSERT(__vec, __size, __allocated, __begin, __end, __alloc, __msg) \
-    ASSERT((__vec).size() == (__size), (__msg) + std::string(" size() check")); \
-    ASSERT((__vec).empty() == !(__size), (__msg) + std::string(" empty() check")); \
-    ASSERT((__vec).capacity() == (__allocated), (__msg) + std::string(" .capacity() check")); \
-    ASSERT((__vec).get_allocator() == (__alloc), (__msg) + std::string(" .get_allocator() check"))
+#  define vec_ASSERT( \
+        __vec, \
+        __size, \
+        __allocated, \
+        __begin, \
+        __end, \
+        __alloc, \
+        __msg \
+    ) \
+    ASSERT((__vec).size() == (__size), \
+        (__msg) + std::string(" size() check")); \
+    ASSERT((__vec).empty() == !(__size), \
+        (__msg) + std::string(" empty() check")); \
+    ASSERT((__vec).capacity() == (__allocated), \
+        (__msg) + std::string(" .capacity() check")); \
+    ASSERT((__vec).get_allocator() == (__alloc), \
+        (__msg) + std::string(" .get_allocator() check"))
 # endif /* __DEBUG */
 
 # define vec_cmp(__msg, __type, __vec, __cmp) do { \
@@ -122,7 +163,8 @@ void run_test(func_T func)
     __sscm << "]"; \
     if (not __ok) \
     { \
-        __ss << "vector compare: (expected) " << __sscm.str() << " != (got) " << __ssvc.str() << ": "; \
+        __ss << "vector compare: (expected) " << __sscm.str() << " != (got) " \
+            << __ssvc.str() << ": "; \
     } \
     ASSERT(__ok, __ss.str() + (__msg)); \
 } while (false)
@@ -156,13 +198,16 @@ void to_trash_(T &_) {(void)_;}
 void start(const char *msg) {
     all = 0;
     ok = 0;
-    std::cout << tlucanti::P << "** results for " << msg << "**" << tlucanti::S << "\n";
+    std::cout << tlucanti::P << "** results for " << msg << "**"
+        << tlucanti::S << "\n";
 }
 void result() {
     if (ok == all)
-        std::cout << tlucanti::G << "[ OK ] all " << tlucanti::C << all << tlucanti::G << " tests passed " << tlucanti::S << "\n\n";
+        std::cout << tlucanti::G << "[ OK ] all " << tlucanti::C << all
+            << tlucanti::G << " tests passed " << tlucanti::S << "\n\n";
     else
-        std::cout << tlucanti::R << "[FAIL] " << tlucanti::C << ok << " / " << all << tlucanti::R << " tests passed\n\n";
+        std::cout << tlucanti::R << "[FAIL] " << tlucanti::C << ok << " / "
+            << all << tlucanti::R << " tests passed\n\n";
 }
 
 void final() {
@@ -180,7 +225,8 @@ void final() {
     }
     std::cout << c << "╭────────────────────╮" << tlucanti::S << "\n";
     std::cout << c << "│" << status << "│"<< tlucanti::S << "\n";
-    std::cout << c << "│ " << "TOTAL TESTS PASSED " << c << "│" << tlucanti::S << "\n";
+    std::cout << c << "│ " << "TOTAL TESTS PASSED " << c << "│"
+        << tlucanti::S << "\n";
 
     printf("%s│     ", c.str().c_str());
     printf("%s", tlucanti::C.str().c_str());
@@ -220,15 +266,40 @@ void sigabrt_catcher(UNUSED int sig)
 #endif
 }
 
-# define vec_123(__vec) ft::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
-# define vec_111(__vec) ft::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
-# define std_vec_123(__vec) std::vector<int> __vec(3); (__vec)[0] = 1; (__vec)[1] = 2; (__vec)[2] = 3
-# define std_vec_111(__vec) std::vector<int> __vec(3); (__vec)[0] = 123; (__vec)[1] = 456; (__vec)[2] = 789
-# define const_vec_123(__vec) vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
+# define vec_123(__vec) \
+    ft::vector<int> __vec(3); \
+    (__vec)[0] = 1; \
+    (__vec)[1] = 2; \
+    (__vec)[2] = 3
+
+# define vec_111(__vec) \
+    ft::vector<int> __vec(3); \
+    (__vec)[0] = 123; \
+    (__vec)[1] = 456; \
+    (__vec)[2] = 789
+
+# define std_vec_123(__vec) \
+    std::vector<int> __vec(3); \
+    (__vec)[0] = 1; \
+    (__vec)[1] = 2; \
+    (__vec)[2] = 3
+
+# define std_vec_111(__vec) \
+    std::vector<int> __vec(3); \
+    (__vec)[0] = 123; \
+    (__vec)[1] = 456; \
+    (__vec)[2] = 789
+
+# define const_vec_123(__vec) \
+    vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
     const ft::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
-# define const_vec_111(__vec) vec_111(GLUE2(__vec_non_const_macro__, __vec)); \
+
+# define const_vec_111(__vec) \
+    vec_111(GLUE2(__vec_non_const_macro__, __vec)); \
     const ft::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
-# define const_std_vec_123(__vec) std_vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
+
+# define const_std_vec_123(__vec) \
+    std_vec_123(GLUE2(__vec_non_const_macro__, __vec)); \
     const std::vector<int> __vec = GLUE2(__vec_non_const_macro__, __vec)
 
 template<class V>
@@ -259,13 +330,15 @@ void std_vec_cmp(const v1T &expected, const v2T &got, const std::string &msg)
     sexp = vec_to_str_(expected);
     sgot = vec_to_str_(got);
     std::string outmsg;
-    if (static_cast<std::ptrdiff_t>(expected.size()) != static_cast<std::ptrdiff_t>(got.size()))
+    if (static_cast<std::ptrdiff_t>(expected.size())
+        != static_cast<std::ptrdiff_t>(got.size()))
     {
         _ok = false;
         outmsg = "vector size mismatch: ";
         goto _ASSERT_LABEL;
     }
-    for (std::ptrdiff_t i=0; i < static_cast<std::ptrdiff_t>(expected.size()); ++i)
+    for (std::ptrdiff_t i=0;
+        i < static_cast<std::ptrdiff_t>(expected.size()); ++i)
     {
         if (expected.data()[i] != got.data()[i])
         {
@@ -275,7 +348,8 @@ void std_vec_cmp(const v1T &expected, const v2T &got, const std::string &msg)
         }
     }
     _ASSERT_LABEL:
-    ASSERT(_ok, outmsg + "(expected) " + sexp + " != (got) " + sgot + ": " + msg);
+    ASSERT(_ok,
+        outmsg + "(expected) " + sexp + " != (got) " + sgot + ": " + msg);
 }
 
 
@@ -348,13 +422,13 @@ std::ostream &operator <<(std::ostream &out, const ColString &s)
     return out;
 }
 
-ColString Def("def", ColStr_Green_); // = G + std::string("def") + Y;
-ColString Cons("cons", ColStr_Cyan_); // = C + std::string("cons") + Y;
-ColString Del("del", ColStr_Red_); // = R + std::string("del") + Y;
-ColString Cpy("cpy", ColStr_Blue_); // = C + std::string("cpy") + Y;
-ColString Icpy("icpy", ColStr_Blue_); // = B + std::string("icpy") + Y;
-ColString Mv("mv", ColStr_Purple_); // = P + std::string("mv") + Y;
-ColString Imv("imv", ColStr_Black_); // = K + std::string("imv") + Y;
+ColString Def("def", ColStr_Green_);    // = G + std::string("def")  + Y;
+ColString Cons("cons", ColStr_Cyan_);   // = C + std::string("cons") + Y;
+ColString Del("del", ColStr_Red_);      // = R + std::string("del")  + Y;
+ColString Cpy("cpy", ColStr_Blue_);     // = C + std::string("cpy")  + Y;
+ColString Icpy("icpy", ColStr_Blue_);   // = B + std::string("icpy") + Y;
+ColString Mv("mv", ColStr_Purple_);     // = P + std::string("mv")   + Y;
+ColString Imv("imv", ColStr_Black_);    // = K + std::string("imv")  + Y;
 
 std::vector<ColString> moves;
 std::vector<ColString> moves_std;
@@ -403,7 +477,8 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << tlucanti::G << " default" << tlucanti::S << "\n";
+            std::cout << str() << tlucanti::G << " default"
+                << tlucanti::S << "\n";
     }
     UserClass(int _a, int _b) : a(_a), b(_b) {
         valid = new(bool);
@@ -415,7 +490,8 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << tlucanti::C << " constructor" << tlucanti::S << "\n";
+            std::cout << str() << tlucanti::C << " constructor"
+                << tlucanti::S << "\n";
     }
     ~UserClass() EXCEPT(std::runtime_error) {
         if (!valid)
@@ -429,7 +505,8 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << tlucanti::R << " destructor" << tlucanti::S << "\n";
+            std::cout << str() << tlucanti::R << " destructor"
+                << tlucanti::S << "\n";
     }
     WUR std::string cl() const {
         switch (my_c % 7) {
@@ -481,7 +558,8 @@ struct UserClass
             convolve(moves);
         }
         if (verbose)
-            std::cout << str() << tlucanti::C << " << copy assign" << tlucanti::S << "\n";
+            std::cout << str() << tlucanti::C << " << copy assign"
+                << tlucanti::S << "\n";
         return *this;
     }
 
@@ -577,7 +655,8 @@ int rb_tree_height_dfs_(Rb_node *node, int cur=1)
 }
 
 template <typename Rb_node>
-void print_rb_level_(Rb_node *node, int level, std::vector<Rb_node *> &line, int cur=0)
+void print_rb_level_(Rb_node *node, int level,
+        std::vector<Rb_node *> &line, int cur=0)
 {
     if (cur == level)
     {
@@ -631,10 +710,12 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
     {
         std::vector<_Rb_node *> line;
         print_rb_level_(tree, level, line);
-        std::cout << string_mul("    ", ipow(2, static_cast<unsigned long>(h - level - 1)) - 1);
+        std::cout << string_mul("    ",
+            ipow(2, static_cast<unsigned long>(h - level - 1)) - 1);
         for (size_t i=0; i < line.size(); ++i)
         {
-            std::string space = string_mul("    ", ipow(2, static_cast<unsigned long>(h - level)) - 1);
+            std::string space = string_mul("    ",
+                ipow(2, static_cast<unsigned long>(h - level)) - 1);
             if (line[i] == nullptr)
             {
                 std::cout << " .  " << space;
@@ -643,7 +724,8 @@ void _print_rb_tree(_Rb_node *tree, const char *msg)
             tlucanti::TermColor col = tlucanti::Red;
             if (line[i]->color == _Rb_Black)
                 col = tlucanti::White;
-            std::cout << col << '[' << reinterpret_cast<long>(line[i]->key) << ']' << tlucanti::Reset << space;
+            std::cout << col << '[' << reinterpret_cast<long>(line[i]->key)
+                << ']' << tlucanti::Reset << space;
         }
         std::cout << std::endl;
     }
@@ -677,14 +759,27 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
     _print_rb_tree(tree->root.node, msg.c_str());
 }
 
-# define CHECK_EDGE(__root, __dir, __root_key, __dir_key, __root_col, __dir_col, __msg) \
+# define CHECK_EDGE( \
+        __root, \
+        __dir, \
+        __root_key, \
+        __dir_key, \
+        __root_col, \
+        __dir_col, \
+        __msg \
+    ) \
     ASSERT((__root), (__msg) + std::string(" root check")); \
     ASSERT((__root)->__dir, (__msg) + std::string(" dir check")); \
-    ASSERT((__root)->key == PTR(__root_key), (__msg) + std::string(" root key check")); \
-    ASSERT((__root)->__dir->key == PTR(__dir_key), (__msg) + std::string(" dir key check")); \
-    ASSERT((__root)->color == (__root_col), (__msg) + std::string(" root color check")); \
-    ASSERT((__root)->__dir->color == (__dir_col), (__msg) + std::string(" dir color check")); \
-    ASSERT((__root)->__dir->parent == (__root), (__msg) + std::string(" dir parent check"))
+    ASSERT((__root)->key == PTR(__root_key), \
+        (__msg) + std::string(" root key check")); \
+    ASSERT((__root)->__dir->key == PTR(__dir_key), \
+        (__msg) + std::string(" dir key check")); \
+    ASSERT((__root)->color == (__root_col), \
+        (__msg) + std::string(" root color check")); \
+    ASSERT((__root)->__dir->color == (__dir_col), \
+        (__msg) + std::string(" dir color check")); \
+    ASSERT((__root)->__dir->parent == (__root), \
+        (__msg) + std::string(" dir parent check"))
 
 # define _R _Rb_Red
 # define _B _Rb_Black
@@ -703,19 +798,22 @@ void print_rb_tree(rb_tree *tree, const std::string &msg)
     rb_node __rm = rb_remove(&tree, PTR(__val), int_compare, int_destroy); \
     if (__find.node != nullptr) \
     { \
-        ASSERT(__find.node->key == __rm.node->key, "success remove return test"); \
+        ASSERT(__find.node->key == __rm.node->key, \
+            "success remove return test"); \
     } \
     else \
         ASSERT(__rm.node == nullptr, "failed remove return test"); \
 } while (false)
 
 # define RB_NOT_FOUND(__val, __msg) do { \
-    ASSERT(rb_get_key(rb_find(&tree, PTR(__val), int_compare)) == nullptr, __msg); \
+    ASSERT(rb_get_key(rb_find(&tree, PTR(__val), \
+        int_compare)) == nullptr, __msg); \
 } while (false)
 
 # define FIND_ASSERT(__tree, __val, __msg) do { \
     RB_TREE_INSERT(__tree, __val); \
-    ASSERT(rb_get_key(rb_find(&__tree, PTR(__val), int_compare)) == PTR(__val), __msg); \
+    ASSERT(rb_get_key(rb_find(&__tree, PTR(__val), \
+        int_compare)) == PTR(__val), __msg); \
 } while (false)
 
 int random(int start, int stop)
@@ -818,7 +916,8 @@ int int_compare(void *lhs, void *rhs)
 }
 
 template <typename rb_tree>
-void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int max, rb_tree *tree2=nullptr)
+void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count,
+    int max, rb_tree *tree2=nullptr)
 {
     for (int i=0; i < count; ++i)
     {
@@ -833,7 +932,8 @@ void generate_rb_tree(rb_tree *tree, std::vector<int> &_moves, int count, int ma
 template <typename _Rb_node>
 void _dfs_compare(_Rb_node *root, const std::set<int> &std_tree)
 {
-    if (std_tree.count(static_cast<int>(reinterpret_cast<std::size_t>(root->key))) == 0)
+    if (std_tree.count(
+        static_cast<int>(reinterpret_cast<std::size_t>(root->key))) == 0)
     {
         std::stringstream ss;
         ss << "tree has excess element " << root->key;
@@ -870,8 +970,10 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
 
 
 # define PAIR_ASSERT(__name, __first, __second, __msg) \
-    ASSERT((__name).first == (__first), std::string("constructor first argument check ") + (__msg)); \
-    ASSERT((__name).second == (__second), std::string("constructor second argument check ") + (__msg))
+    ASSERT((__name).first == (__first), \
+        std::string("constructor first argument check ") + (__msg)); \
+    ASSERT((__name).second == (__second), \
+        std::string("constructor second argument check ") + (__msg))
 
 # define PAIR_SET_ASSERT(__name, __type1, __type2, __first, __second, __msg) \
     ft::pair<__type1, __type2> __name(__first, __second); \
@@ -885,17 +987,37 @@ void compare_trees(rb_tree *tree, const std::set<int> &std_tree)
         ASSERT(PTR(node->get_key()) == PTR(__cmp), __msg); \
 } while (false)
 
-# define _RBCPP_METHODVAL_ASSERT(__method, __val, __msg) _RBCPP_METHODVAL_CMPASSERT(__method, __val, __val, __msg)
-# define _RBCPP_METHODNODE_ASSERT(__method, __nd, __val, __msg) _RBCPP_METHODVAL_CMPASSERT(__method, __nd, __val, __msg)
+# define _RBCPP_METHODVAL_ASSERT(__method, __val, __msg) \
+    _RBCPP_METHODVAL_CMPASSERT(__method, __val, __val, __msg)
+# define _RBCPP_METHODNODE_ASSERT(__method, __nd, __val, __msg) \
+    _RBCPP_METHODVAL_CMPASSERT(__method, __nd, __val, __msg)
 
-# define RBCPP_INSERT_ASSERT(__val, __msg) _RBCPP_METHODVAL_ASSERT(insert, __val, __msg);
-# define RBCPP_FIND_ASSERT(__val, __msg) _RBCPP_METHODVAL_ASSERT(find, __val, __msg)
-# define RBCPP_REMOVE_ASSERT(__val, __cmp, __msg) _RBCPP_METHODVAL_CMPASSERT(remove, __val, __cmp, __msg)
-# define RBCPP_NEXT_ASSERT(__nd, __val, __msg) _RBCPP_METHODNODE_ASSERT(next, __nd, __val, __msg)
-# define RBCPP_PREV_ASSERT(__nd, __val, __msg) _RBCPP_METHODNODE_ASSERT(prev, __nd, __val, __msg)
-# define RBCPP_LOWERBOUND_ASSERT(__val, __cmp, __msg) _RBCPP_METHODVAL_CMPASSERT(lower_bound, __val, __cmp, __msg)
-# define RBCPP_UPPERBOUND_ASSERT(__val, __cmp, __msg) _RBCPP_METHODVAL_CMPASSERT(upper_bound, __val, __cmp, __msg)
+# define RBCPP_INSERT_ASSERT(__val, __msg)\
+     _RBCPP_METHODVAL_ASSERT(insert, __val, __msg);
 
-# define set_123(__name) ft::set<int> __name; (__name).insert(1), (__name).insert(2), (__name).insert(3)
+# define RBCPP_FIND_ASSERT(__val, __msg) \
+    _RBCPP_METHODVAL_ASSERT(find, __val, __msg)
+
+# define RBCPP_REMOVE_ASSERT(__val, __cmp, __msg) \
+    _RBCPP_METHODVAL_CMPASSERT(remove, __val, __cmp, __msg)
+
+# define RBCPP_NEXT_ASSERT(__nd, __val, __msg) \
+    _RBCPP_METHODNODE_ASSERT(next, __nd, __val, __msg)
+
+# define RBCPP_PREV_ASSERT(__nd, __val, __msg) \
+    _RBCPP_METHODNODE_ASSERT(prev, __nd, __val, __msg)
+
+# define RBCPP_LOWERBOUND_ASSERT(__val, __cmp, __msg) \
+    _RBCPP_METHODVAL_CMPASSERT(lower_bound, __val, __cmp, __msg)
+
+# define RBCPP_UPPERBOUND_ASSERT(__val, __cmp, __msg) \
+    _RBCPP_METHODVAL_CMPASSERT(upper_bound, __val, __cmp, __msg)
+
+
+# define set_123(__name) \
+    ft::set<int> __name; \
+    (__name).insert(1), \
+    (__name).insert(2), \
+    (__name).insert(3)
 
 #endif /* PAIR_HPP */

@@ -6,7 +6,7 @@
 /*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/13 18:40:45 by tlucanti          #+#    #+#             */
-/*   Updated: 2022/08/13 19:00:39 by tlucanti         ###   ########.fr       */
+/*   Updated: 2022/08/14 19:29:15 by tlucanti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,7 @@
 # include <cstdlib>
 # include <cctype>
 
-# ifdef __DEBUG
-#  define PRIVATE   public
-#  define PROTECTED public
-# else
-#  define PRIVATE   private
-#  define PROTECTED protected
-# endif
-
+// -----------------------------------------------------------------------------
 # define CPP	    1
 # define CPP98		__cplusplus >= 199711L
 # define CPP11		__cplusplus >= 201103L
@@ -40,6 +33,7 @@
 # define PRECPP20	__cplusplus <  202002L
 # define PRECPP23	1
 
+// -----------------------------------------------------------------------------
 # define TLU_NAMESPACE              tlucanti
 # define TLU_NAMESPACE_BEGIN        namespace TLU_NAMESPACE {
 # define TLU_NAMESPACE_END          }
@@ -47,9 +41,11 @@
 # define TLU_NAMESPACE_HIDDEN_BEGIN namespace TLU_NAMESPACE_HIDDEN {
 # define TLU_NAMESPACE_HIDDEN_END   }
 
+// -----------------------------------------------------------------------------
 # define LIKELY(__expr)     __builtin_expect((__expr), 1)
 # define UNLIKELY(__expr)   __builtin_expect((__expr), 0)
 
+// -----------------------------------------------------------------------------
 # define GLUE2(__a, __b)                __a##__b
 # define GLUE3(__a, __b, __c)           GLUE2(__a, __b)##__c
 # define GLUE4(__a, __b, __c, __d)      GLUE3(__a, __b, __c)##__d
@@ -91,6 +87,8 @@ inline void do_abort_(
     abort();
 }
 
+// =============================================================================
+// ---------------------------------- C++ 11 -----------------------------------
 # if CPP11
 #  ifndef DEFAULT
 #   define DEFAULT      =default;
@@ -107,7 +105,7 @@ inline void do_abort_(
 #  ifndef EXCEPT
 #   define EXCEPT(__e)  noexcept(false)
 #  endif /* EXCEPT */
-
+// -----------------------------------------------------------------------------
 # else /* PRECPP11 */
 #  ifndef DEFAULT
 #   define DEFAULT  {}
@@ -135,13 +133,17 @@ inline void do_abort_(
 #  endif /* AUTO */
 # endif /* CPP11 */
 
-
+// =============================================================================
+// ---------------------------------- C++ 14 -----------------------------------
 # if PRECPP14
 #  ifndef constexpr
 #   define constexpr
 #  endif /* constexpr */
 # endif /* PRECPP14 */
 
+
+// =============================================================================
+// ---------------------------------- C++ 17 -----------------------------------
 # if CPP17
 #  ifndef WUR
 #   define WUR      [[nodiscard]]

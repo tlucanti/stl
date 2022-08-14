@@ -15,6 +15,7 @@
 
 # include "defs.hpp"
 
+// -----------------------------------------------------------------------------
 # define IS_INTEGRAL(__type) typename TLU_NAMESPACE::enable_if< \
     TLU_NAMESPACE::is_integral<__type>::value, __type>::type
 # define NOT_INTEGRAL(__type) typename TLU_NAMESPACE::enable_if< \
@@ -91,7 +92,7 @@ TLU_NAMESPACE_BEGIN
 
 // -------------------------------- is_pointer ---------------------------------
     template <class type_T> struct is_pointer           : public false_type {};
-    template <class type_T> struct is_pointer<type_T *> : public true_type {}
+    template <class type_T> struct is_pointer<type_T *> : public true_type {};
 
 // -------------------------------- is_iterator --------------------------------
 TLU_NAMESPACE_HIDDEN_BEGIN

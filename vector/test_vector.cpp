@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_vector.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:24:14 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "vector.hpp"
 #include "test.hpp"
@@ -89,25 +100,30 @@ void constructor_test()
     std::allocator<int> alloc;
     {
         ft::vector<int> a;
-        vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc, "default constructor test");
+        vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc,
+            "default constructor test");
     }
     {
         ft::vector<int> a(alloc);
-        vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc, "default constructor + alloc test");
+        vec_ASSERT(a, 0, 0, nullptr, nullptr, alloc,
+            "default constructor + alloc test");
     }
     {
         ft::vector<int> a(3);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size constructor test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "default size constructor test");
         ASSERT(a.size() == 3, "size 3 vec iterator test 1");
     }
     {
         ft::vector<int> a(3, alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "default size + alloc constructor test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "default size + alloc constructor test");
         ASSERT(a.size() == 3, "default size iterator test 1");
     }
     {
         ft::vector<int> a(3, 123);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "constructor default value test");
         ASSERT(a.size() == 3, "constructor default value iterator test 1");
         ASSERT(a[0] == 123, "constructor default value test 1");
         ASSERT(a[1] == 123, "constructor default value test 2");
@@ -115,7 +131,8 @@ void constructor_test()
     }
     {
         ft::vector<int> a(3, 123, alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor default value + alloc test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "constructor default value + alloc test");
         ASSERT(a.size() == 3, "constructor default value + alloc iterator test 1");
         ASSERT(a[0] == 123, "constructor default value + alloc test 1");
         ASSERT(a[1] == 123, "constructor default value + alloc test 2");
@@ -126,21 +143,24 @@ void constructor_test()
         std_vec_123(stdv);
         {
             ft::vector<int> a(v.begin(), v.end());
-            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 1");
+            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+                "constructor iterator copy test 1");
             ASSERT(a.size() == 3, "constructor iterator copy iterator test 1");
             ASSERT(a[0] == 1, "constructor iterator copy test 1");
             ASSERT(a[1] == 2, "constructor iterator copy test 2");
             ASSERT(a[2] == 3, "constructor iterator copy test 3");
         } {
             ft::vector<int> a(v.data(), v.data() + v.size());
-            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 2");
+            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+                "constructor iterator copy test 2");
             ASSERT(a.size() == 3, "constructor iterator copy iterator test 2");
             ASSERT(a[0] == 1, "constructor iterator copy test 4");
             ASSERT(a[1] == 2, "constructor iterator copy test 5");
             ASSERT(a[2] == 3, "constructor iterator copy test 6");
         } {
             ft::vector<int> a(stdv.begin(), stdv.end());
-            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy test 3");
+            vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+                "constructor iterator copy test 3");
             ASSERT(a.size() == 3, "constructor iterator copy iterator test 3");
             ASSERT(a[0] == 1, "constructor iterator copy test 7");
             ASSERT(a[1] == 2, "constructor iterator copy test 8");
@@ -150,8 +170,10 @@ void constructor_test()
     {
         vec_123(v);
         ft::vector<int> a(v.begin(), v.end(), alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "constructor iterator copy + alloc test");
-        ASSERT(a.size() == 3, "constructor iterator copy + alloc iterator test 1");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "constructor iterator copy + alloc test");
+        ASSERT(a.size() == 3,
+            "constructor iterator copy + alloc iterator test 1");
         ASSERT(a[0] == 1, "constructor iterator copy + alloc test 1");
         ASSERT(a[1] == 2, "constructor iterator copy + alloc test 2");
         ASSERT(a[2] == 3, "constructor iterator copy + alloc test 3");
@@ -168,7 +190,8 @@ void constructor_test()
     {
         vec_123(v);
         ft::vector<int> a(v, alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "copy constructor + alloc test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "copy constructor + alloc test");
         ASSERT(a.size() == 3, "copy constructor + alloc iterator test 1");
         ASSERT(a[0] == 1, "copy constructor + alloc test 1");
         ASSERT(a[1] == 2, "copy constructor + alloc test 2");
@@ -178,17 +201,20 @@ void constructor_test()
     {
         vec_123(v);
         ft::vector<int> a(std::move(v));
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move constructor test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "move constructor test");
         ASSERT(a.size() == 3, "move constructor iterator test 1");
         ASSERT(a[0] == 1, "move constructor test 1");
         ASSERT(a[1] == 2, "move constructor test 2");
         ASSERT(a[2] == 3, "move constructor test 3");
-        vec_ASSERT(v, 0, 0, nullptr, nullptr, alloc, "move constructor empty vector test");
+        vec_ASSERT(v, 0, 0, nullptr, nullptr, alloc,
+            "move constructor empty vector test");
     }
     {
         vec_123(v);
         ft::vector<int> a(std::move(v), alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "move + alloc constructor test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "move + alloc constructor test");
         ASSERT(a.size() == 3, "move + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "move + alloc constructor test 1");
         ASSERT(a[1] == 2, "move + alloc constructor test 2");
@@ -197,7 +223,8 @@ void constructor_test()
     }
     {
         ft::vector<int> a({1, 2, 3});
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list constructor test");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "initializer list constructor test");
         ASSERT(a.size() == 3, "initializer list constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list constructor test 1");
         ASSERT(a[1] == 2, "initializer list constructor test 2");
@@ -205,8 +232,10 @@ void constructor_test()
     }
     {
         ft::vector<int> a({1, 2, 3}, alloc);
-        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc, "initializer list + alloc constructor test");
-        ASSERT(a.size() == 3, "initializer list + alloc constructor iterator test 1");
+        vec_ASSERT(a, 3, 7, a._begin, a._end, alloc,
+            "initializer list + alloc constructor test");
+        ASSERT(a.size() == 3,
+            "initializer list + alloc constructor iterator test 1");
         ASSERT(a[0] == 1, "initializer list + alloc constructor test 1");
         ASSERT(a[1] == 2, "initializer list + alloc constructor test 2");
         ASSERT(a[2] == 3, "initializer list + alloc constructor test 3");
@@ -456,18 +485,30 @@ void F_iterator_test_suite(myVec &a, myVec &b)
     ASSERT(b.begin() == b.end(), "iterator empty test 1");
 
     const_std_vec_123(_a);
-    ASSERT((a.begin() < a.end()) == (_a.begin() < _a.end()), "basic iterator test 12");
-    ASSERT((a.begin() > a.end()) == (_a.begin() > _a.end()), "basic iterator test 13");
-    ASSERT((a.begin() <= a.end()) == (_a.begin() <= _a.end()), "basic iterator test 14");
-    ASSERT((a.begin() >= a.end()) == (_a.begin() >= _a.end()), "basic iterator test 15");
-    ASSERT((a.begin() <= a.end() - 3) == (_a.begin() <= _a.end() - 3), "basic iterator tes 16");
-    ASSERT((a.begin() >= a.end() - 3) == (_a.begin() >= _a.end() - 3), "basic iterator tes 17");
-    ASSERT((a.end() > a.begin()) == (_a.end() > _a.begin()), "basic iterator test 18");
-    ASSERT((a.end() < a.begin()) == (_a.end() < _a.begin()), "basic iterator test 19");
-    ASSERT((a.end() >= a.begin()) == (_a.end() >= _a.begin()), "basic iterator test 20");
-    ASSERT((a.end() <= a.begin()) == (_a.end() <= _a.begin()), "basic iterator test 21");
-    ASSERT((a.end() >= a.begin() + 3) == (_a.end() >= _a.begin() + 3), "basic iterator test 22");
-    ASSERT((a.end() <= a.begin() + 3) == (_a.end() <= _a.begin() + 3), "basic iterator test 23");
+    ASSERT((a.begin() < a.end()) == (_a.begin() < _a.end()),
+        "basic iterator test 12");
+    ASSERT((a.begin() > a.end()) == (_a.begin() > _a.end()),
+        "basic iterator test 13");
+    ASSERT((a.begin() <= a.end()) == (_a.begin() <= _a.end()),
+        "basic iterator test 14");
+    ASSERT((a.begin() >= a.end()) == (_a.begin() >= _a.end()),
+        "basic iterator test 15");
+    ASSERT((a.begin() <= a.end() - 3) == (_a.begin() <= _a.end() - 3),
+        "basic iterator tes 16");
+    ASSERT((a.begin() >= a.end() - 3) == (_a.begin() >= _a.end() - 3),
+        "basic iterator tes 17");
+    ASSERT((a.end() > a.begin()) == (_a.end() > _a.begin()),
+        "basic iterator test 18");
+    ASSERT((a.end() < a.begin()) == (_a.end() < _a.begin()),
+        "basic iterator test 19");
+    ASSERT((a.end() >= a.begin()) == (_a.end() >= _a.begin()),
+        "basic iterator test 20");
+    ASSERT((a.end() <= a.begin()) == (_a.end() <= _a.begin()),
+        "basic iterator test 21");
+    ASSERT((a.end() >= a.begin() + 3) == (_a.end() >= _a.begin() + 3),
+        "basic iterator test 22");
+    ASSERT((a.end() <= a.begin() + 3) == (_a.end() <= _a.begin() + 3),
+        "basic iterator test 23");
 
     result();
 }
@@ -499,8 +540,10 @@ void F_reverse_iterator_test_suite(myVec &a, myVec &b)
     ASSERT(*(--(--a.rend())) == 2, "basic reverse iterator test 5");
     ASSERT(*(--(--(--a.rend()))) == 3, "basic reverse iterator test 6");
 
-    ASSERT(a.rbegin()++ == a.rbegin(), "basic increment reverse iterator test 1");
-    ASSERT(a.rbegin() < ++a.rbegin(), "basic increment reverse iterator test 2");
+    ASSERT(a.rbegin()++ == a.rbegin(),
+        "basic increment reverse iterator test 1");
+    ASSERT(a.rbegin() < ++a.rbegin(),
+        "basic increment reverse iterator test 2");
     ASSERT(a.rend()-- == a.rend(), "basic increment reverse iterator test 3");
     ASSERT(a.rend() > --a.rend(), "basic increment reverse iterator test 4");
 
@@ -527,18 +570,30 @@ void F_reverse_iterator_test_suite(myVec &a, myVec &b)
     ASSERT(b.begin() == b.end(), "iterator empty test 1");
 
     const_std_vec_123(_a);
-    ASSERT((a.rbegin() < a.rend()) == (_a.rbegin() < _a.rend()), "basic iterator test 12");
-    ASSERT((a.rbegin() > a.rend()) == (_a.rbegin() > _a.rend()), "basic iterator test 13");
-    ASSERT((a.rbegin() <= a.rend()) == (_a.rbegin() <= _a.rend()), "basic iterator test 14");
-    ASSERT((a.rbegin() >= a.rend()) == (_a.rbegin() >= _a.rend()), "basic iterator test 15");
-    ASSERT((a.rbegin() <= a.rend() - 3) == (_a.rbegin() <= _a.rend() - 3), "basic iterator tes 16");
-    ASSERT((a.rbegin() >= a.rend() - 3) == (_a.rbegin() >= _a.rend() - 3), "basic iterator tes 17");
-    ASSERT((a.rend() > a.rbegin()) == (_a.rend() > _a.rbegin()), "basic iterator test 18");
-    ASSERT((a.rend() < a.rbegin()) == (_a.rend() < _a.rbegin()), "basic iterator test 19");
-    ASSERT((a.rend() >= a.rbegin()) == (_a.rend() >= _a.rbegin()), "basic iterator test 20");
-    ASSERT((a.rend() <= a.rbegin()) == (_a.rend() <= _a.rbegin()), "basic iterator test 21");
-    ASSERT((a.rend() >= a.rbegin() + 3) == (_a.rend() >= _a.rbegin() + 3), "basic iterator test 22");
-    ASSERT((a.rend() <= a.rbegin() + 3) == (_a.rend() <= _a.rbegin() + 3), "basic iterator test 23");
+    ASSERT((a.rbegin() < a.rend()) == (_a.rbegin() < _a.rend()),
+        "basic iterator test 12");
+    ASSERT((a.rbegin() > a.rend()) == (_a.rbegin() > _a.rend()),
+        "basic iterator test 13");
+    ASSERT((a.rbegin() <= a.rend()) == (_a.rbegin() <= _a.rend()),
+        "basic iterator test 14");
+    ASSERT((a.rbegin() >= a.rend()) == (_a.rbegin() >= _a.rend()),
+        "basic iterator test 15");
+    ASSERT((a.rbegin() <= a.rend() - 3) == (_a.rbegin() <= _a.rend() - 3),
+        "basic iterator tes 16");
+    ASSERT((a.rbegin() >= a.rend() - 3) == (_a.rbegin() >= _a.rend() - 3),
+        "basic iterator tes 17");
+    ASSERT((a.rend() > a.rbegin()) == (_a.rend() > _a.rbegin()),
+        "basic iterator test 18");
+    ASSERT((a.rend() < a.rbegin()) == (_a.rend() < _a.rbegin()),
+        "basic iterator test 19");
+    ASSERT((a.rend() >= a.rbegin()) == (_a.rend() >= _a.rbegin()),
+        "basic iterator test 20");
+    ASSERT((a.rend() <= a.rbegin()) == (_a.rend() <= _a.rbegin()),
+        "basic iterator test 21");
+    ASSERT((a.rend() >= a.rbegin() + 3) == (_a.rend() >= _a.rbegin() + 3),
+        "basic iterator test 22");
+    ASSERT((a.rend() <= a.rbegin() + 3) == (_a.rend() <= _a.rbegin() + 3),
+        "basic iterator test 23");
 
     result();
 }
@@ -1216,7 +1271,8 @@ void user_type_test()
             std::vector<UserClass> a;
             a.push_back(UserClass());
             ColString _vec_[] = {Def, Cpy, Del};
-            vec_cmp_lock("std -- user class modern test 0", ColString, moves, _vec_);
+            vec_cmp_lock("std -- user class modern test 0",
+                ColString, moves, _vec_);
         }
         ColString _v_[] = {Def, Cpy, Del * 2};
         vec_cmp_lock("std -- user class modern test 1", ColString, moves, _v_);
@@ -1262,7 +1318,8 @@ void user_type_test()
     {
         moves.clear();
         {
-            ft::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
+            ft::vector<UserClass> a(11, UserClass(123, 456));
+                // 11 items + 18 allocated
             ColString _vec1_[] = {Cons, Cpy * 11, Del};
             vec_cmp_lock("user class modern test 5", ColString, moves, _vec1_);
             moves.clear();
@@ -1282,9 +1339,11 @@ void user_type_test()
     {{{
         moves.clear();
         {
-            std::vector<UserClass> a(11, UserClass(123, 456)); // 11 items + 18 allocated
+            std::vector<UserClass> a(11, UserClass(123, 456));
+                // 11 items + 18 allocated
             ColString _vec1_[] = {Cons, Cpy * 11, Del};
-            vec_cmp_lock("std -- user class modern test 5", ColString, moves, _vec1_);
+            vec_cmp_lock("std -- user class modern test 5",
+                ColString, moves, _vec1_);
             moves.clear();
             a.pop_back(); // 10 left + 1 del
             a.pop_back(); // 9 left + 2 del
@@ -1292,7 +1351,8 @@ void user_type_test()
             a.pop_back(); // 7 left + 4 del
             a.pop_back(); // 6 left + 5 del --> reallocation
             ColString _vec2_[] = {Del * 5};
-            vec_cmp_lock("std -- user class modern test 6", ColString, moves, _vec2_);
+            vec_cmp_lock("std -- user class modern test 6",
+                ColString, moves, _vec2_);
             moves.clear();
         }
         ColString _v_[] = {Del * 6};
@@ -1322,11 +1382,13 @@ void user_type_test()
         {
             std::vector<UserClass> a(3);
             ColString _vec1_[] = {Def * 3};
-            vec_cmp_lock("std -- user class modern test 8", ColString, moves, _vec1_);
+            vec_cmp_lock("std -- user class modern test 8",
+                ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin());
             ColString _vec2_[] = {Icpy, Del};
-            vec_cmp_lock("std -- user class modern test 9", ColString, moves, _vec2_);
+            vec_cmp_lock("std -- user class modern test 9",
+                ColString, moves, _vec2_);
             moves.clear();
         }
         ColString _v_[] = {Del * 2};
@@ -1355,12 +1417,14 @@ void user_type_test()
         {
             std::vector<UserClass> a(5);
             ColString _vec1_[] = {Def * 5};
-            vec_cmp_lock("std -- user class modern test 11", ColString, moves, _vec1_);
+            vec_cmp_lock("std -- user class modern test 11",
+                ColString, moves, _vec1_);
             moves.clear();
             a.erase(++a.begin(), --a.end());
             ASSERT(a.size() == 2, "user class test 13");
             ColString _vec2_[] = {Icpy, Del * 3};
-            vec_cmp_lock("std -- user class modern test 12", ColString, moves, _vec2_);
+            vec_cmp_lock("std -- user class modern test 12",
+                ColString, moves, _vec2_);
             moves.clear();
         }
         ColString _v_[] = {Del * 2};
@@ -1389,7 +1453,8 @@ void user_type_test()
             ASSERT(UserClass::total_instances == 0, "std -- user type test 15");
             a.insert(a.end(), UserClass(1, 2));
             ColString _vec_[] = {Cons, Cpy, Del};
-            vec_cmp_lock("std -- user class modern test 14", ColString, moves, _vec_);
+            vec_cmp_lock("std -- user class modern test 14",
+                ColString, moves, _vec_);
             moves.clear();
         }
         ColString _v_[] = {Del};
@@ -1407,11 +1472,13 @@ void user_type_test()
             {
                 ft::vector<UserClass> b(3, UserClass(4, 5));
                 ColString _vec2_[] = {Cons, Cpy * 3, Del};
-                vec_cmp_lock("user class modern test 17", ColString, moves, _vec2_);
+                vec_cmp_lock("user class modern test 17",
+                    ColString, moves, _vec2_);
                 moves.clear();
                 a.insert(++a.begin(), b.begin(), b.end());
                 ColString _vec3_[] = {Cpy, Icpy, Cpy * 2};
-                vec_cmp_lock("user class modern test 18", ColString, moves, _vec3_);
+                vec_cmp_lock("user class modern test 18",
+                    ColString, moves, _vec3_);
                 moves.clear();
                 ASSERT(UserClass::total_instances == 8, "user type test 16.1");
             }
@@ -1429,25 +1496,30 @@ void user_type_test()
         {
             std::vector<UserClass> a(2);
             ColString _vec1_[] = {Def * 2};
-            vec_cmp_lock("std -- user class modern test 16", ColString, moves, _vec1_);
+            vec_cmp_lock("std -- user class modern test 16",
+                ColString, moves, _vec1_);
             moves.clear();
             {
                 std::vector<UserClass> b(3, UserClass(4, 5));
                 ColString _vec2_[] = {Cons, Cpy * 3, Del};
-                vec_cmp_lock("std -- user class modern test 17", ColString, moves, _vec2_);
+                vec_cmp_lock("std -- user class modern test 17",
+                    ColString, moves, _vec2_);
                 moves.clear();
                 a.insert(++(++a.begin()), b.begin(), b.end());
                 ColString _vec3_[] = {Cpy * 5, Del * 2};
-                vec_cmp_lock("std -- user class modern test 18", ColString, moves, _vec3_);
+                vec_cmp_lock("std -- user class modern test 18",
+                    ColString, moves, _vec3_);
                 moves.clear();
             }
             ColString _v1_[] = {Del * 3};
-            vec_cmp_lock("std -- user class modern test 18.1", ColString, moves, _v1_);
+            vec_cmp_lock("std -- user class modern test 18.1",
+                ColString, moves, _v1_);
             ASSERT(UserClass::total_instances == 5, "std -- user type test 17");
             moves.clear();
         }
         ColString _v2_[] = {Del * 5};
-        vec_cmp_lock("std -- user class modern test 19", ColString, moves, _v2_);
+        vec_cmp_lock("std -- user class modern test 19",
+            ColString, moves, _v2_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 18");
     }}}
     {
@@ -1458,11 +1530,13 @@ void user_type_test()
             {
                 ft::vector<UserClass> b(3);
                 ColString _vec1_[] = {Def * 3};
-                vec_cmp_lock("user class modern test 20", ColString, moves, _vec1_);
+                vec_cmp_lock("user class modern test 20",
+                    ColString, moves, _vec1_);
                 moves.clear();
                 a.insert(a.begin(), b.begin(), b.end());
                 ColString _vec2_[] = {Cpy * 3};
-                vec_cmp_lock("user class modern test 21", ColString, moves, _vec2_);
+                vec_cmp_lock("user class modern test 21",
+                    ColString, moves, _vec2_);
                 ASSERT(UserClass::total_instances == 6, "user type test 20");
                 moves.clear();
             }
@@ -1483,21 +1557,26 @@ void user_type_test()
             {
                 std::vector<UserClass> b(3);
                 ColString _vec1_[] = {Def * 3};
-                vec_cmp_lock("std -- user class modern test 20", ColString, moves, _vec1_);
+                vec_cmp_lock("std -- user class modern test 20",
+                    ColString, moves, _vec1_);
                 moves.clear();
                 a.insert(a.begin(), b.begin(), b.end());
                 ColString _vec2_[] = {Cpy * 3};
-                vec_cmp_lock("std -- user class modern test 21", ColString, moves, _vec2_);
-                ASSERT(UserClass::total_instances == 6, "std -- user type test 20");
+                vec_cmp_lock("std -- user class modern test 21",
+                    ColString, moves, _vec2_);
+                ASSERT(UserClass::total_instances == 6,
+                    "std -- user type test 20");
                 moves.clear();
             }
             ColString _v1_[] = {Del * 3};
-            vec_cmp_lock("std -- user class modern test 22", ColString, moves, _v1_);
+            vec_cmp_lock("std -- user class modern test 22",
+                ColString, moves, _v1_);
             ASSERT(UserClass::total_instances == 3, "std -- user type test 21");
             moves.clear();
         }
         ColString _v2_[] = {Del * 3};
-        vec_cmp_lock("std -- user class modern test 23", ColString, moves, _v2_);
+        vec_cmp_lock("std -- user class modern test 23",
+            ColString, moves, _v2_);
         ASSERT(UserClass::total_instances == 0, "std -- user type test 22");
     }}}
     result();

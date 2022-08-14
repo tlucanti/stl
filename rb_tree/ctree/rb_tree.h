@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rb_tree.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/12 17:01:24 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 17:10:31 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef RB_TREE_H
 # define RB_TREE_H
@@ -18,13 +29,15 @@ extern "C" {
 #  endif
 # endif
 
-typedef enum e_Rb_colors
+// -----------------------------------------------------------------------------
+typedef enum	e_Rb_colors
 {
 	_Rb_Red,
 	_Rb_Black
 }	_Rb_colors;
 
-typedef struct s_Rb_node
+// -----------------------------------------------------------------------------
+typedef struct	s_Rb_node
 {
 	struct s_Rb_node	*parent;
 	struct s_Rb_node	*left;
@@ -34,12 +47,14 @@ typedef struct s_Rb_node
 	void                *key;
 }	_Rb_node;
 
-typedef struct s_rb_node
+// -----------------------------------------------------------------------------
+typedef struct	s_rb_node
 {
     _Rb_node    *node;
 }   rb_node;
 
-typedef struct s_rb_tree
+// -----------------------------------------------------------------------------
+typedef struct	s_rb_tree
 {
     rb_node     root;
     rb_node     begin;
@@ -47,31 +62,39 @@ typedef struct s_rb_tree
     size_t      size;
 }   rb_tree;
 
-
+// -----------------------------------------------------------------------------
 typedef int (*compare_fun)(void *, void *) WUR;
 typedef void *(*copy_fun)(void *) WUR;
 typedef void (*del_fun)(void *);
 
 # define RB_TREE_INITIALIZER {{nullptr}, {nullptr}, {nullptr}, 0}
 
+// -----------------------------------------------------------------------------
 void    *rb_get_key(rb_node node) WUR NOEXCEPT;
-rb_node rb_insert(rb_tree *root, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
-rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key, compare_fun compare, int *was_inserted) NOEXCEPT;
-rb_node rb_find(rb_tree *root, void *key, compare_fun compare) WUR NOEXCEPT;
-rb_node rb_remove(rb_tree *root, void *key, compare_fun compare, del_fun del) NOEXCEPT;
+rb_node rb_insert(rb_tree *root, void *key, compare_fun compare,
+			int *was_inserted) NOEXCEPT;
+rb_node rb_insert_hint(rb_tree *root, rb_node hint, void *key,
+			compare_fun compare, int *was_inserted) NOEXCEPT;
+rb_node rb_find(rb_tree *root, void *key,
+			compare_fun compare) WUR NOEXCEPT;
+rb_node rb_remove(rb_tree *root, void *key, compare_fun compare,
+			del_fun del) NOEXCEPT;
 rb_node rb_remove_node(rb_tree *root, rb_node node, del_fun del) NOEXCEPT;
 rb_node rb_next(rb_node node) WUR NOEXCEPT;
 rb_node rb_prev(rb_node node) WUR NOEXCEPT;
 rb_tree rb_copy(rb_tree *root, copy_fun copy) WUR NOEXCEPT;
 void    rb_destroy(rb_tree *root, del_fun del) NOEXCEPT;
 void    rb_destroy_node(rb_node node, del_fun del) NOEXCEPT;
-rb_node rb_lower_bound(rb_tree *root, void *value, compare_fun cmp) WUR NOEXCEPT;
-rb_node rb_upper_bound(rb_tree *root, void *value, compare_fun cmp) WUR NOEXCEPT;
+rb_node rb_lower_bound(rb_tree *root, void *value,
+			compare_fun cmp) WUR NOEXCEPT;
+rb_node rb_upper_bound(rb_tree *root, void *value,
+			compare_fun cmp) WUR NOEXCEPT;
 int     rb_equal(rb_tree *tree1, rb_tree *tree2, compare_fun cmp) WUR NOEXCEPT;
-int     rb_compare(rb_tree *tree1, rb_tree *tree2, compare_fun cmp) WUR NOEXCEPT;
+int     rb_compare(rb_tree *tree1, rb_tree *tree2,
+			compare_fun cmp) WUR NOEXCEPT;
 
 #ifdef __cplusplus
-}
+} /* extern "C" */
 #endif /* __cplusplus */
 
 #endif /* RB_TREE_H */

@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   speed_test.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/07 15:58:52 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 19:20:31 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "vector.hpp"
 #include <vector>
@@ -23,7 +34,8 @@ int main()
 
     RUN_TESTS("vec(vec) copy constructor test", copy_constructor_test);
 
-    RUN_TESTS("vec(a.begin(), a.end()) iterator constructor test", iterator_constructor_test);
+    RUN_TESTS("vec(a.begin(), a.end()) iterator constructor test",
+        iterator_constructor_test);
 
     RUN_TESTS("~vec() destructor test", destructor_test);
 

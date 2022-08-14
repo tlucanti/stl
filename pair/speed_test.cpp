@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   speed_test.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 16:45:40 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 16:45:42 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "pair.hpp"
 #include <utility>
@@ -26,4 +37,3 @@ int main()
     RUN_TESTS("pair = pair assign operator test", empty_assign_operator_test);
 
 }
-

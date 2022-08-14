@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rb_tree.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/14 11:26:42 by tlucanti          #+#    #+#             */
+/*   Updated: 2022/08/14 20:03:45 by tlucanti         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef RB_TREE_HPP
 # define RB_TREE_HPP
@@ -11,6 +22,9 @@
 
 TLU_NAMESPACE_BEGIN
 
+
+// =============================================================================
+// -------------------------------- vector_base --------------------------------
 template <
         class key_T,
         class cmp_T=std::less<key_T>,
@@ -18,11 +32,14 @@ template <
 >
 class rb_tree
 {
+// =============================================================================
+// --------------------------------- rb_node ----------------------------------
 public:
-
     class rb_node
     {
         friend class rb_tree;
+
+    // ---------------------------- public members -----------------------------
     public:
         enum rb_colors
         {
@@ -30,13 +47,14 @@ public:
             rb_black = true
         };
 
-        rb_node(
+    // -------------------------------------------------------------------------
+        constexpr rb_node(
                 rb_node     *_parent,
                 rb_node     *_left,
                 rb_node     *_right,
                 rb_colors   _color,
                 key_T    *_key
-        ) :
+        ) noexcept :
                 parent(_parent),
                 left(_left),
                 right(_right),
@@ -44,20 +62,24 @@ public:
                 key(_key)
         {}
 
-private:
+    // ---------------------------- private members ----------------------------
+    private:
         rb_node     *parent;
         rb_node     *left;
         rb_node     *right;
         rb_colors   color;
         key_T       *key;
 
+    // ---------------------------- public methods -----------------------------
     public:
-        key_T &get_key()
+        constexpr key_T &get_key() const noexcept
         {
             return *key;
         }
-    };
 
+    }; /* rb_node */
+
+// ------------------------------ private fields -------------------------------
 private:
     rb_node         *_root;
     rb_node         *_begin;
@@ -71,9 +93,9 @@ private:
         rb_black = rb_node::rb_black;
     typedef typename rb_node::rb_colors rb_colors;
 
+// ------------------------------ initialization -------------------------------
 public:
-
-    rb_tree() :
+    constexpr rb_tree() noexcept :
         _root(nullptr),
         _begin(nullptr),
         _end(nullptr),
@@ -82,7 +104,8 @@ public:
         _size(0)
     {}
 
-    rb_tree(const cmp_T &cmp, const allocator_T &alloc) :
+// -----------------------------------------------------------------------------
+    constexpr rb_tree(const cmp_T &cmp, const allocator_T &alloc) constexpr :
         _root(nullptr),
         _begin(nullptr),
         _end(nullptr),
@@ -91,9 +114,9 @@ public:
         _size(0)
     {}
 
-
+// -----------------------------------------------------------------------------
 #if CPP11
-    rb_tree(rb_tree andmv) :
+    constexpr rb_tree(rb_tree &&mv) noexcept :
         _root(mv._root),
         _begin(mv._begin),
         _end(mv._end),
@@ -108,7 +131,8 @@ public:
     }
 #endif
 
-    rb_tree(const rb_tree &cpy) :
+// -----------------------------------------------------------------------------
+    constexpr rb_tree(const rb_tree &cpy) :
         _root(nullptr),
         _begin(nullptr),
         _end(nullptr),
@@ -123,14 +147,16 @@ public:
         _end = _bst_max(_root);
     }
 
+// -----------------------------------------------------------------------------
     ~rb_tree()
     {
         if (LIKELY(_root != nullptr))
             _rb_destroy(_root);
     }
 
+// ------------------------------ private methods ------------------------------
 private:
-    int compare(const key_T *lhs, const key_T *rhs) const
+    constexpr int   compare(const key_T *lhs, const key_T *rhs) const
     {
         if (_cmp(*lhs, *rhs))
             return -1;
@@ -139,33 +165,42 @@ private:
         return 0;
     }
 
+// ------------------------------ public methods -------------------------------
 public:
-
-    rb_node *end() const
+    constexpr rb_node   *end() const noexcept
     {
         return _end;
     }
 
-    rb_node *begin() const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *begin() const noexcept
     {
         return _begin;
     }
 
-    rb_node *insert(const key_T &key)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *insert(const key_T &key)
     {
         bool _;
         return insert(_root, key, _);
     }
 
-    rb_node *insert(const key_T &key, bool &was_inserted)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *insert(const key_T &key, bool &was_inserted)
     {
         return insert(_root, key, was_inserted);
     }
 
-    rb_node *insert(rb_node *hint, const key_T &key, bool &was_inserted)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *insert(
+            rb_node *hint,
+            const key_T &key,
+            bool &was_inserted
+        )
     {
         AUTO(key_T   *) key_ptr = new key_T(key);
-        AUTO(rb_node *) node = new rb_node(nullptr, nullptr, nullptr, rb_red, key_ptr);
+        AUTO(rb_node *) node = new rb_node(nullptr, nullptr, nullptr,
+            rb_red, key_ptr);
         was_inserted = true;
         if (UNLIKELY(_root == nullptr))
         {
@@ -187,14 +222,19 @@ public:
         return ret;
     }
     
-    rb_node *find(const key_T &key, rb_node *start_from=nullptr) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *find(
+            const key_T &key,
+            rb_node *start_from=nullptr
+        ) const noexcept
     {
         if (start_from == nullptr)
             start_from = _root;
         return _bst_find(&key, start_from);
     }
     
-    rb_node *remove(const key_T &key)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *remove(const key_T &key) noexcept
     {
         if (UNLIKELY(_root == nullptr))
             return nullptr;
@@ -212,7 +252,8 @@ public:
         return ret;
     }
 
-    rb_node *remove_node(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *remove_node(rb_node *node) noexcept
     {
         --_size;
         rb_node *ret;
@@ -236,36 +277,42 @@ public:
         return ret;
     }
     
-    static rb_node *next(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *next(rb_node *node)
     {
         return _bst_next(node);
     }
     
-    static rb_node *prev(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *prev(rb_node *node)
     {
         return _bst_prev(node);
     }
     
-    rb_node *lower_bound(const key_T &key) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *lower_bound(const key_T &key) const noexcept
     {
         if (_root == nullptr)
             return nullptr;
         return _bst_lower_bound(&key);
     }
     
-    rb_node *upper_bound(const key_T &key) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *upper_bound(const key_T &key) const noexcept
     {
         if (_root == nullptr)
             return nullptr;
         return _bst_upper_bound(&key);
     }
 
-    std::size_t size() const
+// -----------------------------------------------------------------------------
+    constexpr std::size_t   size() const noexcept
     {
         return _size;
     }
 
-    void assign(const rb_tree &cpy)
+// -----------------------------------------------------------------------------
+    constexpr void  assign(const rb_tree &cpy)
     {
         if (_root != nullptr)
             _rb_destroy(_root);
@@ -275,7 +322,8 @@ public:
         _size = cpy._size;
     }
 
-    void destroy()
+// -----------------------------------------------------------------------------
+    constexpr void  destroy()
     {
         if (_root == nullptr)
             return ;
@@ -286,17 +334,20 @@ public:
         _size = 0;
     }
 
-    allocator_T get_allocator() const
+// -----------------------------------------------------------------------------
+    constexpr allocator_T   get_allocator() const noexcept
     {
         return _alloc;
     }
 
-    cmp_T   get_cmp() const
+// -----------------------------------------------------------------------------
+    constexpr cmp_T     get_cmp() const noexcept
     {
         return _cmp;
     }
 
-    void swap(rb_tree &swp)
+// -----------------------------------------------------------------------------
+    constexpr void  swap(rb_tree &swp) noexcept
     {
         std::swap(_root, swp._root);
         std::swap(_begin, swp._begin);
@@ -306,19 +357,21 @@ public:
         std::swap(_cmp, swp._cmp);
     }
 
+// ------------------------------ private methods ------------------------------
 private:
-
-    rb_node     *_rb_node_create(key_T *key)
+    constexpr rb_node   *_rb_node_create(key_T *key)
     {
         return new rb_node(nullptr, nullptr, nullptr, rb_red, key);
     }
     
-    rb_node     *_rb_grandparent(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_grandparent(rb_node *node) const noexcept
     {
         return node->parent->parent;
     }
 
-    rb_node     *_rb_uncle(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_uncle(rb_node *node) const noexcept
     {
         rb_node   *gp;
 
@@ -328,7 +381,8 @@ private:
         return gp->left;
     }
 
-    rb_node     *_rb_rotate_right(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_rotate_right(rb_node *node) noexcept
     {
         rb_node *pivot = node->left;
         if (node == _root)
@@ -349,7 +403,8 @@ private:
         return node;
     }
 
-    rb_node     *_rb_rotate_left(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_rotate_left(rb_node *node) noexcept
     {
         rb_node *pivot = node->right;
         if (node == _root)
@@ -372,7 +427,12 @@ private:
         return node;
     }
 
-    rb_node *_rb_insert(rb_node *hint, rb_node *node, bool &was_inserted)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_insert(
+            rb_node *hint,
+            rb_node *node,
+            bool &was_inserted
+        ) noexcept
     {
         rb_node *parent = _bst_find_parent(hint, node->key);
         if (parent != nullptr and compare(node->key, parent->key) == 0)
@@ -390,7 +450,8 @@ private:
         return node;
     }
 
-    void        _bst_insert(rb_node *root, rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr void  _bst_insert(rb_node *root, rb_node *node)
     {
         while (true)
         {
@@ -417,7 +478,8 @@ private:
         }
     }
 
-    rb_node     *_bst_find(const key_T *value, rb_node *root) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_bst_find(const key_T *value, rb_node *root) const
     {
         if (root == nullptr)
             return nullptr;
@@ -441,7 +503,8 @@ private:
         }
     }
 
-    rb_node     *_bst_find_parent(rb_node *root, const key_T *value)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_bst_find_parent(rb_node *root, const key_T *value)
     {
         if (root == NULL)
             return NULL;
@@ -465,7 +528,8 @@ private:
         }
     }
 
-    rb_node     *_rb_recolor(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_recolor(rb_node *node) noexcept
     {
         rb_node *gp = _rb_grandparent(node);
         gp->color = rb_red;
@@ -474,7 +538,8 @@ private:
         return gp;
         }
 
-    rb_node     *_rb_insert_case_1(rb_node *node, rb_node *gp)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_insert_case_1(rb_node *node, rb_node *gp) noexcept
     {
         if (gp->right and gp->right->color == rb_red)
             return _rb_recolor(node); // case 1
@@ -490,7 +555,8 @@ private:
         }
     }
 
-    rb_node     *_rb_insert_case_2(rb_node *node, rb_node *gp)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_insert_case_2(rb_node *node, rb_node *gp) noexcept
     {
         if (gp->left and gp->left->color == rb_red)
             return _rb_recolor(node); // case 1
@@ -506,7 +572,8 @@ private:
         }
     }
 
-    void         _rb_balance_after_insert(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr void      _rb_balance_after_insert(rb_node *node) noexcept
     {
         while (node != _root and node->color == rb_red)
         {
@@ -523,21 +590,24 @@ private:
         _root->color = rb_black;
     }
 
-    static rb_node     *_bst_max(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *_bst_max(rb_node *node)
     {
         while (node->right != nullptr)
             node = node->right;
         return node;
     }
 
-    static rb_node     *_bst_min(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *_bst_min(rb_node *node)
     {
         while (node->left != nullptr)
             node = node->left;
         return node;
     }
 
-    rb_node     *_bst_remove(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_bst_remove(rb_node *node)
     {
         if (node->left == nullptr and node->right == nullptr)
         // case 1
@@ -567,13 +637,15 @@ private:
         return _bst_remove(accessor);
     }
 
-    bool          _rb_is_black_children(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr bool  _rb_is_black_children(rb_node *node) const noexcept
     {
         return (node->left == nullptr or node->left->color == rb_black)
             and (node->right == nullptr or node->right->color == rb_black);
     }
 
-    void         _rb_fix_double_black(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr void  _rb_fix_double_black(rb_node *node) noexcept
     {
         if (node == _root)
             return ;
@@ -583,7 +655,8 @@ private:
             _rb_fix_double_black_right(node);
     }
 
-    void         _rb_fix_double_black_left(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr void  _rb_fix_double_black_left(rb_node *node) noexcept
     {
         if (node == _root)
         // case 2
@@ -627,7 +700,8 @@ private:
         _rb_rotate_left(parent);
     }
 
-    void         _rb_fix_double_black_right(rb_node *node)
+// -----------------------------------------------------------------------------
+    constexpr void  _rb_fix_double_black_right(rb_node *node) noexcept
     {
         if (node == _root)
             // case 2
@@ -671,7 +745,8 @@ private:
         _rb_rotate_right(parent);
     }
 
-    void    _rb_remove_node(rb_node *rm)
+// -----------------------------------------------------------------------------
+    constexpr void  _rb_remove_node(rb_node *rm)
     {
         if (_root == nullptr)
             return ;
@@ -705,7 +780,8 @@ private:
         delete leaf;
     }
 
-    rb_node     *_rb_remove(const key_T *value)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_remove(const key_T *value)
     {
         if (_root == nullptr)
             return nullptr;
@@ -722,7 +798,8 @@ private:
         return ret;
     }
 
-    static rb_node    *_bst_next(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *_bst_next(rb_node *node)
     {
         if (node->right)
             return _bst_min(node->right);
@@ -733,7 +810,8 @@ private:
         return nullptr;
     }
 
-    static rb_node    *_bst_prev(rb_node *node)
+// -----------------------------------------------------------------------------
+    static constexpr rb_node    *_bst_prev(rb_node *node)
     {
         if (node->left)
             return _bst_max(node->left);
@@ -744,7 +822,8 @@ private:
         return nullptr;
     }
 
-    rb_node *_rb_copy(rb_node *root)
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_rb_copy(rb_node *root)
     {
         AUTO(key_T *) node_ptr = new key_T(*root->key);
         rb_node *new_root = _rb_node_create(node_ptr);
@@ -756,7 +835,8 @@ private:
         return new_root;
     }
 
-    void _rb_destroy(rb_node *root)
+// -----------------------------------------------------------------------------
+    constexpr void      _rb_destroy(rb_node *root)
     {
         delete root->key;
         if (root->left)
@@ -766,7 +846,8 @@ private:
         delete root;
     }
 
-    rb_node *_bst_lower_bound(const key_T *value) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_bst_lower_bound(const key_T *value) const noexcept
     {
         rb_node *root = _root;
         rb_node *ret = root;
@@ -785,7 +866,8 @@ private:
         return ret;
     }
 
-    rb_node *_bst_upper_bound(const key_T *value) const
+// -----------------------------------------------------------------------------
+    constexpr rb_node   *_bst_upper_bound(const key_T *value) const noexcept
     {
         rb_node *root = _root;
         rb_node *ret = root;
@@ -804,7 +886,8 @@ private:
         return ret;
     }
 
-    bool _dfs_compare(rb_node *rt1, rb_node *rt2) const
+// -----------------------------------------------------------------------------
+    constexpr bool  _dfs_compare(rb_node *rt1, rb_node *rt2) const
     {
         unsigned int left = 1;
         unsigned int right = 1;
@@ -822,7 +905,13 @@ private:
         return left and right;
     }
 
-    int          _bst_compare(rb_node *rt1, rb_node *rt2, rb_node *end1, rb_node *end2) const
+// -----------------------------------------------------------------------------
+    constexpr int   _bst_compare(
+            rb_node *rt1,
+            rb_node *rt2,
+            rb_node *end1,
+            rb_node *end2
+        ) const
     {
         while (true)
         {
@@ -842,7 +931,8 @@ private:
         }
     }
 
-    bool _equal(const rb_tree &tree2) const
+// -----------------------------------------------------------------------------
+    constexpr bool  _equal(const rb_tree &tree2) const
     {
         if (_size != tree2._size)
             return false;
@@ -851,7 +941,8 @@ private:
         return _dfs_compare(_root, tree2._root);
     }
 
-    int _compare(const rb_tree &tree2) const
+// -----------------------------------------------------------------------------
+    constexpr int   _compare(const rb_tree &tree2) const
     {
         if (_size != tree2._size)
             return tlucanti::sign(_size - tree2._size);
@@ -860,37 +951,62 @@ private:
         return _bst_compare(_root, tree2._root, _end, tree2._end);
     }
 
+// -------------------------- lexicographical compare --------------------------
 public:
-    friend bool operator ==(const rb_tree &tree1, const rb_tree &tree2)
+    friend constexpr bool   operator ==(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return tree1._equal(tree2);
     }
 
-    friend bool operator !=(const rb_tree &tree1, const rb_tree &tree2)
+// -----------------------------------------------------------------------------
+    friend constexpr bool   operator !=(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return not tree1._equal(tree2);
     }
 
-    friend bool operator >(const rb_tree &tree1, const rb_tree &tree2)
+// -----------------------------------------------------------------------------
+    friend constexpr bool   operator >(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return tree1._compare(tree2) > 0;
     }
 
-    friend bool operator >=(const rb_tree &tree1, const rb_tree &tree2)
+// -----------------------------------------------------------------------------
+    friend constexpr bool   operator >=(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return tree1._compare(tree2) >= 0;
     }
 
-    friend bool operator <(const rb_tree &tree1, const rb_tree &tree2)
+// -----------------------------------------------------------------------------
+    friend constexpr bool   operator <(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return tree1._compare(tree2) < 0;
     }
 
-    friend bool operator <=(const rb_tree &tree1, const rb_tree &tree2)
+// -----------------------------------------------------------------------------
+    friend constexpr bool   operator <=(
+            const rb_tree &tree1,
+            const rb_tree &tree2
+        )
     {
         return tree1._compare(tree2) <= 0;
     }
-};
+
+}; /* rb_tree */
 
 TLU_NAMESPACE_END
 
